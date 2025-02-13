@@ -299,6 +299,18 @@ export default function Ranges() {
     return acc;
   }, {} as { [key: string]: { color: string; tasks: typeof taskSuccess.categories } });
 
+  const getExpenseColor = (value: number, maxValue: number) => {
+    // Если максимальное значение 0, возвращаем самый светлый оттенок
+    if (maxValue === 0) return 'rgba(249, 115, 22, 0.1)';
+
+    // Нормализуем значение от 0 до 1
+    const normalizedValue = value / maxValue;
+    // Преобразуем в значение прозрачности от 0.1 до 0.5
+    const opacity = 0.1 + (normalizedValue * 0.4);
+
+    return `rgba(249, 115, 22, ${opacity})`;
+  };
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex items-center justify-between mb-6">
@@ -593,6 +605,11 @@ export default function Ranges() {
               </thead>
               <tbody>
                 {expenseData.periods.map((period, idx) => {
+                  // Находим максимальное значение в этом периоде среди всех категорий
+                  const maxInPeriod = Math.max(
+                    ...expenseData.categories.map(category => category.periods[idx]?.value || 0)
+                  );
+
                   const rowTotal = expenseData.categories.reduce((sum, category) => {
                     return sum + (category.periods[idx]?.value || 0);
                   }, 0);
@@ -608,7 +625,7 @@ export default function Ranges() {
                             key={`${category.categoryName}-${period}`}
                             className="py-2 px-4 text-center"
                             style={{
-                              backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                              backgroundColor: getExpenseColor(value, maxInPeriod)
                             }}
                           >
                             {value} zł
@@ -633,12 +650,20 @@ export default function Ranges() {
                     const categoryTotal = category.periods.reduce((sum, period) => {
                       return sum + (period.value || 0);
                     }, 0);
+
+                    // Находим максимальное значение среди всех итоговых сумм категорий
+                    const maxCategoryTotal = Math.max(
+                      ...expenseData.categories.map(cat =>
+                        cat.periods.reduce((sum, period) => sum + (period.value || 0), 0)
+                      )
+                    );
+
                     return (
                       <td
                         key={`total-${category.categoryName}`}
                         className="py-2 px-4 text-center"
                         style={{
-                          backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                          backgroundColor: getExpenseColor(categoryTotal, maxCategoryTotal)
                         }}
                       >
                         {categoryTotal} zł
