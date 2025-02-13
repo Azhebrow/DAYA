@@ -25,7 +25,7 @@ export default function Ranges() {
   useEffect(() => {
     const endDate = endOfMonth(new Date());
     const startDate = startOfMonth(subMonths(endDate, 11));
-    
+
     setDateRangeText(`${format(startDate, 'MMMM yyyy')} - ${format(endDate, 'MMMM yyyy')}`);
 
     const days: DayEntry[] = [];
@@ -46,7 +46,7 @@ export default function Ranges() {
     if (!data.length) return [];
 
     const months: { [key: string]: DayEntry[] } = {};
-    
+
     data.forEach(day => {
       const monthKey = format(new Date(day.date), 'MMMM yyyy');
       if (!months[monthKey]) {
@@ -113,20 +113,23 @@ export default function Ranges() {
       periods: { period: string; value: number }[];
     }[] = [];
 
-    // Initialize task data structure
-    data[0]?.categories.slice(0, 4).forEach(category => {
-      category.tasks.forEach(task => {
-        taskData.push({
-          categoryName: category.name,
-          categoryColor: CATEGORY_COLORS[category.name] || '#8884d8',
-          taskName: task.name,
-          type: task.type,
-          periods: []
-        });
+    const firstDay = data[0];
+    if (firstDay && Array.isArray(firstDay.categories)) {
+      firstDay.categories.slice(0, 4).forEach(category => {
+        if (Array.isArray(category.tasks)) {
+          category.tasks.forEach(task => {
+            taskData.push({
+              categoryName: category.name,
+              categoryColor: CATEGORY_COLORS[category.name] || '#8884d8',
+              taskName: task.name,
+              type: task.type,
+              periods: []
+            });
+          });
+        }
       });
-    });
+    }
 
-    // Calculate values for each month
     Object.entries(months).forEach(([month, days]) => {
       taskData.forEach(taskItem => {
         let total = 0;
