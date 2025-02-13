@@ -6,9 +6,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
-import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { format, subMonths, startOfMonth, endOfMonth, getWeek, startOfWeek, endOfWeek, parseISO } from 'date-fns';
 import { calculateDayScore } from '@/lib/utils';
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChart as BarChartIcon } from 'lucide-react';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
@@ -21,6 +22,7 @@ const CATEGORY_COLORS: { [key: string]: string } = {
 export default function Ranges() {
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState('');
+  const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
 
   useEffect(() => {
     const endDate = endOfMonth(new Date());
@@ -42,20 +44,24 @@ export default function Ranges() {
     setData(days);
   }, []);
 
-  const aggregateDataByMonth = () => {
+  const aggregateData = () => {
     if (!data.length) return [];
 
-    const months: { [key: string]: DayEntry[] } = {};
+    const periods: { [key: string]: DayEntry[] } = {};
 
     data.forEach(day => {
-      const monthKey = format(new Date(day.date), 'MMMM yyyy');
-      if (!months[monthKey]) {
-        months[monthKey] = [];
+      const date = parseISO(day.date);
+      const periodKey = viewMode === 'month'
+        ? format(date, 'MMMM yyyy')
+        : `Неделя ${getWeek(date)}`;
+
+      if (!periods[periodKey]) {
+        periods[periodKey] = [];
       }
-      months[monthKey].push(day);
+      periods[periodKey].push(day);
     });
 
-    return Object.entries(months).map(([month, days]) => {
+    return Object.entries(periods).map(([period, days]) => {
       let totalTime = 0;
       let totalCalories = 0;
       let totalExpenses = 0;
@@ -91,7 +97,7 @@ export default function Ranges() {
       });
 
       return {
-        date: month,
+        date: period,
         score: daysWithData > 0 ? Math.round(totalScore / daysWithData) : 0,
         calories: daysWithCalories > 0 ? Math.round(totalCalories / daysWithCalories) : 0,
         time: totalTime,
@@ -100,16 +106,20 @@ export default function Ranges() {
     });
   };
 
-  const calculateTaskSuccessByMonth = () => {
+  const calculateTaskSuccess = () => {
     if (!data.length) return { periods: [], categories: [] };
 
-    const months: { [key: string]: DayEntry[] } = {};
+    const periods: { [key: string]: DayEntry[] } = {};
     data.forEach(day => {
-      const monthKey = format(new Date(day.date), 'MMMM yyyy');
-      if (!months[monthKey]) {
-        months[monthKey] = [];
+      const date = parseISO(day.date);
+      const periodKey = viewMode === 'month'
+        ? format(date, 'MMMM yyyy')
+        : `Неделя ${getWeek(date)}`;
+
+      if (!periods[periodKey]) {
+        periods[periodKey] = [];
       }
-      months[monthKey].push(day);
+      periods[periodKey].push(day);
     });
 
     const taskData: {
@@ -121,9 +131,9 @@ export default function Ranges() {
     }[] = [];
 
     const firstDay = data[0];
-    if (firstDay && Array.isArray(firstDay.categories)) {
-      firstDay.categories.slice(0, 4).forEach(category => {
-        if (Array.isArray(category.tasks)) {
+    if (firstDay && firstDay.categories && Array.isArray(firstDay.categories)) {
+      firstDay.categories.forEach(category => {
+        if (category && category.tasks && Array.isArray(category.tasks)) {
           category.tasks.forEach(task => {
             taskData.push({
               categoryName: category.name,
@@ -137,7 +147,7 @@ export default function Ranges() {
       });
     }
 
-    Object.entries(months).forEach(([month, days]) => {
+    Object.entries(periods).forEach(([period, days]) => {
       taskData.forEach(taskItem => {
         let total = 0;
         let completed = 0;
@@ -175,30 +185,34 @@ export default function Ranges() {
         }
 
         taskItem.periods.push({
-          period: month,
+          period,
           value
         });
       });
     });
 
     return {
-      periods: Object.keys(months),
+      periods: Object.keys(periods),
       categories: taskData
     };
   };
 
-  const calculateExpensesByMonth = () => {
+  const calculateExpenses = () => {
     if (!data.length) return { periods: [], categories: [] };
 
-    const months: { [key: string]: DayEntry[] } = {};
+    const periods: { [key: string]: DayEntry[] } = {};
     const expenseCategories = new Set<string>();
 
     data.forEach(day => {
-      const monthKey = format(new Date(day.date), 'MMMM yyyy');
-      if (!months[monthKey]) {
-        months[monthKey] = [];
+      const date = parseISO(day.date);
+      const periodKey = viewMode === 'month'
+        ? format(date, 'MMMM yyyy')
+        : `Неделя ${getWeek(date)}`;
+
+      if (!periods[periodKey]) {
+        periods[periodKey] = [];
       }
-      months[monthKey].push(day);
+      periods[periodKey].push(day);
 
       day.categories.forEach(category => {
         if (category.type === CategoryType.EXPENSE) {
@@ -208,7 +222,7 @@ export default function Ranges() {
     });
 
     const expenseData = Array.from(expenseCategories).map(categoryName => {
-      const monthlyValues = Object.entries(months).map(([month, days]) => {
+      const periodValues = Object.entries(periods).map(([period, days]) => {
         let total = 0;
         days.forEach(day => {
           const category = day.categories.find(c => c.name === categoryName);
@@ -222,26 +236,26 @@ export default function Ranges() {
         });
 
         return {
-          period: month,
+          period,
           value: total
         };
       });
 
       return {
         categoryName,
-        periods: monthlyValues
+        periods: periodValues
       };
     });
 
     return {
-      periods: Object.keys(months),
+      periods: Object.keys(periods),
       categories: expenseData
     };
   };
 
-  const monthlyData = aggregateDataByMonth();
-  const taskSuccess = calculateTaskSuccessByMonth();
-  const expenseData = calculateExpensesByMonth();
+  const periodData = aggregateData();
+  const taskSuccess = calculateTaskSuccess();
+  const expenseData = calculateExpenses();
 
   const getSuccessRateColor = (rate: number) => {
     if (rate <= 50) {
@@ -271,6 +285,14 @@ export default function Ranges() {
           <h1 className="text-2xl font-bold">Диапазоны</h1>
           <p className="text-sm text-muted-foreground">{dateRangeText}</p>
         </div>
+        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'month' | 'week')}>
+          <ToggleGroupItem value="month" aria-label="Месяцы">
+            По месяцам
+          </ToggleGroupItem>
+          <ToggleGroupItem value="week" aria-label="Недели">
+            По неделям
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
@@ -278,12 +300,12 @@ export default function Ranges() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <LineChart className="h-5 w-5 text-category-mind" />
-              Показатель успеха по месяцам
+              Показатель успеха по {viewMode === 'month' ? 'месяцам' : 'неделям'}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
+              <AreaChart data={periodData}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -306,12 +328,12 @@ export default function Ranges() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Flame className="h-5 w-5 text-category-sport" />
-              Калории по месяцам
+              Калории по {viewMode === 'month' ? 'месяцам' : 'неделям'}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
+              <AreaChart data={periodData}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -334,12 +356,12 @@ export default function Ranges() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-category-time" />
-              Время по месяцам
+              Время по {viewMode === 'month' ? 'месяцам' : 'неделям'}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
+              <AreaChart data={periodData}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -362,12 +384,12 @@ export default function Ranges() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5 text-category-expenses" />
-              Расходы по месяцам
+              Расходы по {viewMode === 'month' ? 'месяцам' : 'неделям'}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData}>
+              <AreaChart data={periodData}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -391,7 +413,7 @@ export default function Ranges() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChartIcon className="h-5 w-5 text-primary" />
-            Успешность задач по месяцам
+            Успешность задач по {viewMode === 'month' ? 'месяцам' : 'неделям'}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -457,15 +479,12 @@ export default function Ranges() {
                   <td className="py-2 px-4">Итого</td>
                   {Object.values(tasksByCategory).map(category =>
                     category.tasks.map(task => {
-                      // Вычисляем итоговые значения в зависимости от типа задачи
                       const values = task.periods.map(p => p.value || 0);
                       let totalValue = 0;
 
                       if (task.type === TaskType.CHECKBOX) {
-                        // Для чекбоксов берем среднее значение
                         totalValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
                       } else {
-                        // Для остальных типов суммируем
                         totalValue = values.reduce((a, b) => a + b, 0);
                       }
 
