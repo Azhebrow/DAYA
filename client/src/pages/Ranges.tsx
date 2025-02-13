@@ -478,7 +478,7 @@ export default function Ranges() {
               <tbody>
                 {taskSuccess.periods.map((period, idx) => {
                   const periodScore = taskSuccess.periodScores[period];
-                  const averageScore = periodScore.count > 0
+                  const averageScore = periodScore?.count > 0
                     ? Math.round(periodScore.total / periodScore.count)
                     : 0;
 
@@ -516,11 +516,11 @@ export default function Ranges() {
                   <td className="py-2 px-4">Итого</td>
                   <td className="py-2 px-4 text-center">
                     {Math.round(
-                      Object.values(taskSuccess.periodScores).reduce((sum, period) => {
+                      Object.values(taskSuccess.periodScores || {}).reduce((sum, period) => {
                         return period.count > 0
                           ? sum + (period.total / period.count)
                           : sum;
-                      }, 0) / Object.keys(taskSuccess.periodScores).length
+                      }, 0) / (Object.keys(taskSuccess.periodScores || {}).length || 1)
                     )}%
                   </td>
                   {Object.values(tasksByCategory)
