@@ -312,9 +312,11 @@ export default function Statistics() {
 
     data.forEach(day => {
       day.categories.forEach(category => {
-        if (category.type === CategoryType.EXPENSE) {
+        // Check for expense-type tasks in any category
+        const hasExpenses = category.tasks.some(task => task.type === TaskType.EXPENSE);
+        if (hasExpenses) {
           category.tasks.forEach(task => {
-            if (typeof task.value === 'number' && task.value > 0) {
+            if (task.type === TaskType.EXPENSE && typeof task.value === 'number' && task.value > 0) {
               if (!expensesByCategory[category.name]) {
                 expensesByCategory[category.name] = { amount: 0, emoji: category.emoji };
               }
@@ -344,7 +346,8 @@ export default function Statistics() {
     const expenseCategories = new Set<string>();
     data.forEach(day => {
       day.categories.forEach(category => {
-        if (category.type === CategoryType.EXPENSE) {
+        // Check for expense-type tasks in any category
+        if (category.tasks.some(task => task.type === TaskType.EXPENSE)) {
           expenseCategories.add(category.name);
         }
       });
