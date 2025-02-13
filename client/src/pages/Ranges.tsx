@@ -64,28 +64,35 @@ export default function Ranges() {
       let totalScore = 0;
 
       days.forEach(day => {
-        totalScore += calculateDayScore(day);
-        daysWithData++;
+        if (day.categories && Array.isArray(day.categories)) {
+          const dayScore = calculateDayScore(day);
+          if (dayScore > 0) {
+            totalScore += dayScore;
+            daysWithData++;
+          }
 
-        day.categories.forEach(category => {
-          category.tasks.forEach(task => {
-            if (task.type === TaskType.TIME && typeof task.value === 'number') {
-              totalTime += task.value;
-            }
-            if (task.type === TaskType.CALORIE && typeof task.value === 'number' && task.value > 0) {
-              totalCalories += task.value;
-              daysWithCalories++;
-            }
-            if (task.type === TaskType.EXPENSE && typeof task.value === 'number') {
-              totalExpenses += task.value;
+          day.categories.forEach(category => {
+            if (category.tasks && Array.isArray(category.tasks)) {
+              category.tasks.forEach(task => {
+                if (task.type === TaskType.TIME && typeof task.value === 'number') {
+                  totalTime += task.value;
+                }
+                if (task.type === TaskType.CALORIE && typeof task.value === 'number' && task.value > 0) {
+                  totalCalories += task.value;
+                  daysWithCalories++;
+                }
+                if (task.type === TaskType.EXPENSE && typeof task.value === 'number') {
+                  totalExpenses += task.value;
+                }
+              });
             }
           });
-        });
+        }
       });
 
       return {
         date: month,
-        score: Math.round(totalScore / daysWithData),
+        score: daysWithData > 0 ? Math.round(totalScore / daysWithData) : 0,
         calories: daysWithCalories > 0 ? Math.round(totalCalories / daysWithCalories) : 0,
         time: totalTime,
         expenses: totalExpenses
