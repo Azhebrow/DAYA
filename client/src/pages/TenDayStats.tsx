@@ -278,6 +278,34 @@ export default function TenDayStats() {
                     </tr>
                   );
                 })}
+                {/* Итоговая строка */}
+                <tr className="border-t-2 border-border font-bold">
+                  <td className="py-2 px-4">Итого</td>
+                  {monthlyExpenses.categories.map(category => {
+                    const categoryTotal = category.periods.reduce((sum, period) => {
+                      return sum + (period.value || 0);
+                    }, 0);
+                    return (
+                      <td
+                        key={`total-${category.categoryName}`}
+                        className="py-2 px-4 text-center"
+                        style={{
+                          backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                        }}
+                      >
+                        {categoryTotal} zł
+                      </td>
+                    );
+                  })}
+                  <td className="py-2 px-4 text-center">
+                    {monthlyExpenses.periods.reduce((total, _, periodIdx) => {
+                      const periodTotal = monthlyExpenses.categories.reduce((sum, category) => {
+                        return sum + (category.periods[periodIdx]?.value || 0);
+                      }, 0);
+                      return total + periodTotal;
+                    }, 0)} zł
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>

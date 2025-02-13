@@ -142,6 +142,16 @@ export default function MonthlyStats() {
   };
 
   const dailyStats = aggregateDataByPeriod();
+  // Placeholder data - replace with actual data fetching and processing
+  const monthlyExpenses = {
+    categories: [
+      { categoryName: 'Продукты', periods: [{ value: 100 }, { value: 120 }, { value: 150 }] },
+      { categoryName: 'Транспорт', periods: [{ value: 50 }, { value: 60 }, { value: 70 }] },
+      { categoryName: 'Развлечения', periods: [{ value: 30 }, { value: 40 }, { value: 50 }] }
+    ],
+    periods: ['Январь', 'Февраль', 'Март']
+  };
+
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -308,6 +318,94 @@ export default function MonthlyStats() {
                 />
               </AreaChart>
             </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Expenses Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+            <table>
+              <thead>
+                <tr>
+                  <th className="py-2 px-4 text-center">Период</th>
+                  {monthlyExpenses.categories.map(category => {
+                    const matchingCategory = data.find(day =>
+                      day.categories.find(c => c.name === category.categoryName)
+                    )?.categories.find(c => c.name === category.categoryName);
+
+                    return (
+                      <th
+                        key={category.categoryName}
+                        className="py-2 px-4 text-center"
+                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
+                      >
+                        {matchingCategory?.emoji || '📝'} {category.categoryName}
+                      </th>
+                    );
+                  })}
+                  <th className="py-2 px-4 text-center font-bold">Итого</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthlyExpenses.periods.map((period, idx) => {
+                  const rowTotal = monthlyExpenses.categories.reduce((sum, category) => {
+                    return sum + (category.periods[idx]?.value || 0);
+                  }, 0);
+
+                  return (
+                    <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
+                      <td className="py-2 px-4 font-medium">{period}</td>
+                      {monthlyExpenses.categories.map(category => {
+                        const value = category.periods[idx]?.value || 0;
+                        return (
+                          <td
+                            key={`${category.categoryName}-${period}`}
+                            className="py-2 px-4 text-center"
+                            style={{
+                              backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                            }}
+                          >
+                            {value} zł
+                          </td>
+                        );
+                      })}
+                      <td className="py-2 px-4 text-center font-bold">{rowTotal} zł</td>
+                    </tr>
+                  );
+                })}
+                {/* Итоговая строка */}
+                <tr className="border-t-2 border-border font-bold">
+                  <td className="py-2 px-4">Итого</td>
+                  {monthlyExpenses.categories.map(category => {
+                    const categoryTotal = category.periods.reduce((sum, period) => {
+                      return sum + (period.value || 0);
+                    }, 0);
+                    return (
+                      <td
+                        key={`total-${category.categoryName}`}
+                        className="py-2 px-4 text-center"
+                        style={{
+                          backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                        }}
+                      >
+                        {categoryTotal} zł
+                      </td>
+                    );
+                  })}
+                  <td className="py-2 px-4 text-center">
+                    {monthlyExpenses.periods.reduce((total, _, periodIdx) => {
+                      const periodTotal = monthlyExpenses.categories.reduce((sum, category) => {
+                        return sum + (category.periods[periodIdx]?.value || 0);
+                      }, 0);
+                      return total + periodTotal;
+                    }, 0)} zł
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           </CardContent>
         </Card>
       </div>
