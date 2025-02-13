@@ -51,8 +51,10 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
     : 0;
 }
 
-export function calculateDayScore(categories: Category[]): number {
-  const activityCategories = categories.slice(0, 4); // Only consider activity tracker categories
+export function calculateDayScore(day: { categories: Category[] }): number {
+  if (!day || !Array.isArray(day.categories) || day.categories.length === 0) return 0;
+
+  const activityCategories = day.categories.slice(0, 4); // Only consider activity tracker categories
   if (!activityCategories.length) return 0;
 
   const totalProgress = activityCategories.reduce(
