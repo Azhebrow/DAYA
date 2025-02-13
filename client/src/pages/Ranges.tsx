@@ -452,6 +452,41 @@ export default function Ranges() {
                     )}
                   </tr>
                 ))}
+                {/* Итоговая строка */}
+                <tr className="border-t-2 border-border font-bold">
+                  <td className="py-2 px-4">Итого</td>
+                  {Object.values(tasksByCategory).map(category =>
+                    category.tasks.map(task => {
+                      // Вычисляем итоговые значения в зависимости от типа задачи
+                      const values = task.periods.map(p => p.value || 0);
+                      let totalValue = 0;
+
+                      if (task.type === TaskType.CHECKBOX) {
+                        // Для чекбоксов берем среднее значение
+                        totalValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+                      } else {
+                        // Для остальных типов суммируем
+                        totalValue = values.reduce((a, b) => a + b, 0);
+                      }
+
+                      return (
+                        <td
+                          key={`total-${task.taskName}`}
+                          className="py-2 px-4 text-center"
+                          style={{
+                            backgroundColor: task.type === TaskType.CHECKBOX
+                              ? getSuccessRateColor(totalValue)
+                              : `${task.categoryColor}20`
+                          }}
+                        >
+                          {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
+                            task.type === TaskType.TIME ? `${totalValue}m` :
+                              task.type === TaskType.CALORIE ? totalValue : totalValue}
+                        </td>
+                      );
+                    })
+                  )}
+                </tr>
               </tbody>
             </table>
           </div>
@@ -516,6 +551,34 @@ export default function Ranges() {
                     </tr>
                   );
                 })}
+                {/* Итоговая строка для расходов */}
+                <tr className="border-t-2 border-border font-bold">
+                  <td className="py-2 px-4">Итого</td>
+                  <td className="py-2 px-4 text-center">
+                    {expenseData.periods.reduce((total, _, periodIdx) => {
+                      const periodTotal = expenseData.categories.reduce((sum, category) => {
+                        return sum + (category.periods[periodIdx]?.value || 0);
+                      }, 0);
+                      return total + periodTotal;
+                    }, 0)} zł
+                  </td>
+                  {expenseData.categories.map(category => {
+                    const categoryTotal = category.periods.reduce((sum, period) => {
+                      return sum + (period.value || 0);
+                    }, 0);
+                    return (
+                      <td
+                        key={`total-${category.categoryName}`}
+                        className="py-2 px-4 text-center"
+                        style={{
+                          backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                        }}
+                      >
+                        {categoryTotal} zł
+                      </td>
+                    );
+                  })}
+                </tr>
               </tbody>
             </table>
           </div>
