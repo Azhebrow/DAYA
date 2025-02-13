@@ -31,6 +31,8 @@ const getSuccessColor = (value: number, maxValue: number) => {
   return `rgba(16, 185, 129, ${opacity})`;
 };
 
+const CATEGORY_ORDER = ['Разум', 'Привычки', 'Спорт', 'Время'];
+
 export default function Ranges() {
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState('');
@@ -306,18 +308,32 @@ export default function Ranges() {
   const tasksByCategory = taskSuccess.categories.reduce((acc, task) => {
     if (!acc[task.categoryName]) {
       acc[task.categoryName] = {
-        color: task.categoryColor,
+        color: CATEGORY_COLORS[task.categoryName] || '#8884d8',
         tasks: []
       };
     }
-    // Сортируем задачи: сначала все кроме TIME, потом TIME
-    if (task.type !== TaskType.TIME) {
-      acc[task.categoryName].tasks.unshift(task);
-    } else {
-      acc[task.categoryName].tasks.push(task);
-    }
+    acc[task.categoryName].tasks.push(task);
     return acc;
   }, {} as { [key: string]: { color: string; tasks: typeof taskSuccess.categories } });
+
+  const sortedCategories = CATEGORY_ORDER.map(categoryName => {
+    const category = tasksByCategory[categoryName];
+    if (!category) return null;
+
+    const timeTasks = category.tasks.filter(task => task.type === TaskType.TIME);
+    const nonTimeTasks = category.tasks.filter(task => task.type !== TaskType.TIME);
+
+    return {
+      name: categoryName,
+      color: category.color,
+      tasks: nonTimeTasks,
+      timeTasks
+    };
+  }).filter(Boolean);
+
+  const allTimeTasks = sortedCategories
+    .flatMap(category => category?.timeTasks || [])
+    .filter(Boolean);
 
 
   return (
@@ -465,60 +481,49 @@ export default function Ranges() {
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4 text-left">Период</th>
                   <th className="py-2 px-4 text-center">Успех</th>
-                  {Object.entries(tasksByCategory)
-                    .filter(([categoryName]) => !['Расходы'].includes(categoryName))
-                    .map(([categoryName, category]) => (
-                      <th
-                        key={categoryName}
-                        colSpan={category.tasks.filter(t => t.type !== TaskType.TIME).length}
-                        className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${category.color}20` }}
-                      >
-                        {categoryName}
-                      </th>
-                    ))}
-                  <th
-                    colSpan={Object.values(tasksByCategory)
-                      .flatMap(category => category.tasks)
-                      .filter(task => task.type === TaskType.TIME).length}
-                    className="py-2 px-4 text-center"
-                    style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
-                  >
-                    Временные показатели
-                  </th>
+                  {sortedCategories.map(category => (
+                    <th
+                      key={category.name}
+                      colSpan={category.tasks.length}
+                      className="py-2 px-4 text-center"
+                      style={{ backgroundColor: `${category.color}20` }}
+                    >
+                      {category.name}
+                    </th>
+                  ))}
+                  {allTimeTasks.length > 0 && (
+                    <th
+                      colSpan={allTimeTasks.length}
+                      className="py-2 px-4 text-center"
+                      style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
+                    >
+                      Временные показатели
+                    </th>
+                  )}
                 </tr>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4"></th>
                   <th className="py-2 px-4"></th>
-                  {Object.values(tasksByCategory)
-                    .filter(category => !['Расходы'].includes(category.tasks[0]?.categoryName))
-                    .flatMap(category =>
-                      category.tasks
-                        .filter(task => task.type !== TaskType.TIME)
-                        .map(task => (
-                          <th
-                            key={task.taskName}
-                            className="py-2 px-4 text-center text-sm font-medium"
-                            style={{ backgroundColor: `${task.categoryColor}10` }}
-                          >
-                            {task.taskName}
-                          </th>
-                        ))
-                    )}
-                  {Object.values(tasksByCategory)
-                    .flatMap(category =>
-                      category.tasks
-                        .filter(task => task.type === TaskType.TIME)
-                        .map(task => (
-                          <th
-                            key={task.taskName}
-                            className="py-2 px-4 text-center text-sm font-medium"
-                            style={{ backgroundColor: `${CATEGORY_COLORS['Время']}10` }}
-                          >
-                            {task.taskName}
-                          </th>
-                        ))
-                    )}
+                  {sortedCategories.flatMap(category =>
+                    category.tasks.map(task => (
+                      <th
+                        key={task.taskName}
+                        className="py-2 px-4 text-center text-sm font-medium"
+                        style={{ backgroundColor: `${category.color}10` }}
+                      >
+                        {task.taskName}
+                      </th>
+                    ))
+                  )}
+                  {allTimeTasks.map(task => (
+                    <th
+                      key={task.taskName}
+                      className="py-2 px-4 text-center text-sm font-medium"
+                      style={{ backgroundColor: `${CATEGORY_COLORS['Время']}10` }}
+                    >
+                      {task.taskName}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -528,7 +533,6 @@ export default function Ranges() {
                     ? Math.round(periodScore.total / periodScore.count)
                     : 0;
 
-                  // Находим максимальный показатель успеха для этого периода
                   const maxSuccessScore = Math.max(
                     ...Object.values(taskSuccess.periodScores || {})
                       .map(score => score.count > 0 ? Math.round(score.total / score.count) : 0)
@@ -543,44 +547,34 @@ export default function Ranges() {
                       >
                         {averageScore}%
                       </td>
-                      {Object.values(tasksByCategory)
-                        .filter(category => !['Расходы'].includes(category.tasks[0]?.categoryName))
-                        .flatMap(category =>
-                          category.tasks
-                            .filter(task => task.type !== TaskType.TIME)
-                            .map(task => {
-                              const value = task.periods[idx]?.value || 0;
-                              return (
-                                <td
-                                  key={`${task.taskName}-${period}`}
-                                  className="py-2 px-4 text-center"
-                                >
-                                  {task.type === TaskType.CHECKBOX ? `${value}%` :
-                                    task.type === TaskType.CALORIE ? value : value}
-                                </td>
-                              );
-                            })
-                        )}
-                      {Object.values(tasksByCategory)
-                        .flatMap(category =>
-                          category.tasks
-                            .filter(task => task.type === TaskType.TIME)
-                            .map(task => {
-                              const value = task.periods[idx]?.value || 0;
-                              return (
-                                <td
-                                  key={`${task.taskName}-${period}`}
-                                  className="py-2 px-4 text-center"
-                                >
-                                  {`${value}m`}
-                                </td>
-                              );
-                            })
-                        )}
+                      {sortedCategories.flatMap(category =>
+                        category.tasks.map(task => {
+                          const value = task.periods[idx]?.value || 0;
+                          return (
+                            <td
+                              key={`${task.taskName}-${period}`}
+                              className="py-2 px-4 text-center"
+                            >
+                              {task.type === TaskType.CHECKBOX ? `${value}%` :
+                                task.type === TaskType.CALORIE ? value : value}
+                            </td>
+                          );
+                        })
+                      )}
+                      {allTimeTasks.map(task => {
+                        const value = task.periods[idx]?.value || 0;
+                        return (
+                          <td
+                            key={`${task.taskName}-${period}`}
+                            className="py-2 px-4 text-center"
+                          >
+                            {`${value}m`}
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
                 })}
-                {/* Итоговая строка */}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
                   <td className="py-2 px-4 text-center">
@@ -592,7 +586,7 @@ export default function Ranges() {
                             : sum;
                         }, 0) / (Object.keys(taskSuccess.periodScores || {}).length || 1)
                       );
-                      const maxScore = 100; // Максимальный возможный показатель успеха
+                      const maxScore = 100;
                       return (
                         <div
                           style={{ backgroundColor: getSuccessColor(totalScore, maxScore) }}
@@ -603,54 +597,45 @@ export default function Ranges() {
                       );
                     })()}
                   </td>
-                  {Object.values(tasksByCategory)
-                    .filter(category => !['Расходы'].includes(category.tasks[0]?.categoryName))
-                    .flatMap(category =>
-                      category.tasks
-                        .filter(task => task.type !== TaskType.TIME)
-                        .map(task => {
-                          const values = task.periods.map(p => p.value || 0);
-                          let totalValue = 0;
+                  {sortedCategories.flatMap(category =>
+                    category.tasks.map(task => {
+                      const values = task.periods.map(p => p.value || 0);
+                      let totalValue = 0;
 
-                          if (task.type === TaskType.CHECKBOX) {
-                            totalValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
-                          } else {
-                            totalValue = values.reduce((a, b) => a + b, 0);
-                          }
+                      if (task.type === TaskType.CHECKBOX) {
+                        totalValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+                      } else {
+                        totalValue = values.reduce((a, b) => a + b, 0);
+                      }
 
-                          return (
-                            <td
-                              key={`total-${task.taskName}`}
-                              className="py-2 px-4 text-center"
-                              style={{
-                                backgroundColor: task.type === TaskType.CHECKBOX
-                                  ? getSuccessColor(totalValue, 100)
-                                  : `${task.categoryColor}20`
-                              }}
-                            >
-                              {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
-                                task.type === TaskType.CALORIE ? totalValue : totalValue}
-                            </td>
-                          );
-                        })
-                    )}
-                  {Object.values(tasksByCategory)
-                    .flatMap(category =>
-                      category.tasks
-                        .filter(task => task.type === TaskType.TIME)
-                        .map(task => {
-                          const totalValue = task.periods.reduce((sum, period) => sum + (period.value || 0), 0);
-                          return (
-                            <td
-                              key={`total-${task.taskName}`}
-                              className="py-2 px-4 text-center"
-                              style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
-                            >
-                              {`${totalValue}m`}
-                            </td>
-                          );
-                        })
-                    )}
+                      return (
+                        <td
+                          key={`total-${task.taskName}`}
+                          className="py-2 px-4 text-center"
+                          style={{
+                            backgroundColor: task.type === TaskType.CHECKBOX
+                              ? getSuccessColor(totalValue, 100)
+                              : `${category.color}20`
+                          }}
+                        >
+                          {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
+                            task.type === TaskType.CALORIE ? totalValue : totalValue}
+                        </td>
+                      );
+                    })
+                  )}
+                  {allTimeTasks.map(task => {
+                    const totalValue = task.periods.reduce((sum, period) => sum + (period.value || 0), 0);
+                    return (
+                      <td
+                        key={`total-${task.taskName}`}
+                        className="py-2 px-4 text-center"
+                        style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
+                      >
+                        {`${totalValue}m`}
+                      </td>
+                    );
+                  })}
                 </tr>
               </tbody>
             </table>
@@ -691,7 +676,6 @@ export default function Ranges() {
               </thead>
               <tbody>
                 {expenseData.periods.map((period, idx) => {
-                  // Находим максимальное значение в этом периоде среди всех категорий
                   const maxInPeriod = Math.max(
                     ...expenseData.categories.map(category => category.periods[idx]?.value || 0)
                   );
@@ -721,7 +705,6 @@ export default function Ranges() {
                     </tr>
                   );
                 })}
-                {/* Итоговая строка для расходов */}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
                   <td className="py-2 px-4 text-center">
@@ -737,7 +720,6 @@ export default function Ranges() {
                       return sum + (period.value || 0);
                     }, 0);
 
-                    // Находим максимальное значение среди всех итоговых сумм категорий
                     const maxCategoryTotal = Math.max(
                       ...expenseData.categories.map(cat =>
                         cat.periods.reduce((sum, period) => sum + (period.value || 0), 0)
