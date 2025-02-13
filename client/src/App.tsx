@@ -5,9 +5,9 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import Dashboard from "@/pages/Dashboard";
 import Statistics from "@/pages/Statistics";
-import MonthlyStats from "@/pages/MonthlyStats";
+import Ranges from "@/pages/Ranges";
 import Settings from "@/pages/Settings";
-import { LayoutDashboard, LineChart, CalendarDays, Settings2 } from "lucide-react";
+import { LayoutDashboard, LineChart, CalendarDays, Settings2, BarChart } from "lucide-react";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -46,7 +46,7 @@ function App() {
           <div className="flex h-14 items-center justify-center">
             <div className="flex items-center space-x-4">
               <NavLink href="/"><LayoutDashboard className="w-4 h-4" /> Дашборд</NavLink>
-              <NavLink href="/monthly"><CalendarDays className="w-4 h-4" /> Месяцы</NavLink>
+              <NavLink href="/ranges"><BarChart className="w-4 h-4" /> Диапазоны</NavLink>
               <NavLink href="/statistics"><LineChart className="w-4 h-4" /> Статистика</NavLink>
               <NavLink href="/settings"><Settings2 className="w-4 h-4" /> Настройки</NavLink>
             </div>
@@ -55,7 +55,7 @@ function App() {
         <div className="pt-14">
           <Switch>
             <Route path="/" component={Dashboard} />
-            <Route path="/monthly" component={MonthlyStats} />
+            <Route path="/ranges" component={Ranges} />
             <Route path="/statistics" component={Statistics} />
             <Route path="/settings" component={Settings} />
           </Switch>
