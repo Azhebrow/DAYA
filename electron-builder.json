@@ -1,0 +1,22 @@
+{
+  "appId": "com.productivity.tracker",
+  "productName": "Productivity Tracker",
+  "directories": {
+    "output": "releases"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "win": {
+    "target": [
+      "nsis"
+    ],
+    "icon": "generated-icon.png"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true
+  }
+}
