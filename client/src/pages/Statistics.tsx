@@ -507,7 +507,7 @@ export default function Statistics() {
                   return (
                     <tr key={day.date} className="border-b border-border/10">
                       <td className="py-2 px-4 font-medium w-[120px]">
-                        {format(new Date(day.date), 'dd.MM.yyyy')}
+                        {format(new Date(day.date), 'dd.MM')}
                       </td>
                       <td
                         className="py-2 px-4 text-center w-[100px]"
