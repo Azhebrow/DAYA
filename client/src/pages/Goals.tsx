@@ -101,12 +101,12 @@ export default function Goals() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="relative overflow-hidden p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
-                <div className={`absolute inset-0 bg-gradient-to-br ${goal.color} opacity-10`} />
+              <Card className="relative overflow-hidden p-6">
+                <div className={`absolute inset-0 bg-gradient-to-br from-${goal.color.split('-')[0]}-500 to-${goal.color.split('-')[1]}-700 opacity-10`} />
                 <div className="relative space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                      <div className={`p-2 rounded-lg bg-gradient-to-br from-${goal.color.split('-')[0]}-500 to-${goal.color.split('-')[1]}-700`}>
                         {iconComponents[goal.icon]}
                       </div>
                       <h3 className="text-xl font-semibold">{goal.title}</h3>
