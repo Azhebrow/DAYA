@@ -22,10 +22,10 @@ const CATEGORY_COLORS: { [key: string]: string } = {
 
 // Special colors for table headers
 const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
-  'Разум': { bg: '#8B5CF620', text: '#6B7280' },
-  'Время': { bg: '#10B98120', text: '#6B7280' },
-  'Спорт': { bg: '#EF444420', text: '#6B7280' },
-  'Привычки': { bg: '#F59E0B20', text: '#6B7280' }
+  'Разум': { bg: '#8B5CF620', text: '#ffffff' },
+  'Время': { bg: '#10B98120', text: '#ffffff' },
+  'Спорт': { bg: '#EF444420', text: '#ffffff' },
+  'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
 };
 
 // Изменил функцию formatTimeTotal для правильного отображения времени

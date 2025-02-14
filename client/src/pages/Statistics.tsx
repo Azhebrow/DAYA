@@ -14,18 +14,17 @@ import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChart as BarCha
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
-  'Разум': '#6B7280',    // Серый
+  'Разум': '#8B5CF6',    // Фиолетовый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#6B7280',    // Серый для спорта (такой же как у других)
-  'Привычки': '#6B7280',  // Серый для привычек
-  'Расходы': '#F97316'    // Оранжевый
+  'Спорт': '#EF4444',    // Красный
+  'Привычки': '#F59E0B'  // Оранжевый
 };
-const EXPENSE_CATEGORY_COLORS: { [key: string]: string } = {
-  'Разум': '#6B7280',    // Серый
-  'Время': '#6B7280',    // Серый
-  'Спорт': '#6B7280',    // Серый для расходов
-  'Привычки': '#6B7280',  // Серый
-  'Расходы': '#F97316'    // Оранжевый
+
+const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
+  'Разум': { bg: '#8B5CF620', text: '#ffffff' },
+  'Время': { bg: '#10B98120', text: '#ffffff' },
+  'Спорт': { bg: '#EF444420', text: '#ffffff' },
+  'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
 };
 
 const CATEGORY_ORDER = ['Разум', 'Привычки', 'Спорт', 'Время'];
@@ -538,11 +537,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke={CATEGORY_COLORS['Разум']}
-                  fill={CATEGORY_COLORS['Разум']}
+                  stroke="#6B7280"
+                  fill="#6B7280"
                   name="Успех"
                   dot={{ r: 4 }}
-                  label={{ position: 'top', fill: CATEGORY_COLORS['Разум'] }}
+                  label={{ position: 'top', fill: '#6B7280' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -568,11 +567,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="calories"
-                  stroke={CATEGORY_COLORS['Спорт']}
-                  fill={CATEGORY_COLORS['Спорт']}
+                  stroke="#EF4444"
+                  fill="#EF4444"
                   name="Калории"
                   dot={{ r: 4 }}
-                  label={{ position: 'top', fill: CATEGORY_COLORS['Спорт'] }}
+                  label={{ position: 'top', fill: '#EF4444' }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -727,8 +726,10 @@ export default function Statistics() {
                     <th
                       key={category.name}
                       colSpan={category.tasks.length + (category.name === 'Время' ? category.timeTasks.length : 0)}
-                      className="py-2 px-4 text-center"
-                      style={{ backgroundColor: `${category.color}20` }}
+                      className="py-2 px-4 text-center text-white"
+                      style={{
+                        backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020'
+                      }}
                     >
                       {category.name}
                     </th>
@@ -741,8 +742,10 @@ export default function Statistics() {
                     ...category.tasks.map(task => (
                       <th
                         key={task.taskName}
-                        className="py-2 px-4 text-center text-sm font-medium"
-                        style={{ backgroundColor: `${category.color}10` }}
+                        className="py-2 px-4 text-center text-sm font-medium text-white"
+                        style={{
+                          backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020'
+                        }}
                       >
                         {task.taskName}
                       </th>
@@ -750,8 +753,10 @@ export default function Statistics() {
                     ...(category.name === 'Время' ? category.timeTasks.map(task => (
                       <th
                         key={task.taskName}
-                        className="py-2 px-4 text-center text-sm font-medium"
-                        style={{ backgroundColor: `${category.color}10` }}
+                        className="py-2 px-4 text-center text-sm font-medium text-white"
+                        style={{
+                          backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020'
+                        }}
                       >
                         {task.taskName}
                       </th>
@@ -785,14 +790,11 @@ export default function Statistics() {
                               key={`${task.taskName}-${period}`}
                               className="py-2 px-4 text-center"
                               style={{
-                                backgroundColor: task.type === TaskType.CHECKBOX
-                                  ? 'transparent'
-                                  : task.type === TaskType.TIME || task.type === TaskType.CALORIE
-                                    ? '#6B728020'
-                                    : '#6B728020'
+                                backgroundColor: task.type === TaskType.CHECKBOX                                  ? getSuccessColor(value, 100)
+                                  : '#6B728020'  // Серый цвет для всех не-checkbox значений
                               }}
                             >
-                              {task.type === TaskType.CHECKBOX ?`${value}%` :
+                              {task.type === TaskType.CHECKBOX ? `${value}%` :
                                 task.type === TaskType.CALORIE ? value : formatTimeTotal(value)}
                             </td>
                           );
