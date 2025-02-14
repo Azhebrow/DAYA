@@ -5,38 +5,57 @@ import { Button } from '@/components/ui/button';
 import { storage } from '@/lib/storage';
 
 const TypewriterText = ({ text, isVisible }: { text: string; isVisible: boolean }) => {
-  const [displayedText, setDisplayedText] = useState('');
-  const [currentParagraph, setCurrentParagraph] = useState(0);
+  const [displayedText, setDisplayedText] = useState<string[]>([]);
   const paragraphs = text.split('\n\n');
 
   useEffect(() => {
-    if (isVisible) {
-      if (currentParagraph < paragraphs.length) {
-        let currentText = '';
-        const textArray = paragraphs[currentParagraph].split('');
-        let currentIndex = 0;
-
-        const interval = setInterval(() => {
-          if (currentIndex < textArray.length) {
-            currentText += textArray[currentIndex];
-            setDisplayedText(prev => prev + textArray[currentIndex]);
-            currentIndex++;
-          } else {
-            clearInterval(interval);
-            setTimeout(() => {
-              setCurrentParagraph(prev => prev + 1);
-              setDisplayedText(prev => prev + '\n\n');
-            }, 800); // Пауза между параграфами
-          }
-        }, 30); // Ускоренная скорость печати
-
-        return () => clearInterval(interval);
-      }
-    } else {
-      setDisplayedText('');
-      setCurrentParagraph(0);
+    if (!isVisible) {
+      setDisplayedText([]);
+      return;
     }
-  }, [isVisible, currentParagraph, paragraphs]);
+
+    let timeouts: NodeJS.Timeout[] = [];
+    let currentParaIndex = 0;
+    let currentCharIndex = 0;
+    let delay = 0;
+
+    const typeNextChar = () => {
+      if (currentParaIndex >= paragraphs.length) return;
+
+      const currentPara = paragraphs[currentParaIndex];
+      if (currentCharIndex === 0) {
+        setDisplayedText(prev => [...prev, '']);
+      }
+
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => {
+          const newText = [...prev];
+          newText[currentParaIndex] = currentPara.slice(0, currentCharIndex + 1);
+          return newText;
+        });
+
+        currentCharIndex++;
+        if (currentCharIndex < currentPara.length) {
+          typeNextChar();
+        } else {
+          currentParaIndex++;
+          currentCharIndex = 0;
+          if (currentParaIndex < paragraphs.length) {
+            setTimeout(typeNextChar, 800); // Пауза между параграфами
+          }
+        }
+      }, delay);
+
+      timeouts.push(timeout);
+      delay = 30; // Задержка между символами
+    };
+
+    typeNextChar();
+
+    return () => {
+      timeouts.forEach(clearTimeout);
+    };
+  }, [isVisible, paragraphs]);
 
   return (
     <motion.div
@@ -57,14 +76,24 @@ const TypewriterText = ({ text, isVisible }: { text: string; isVisible: boolean 
           repeatType: "reverse",
         }}
       />
-      <motion.pre
-        className="relative whitespace-pre-line text-lg leading-relaxed font-medium bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
-        style={{
-          textShadow: '0 0 20px rgba(255,255,255,0.1)',
-        }}
+      <motion.div
+        className="relative space-y-6"
       >
-        {displayedText}
-      </motion.pre>
+        {displayedText.map((paragraph, index) => (
+          <motion.p
+            key={index}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="whitespace-pre-line text-lg leading-relaxed font-medium bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
+            style={{
+              textShadow: '0 0 20px rgba(255,255,255,0.1)',
+            }}
+          >
+            {paragraph}
+          </motion.p>
+        ))}
+      </motion.div>
     </motion.div>
   );
 };
@@ -82,7 +111,6 @@ export default function Oath() {
 
   const handleStart = () => {
     setStarted(true);
-    // Время до появления кнопки "Клянусь" увеличено для учёта всех параграфов
     setTimeout(() => setShowPledge(true), oathText.length * 30 + 5000);
   };
 
@@ -114,7 +142,6 @@ export default function Oath() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-background relative overflow-hidden">
-      {/* Анимированный фоновый градиент */}
       <motion.div
         className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-background"
         animate={{
