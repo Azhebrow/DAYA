@@ -338,42 +338,58 @@ export default function Statistics() {
   const calculateExpensesByPeriod = () => {
     const periodType = timeRange === '30' ? 'monthly' : timeRange === '14' ? 'decades' : 'daily';
 
-    const expenseCategories = new Set<string>();
-    data.forEach(day => {
+    // Соберем все задачи с типом EXPENSE из всех категорий
+    const expenseData = data.reduce((acc, day) => {
       day.categories.forEach(category => {
-        if (category.tasks.some(task => task.type === TaskType.EXPENSE)) {
-          expenseCategories.add(category.name);
-        }
-      });
-    });
-
-    const expenseData = Array.from(expenseCategories).map(categoryName => {
-      const periodValues = data.map(day => {
-        const category = day.categories.find(c => c.name === categoryName);
-        let total = 0;
-        if (category) {
-          category.tasks.forEach(task => {
-            if (task.type === TaskType.EXPENSE && typeof task.value === 'number') {
-              total += task.value;
+        category.tasks.forEach(task => {
+          if (task.type === TaskType.EXPENSE) {
+            const existingCategory = acc.find(c => c.categoryName === category.name);
+            if (!existingCategory) {
+              acc.push({
+                categoryName: category.name,
+                periods: [{
+                  period: format(new Date(day.date), 'dd.MM'),
+                  value: task.value || 0
+                }]
+              });
+            } else {
+              const existingPeriod = existingCategory.periods.find(p =>
+                p.period === format(new Date(day.date), 'dd.MM')
+              );
+              if (existingPeriod) {
+                existingPeriod.value += task.value || 0;
+              } else {
+                existingCategory.periods.push({
+                  period: format(new Date(day.date), 'dd.MM'),
+                  value: task.value || 0
+                });
+              }
             }
-          });
-        }
-
-        return {
-          period: format(new Date(day.date), 'dd.MM'),
-          value: total
-        };
+          }
+        });
       });
+      return acc;
+    }, [] as { categoryName: string; periods: { period: string; value: number }[] }[]);
 
-      return {
-        categoryName,
-        periods: periodValues
-      };
+    // Заполним нулями пропущенные периоды
+    const allPeriods = data.map(day => format(new Date(day.date), 'dd.MM'));
+    expenseData.forEach(category => {
+      allPeriods.forEach(period => {
+        if (!category.periods.find(p => p.period === period)) {
+          category.periods.push({ period, value: 0 });
+        }
+      });
+      // Сортируем периоды по дате
+      category.periods.sort((a, b) => {
+        const dateA = new Date(data.find(d => format(new Date(d.date), 'dd.MM') === a.period)?.date || '');
+        const dateB = new Date(data.find(d => format(new Date(d.date), 'dd.MM') === b.period)?.date || '');
+        return dateA.getTime() - dateB.getTime();
+      });
     });
 
     return {
-      periods: data.map(day => format(new Date(day.date), 'dd.MM')),
-      categories: expenseData
+      categories: expenseData,
+      periods: allPeriods
     };
   };
 
@@ -862,7 +878,6 @@ export default function Statistics() {
               <thead>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4 text-left">Период</th>
-                  <th className="py-2 px-4 text-center font-bold">Итого</th>
                   {expenseTableData.categories.map(category => {
                     const matchingCategory = data.find(day =>
                       day.categories.find(c => c.name === category.categoryName)
@@ -872,75 +887,89 @@ export default function Statistics() {
                       <th
                         key={category.categoryName}
                         className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${EXPENSE_CATEGORY_COLORS[category.categoryName] || '#6B7280'}20` }}
+                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
                       >
                         {matchingCategory?.emoji || '📝'} {category.categoryName}
                       </th>
                     );
                   })}
+                  <th className="py-2 px-4 text-center font-bold">Итого</th>
                 </tr>
               </thead>
               <tbody>
                 {expenseTableData.periods.map((period, idx) => {
-                  const maxInPeriod = Math.max(
-                    ...expenseTableData.categories.map(category => category.periods[idx]?.value || 0)
-                  );
-
                   const rowTotal = expenseTableData.categories.reduce((sum, category) => {
-                    return sum + (category.periods[idx]?.value || 0);
+                    const periodData = category.periods.find(p => p.period === period);
+                    return sum + (periodData?.value || 0);
                   }, 0);
+
+                  const maxExpense = Math.max(
+                    ...expenseTableData.categories.flatMap(category =>
+                      category.periods.map(p => p.value)
+                    )
+                  );
 
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
                       <td className="py-2 px-4 font-medium">{period}</td>
-                      <td className="py-2 px-4 text-center font-bold">{rowTotal} zł</td>
                       {expenseTableData.categories.map(category => {
-                        const value = category.periods[idx]?.value || 0;
+                        const periodData = category.periods.find(p => p.period === period);
+                        const value = periodData?.value || 0;
                         return (
                           <td
                             key={`${category.categoryName}-${period}`}
                             className="py-2 px-4 text-center"
                             style={{
-                              backgroundColor: getExpenseColor(value, maxInPeriod)
+                              backgroundColor: getExpenseColor(value, maxExpense)
                             }}
                           >
                             {value} zł
                           </td>
                         );
                       })}
+                      <td
+                        className="py-2 px-4 text-center font-bold"
+                        style={{
+                          backgroundColor: getExpenseColor(rowTotal, maxExpense)
+                        }}
+                      >
+                        {rowTotal} zł
+                      </td>
                     </tr>
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
-                  <td className="py-2 px-4 text-center font-bold">
-                    {expenseTableData.categories.reduce((total, category) => {
-                      return total + category.periods.reduce((sum, period) => sum + (period.value || 0), 0);
-                    }, 0)} zł
-                  </td>
                   {expenseTableData.categories.map(category => {
                     const categoryTotal = category.periods.reduce((sum, period) => {
                       return sum + (period.value || 0);
                     }, 0);
-
-                    const maxCategoryTotal = Math.max(
+                    const maxTotal = Math.max(
                       ...expenseTableData.categories.map(cat =>
-                        cat.periods.reduce((sum, period) => sum + (period.value || 0), 0)
+                        cat.periods.reduce((sum, p) => sum + (p.value || 0), 0)
                       )
                     );
-
                     return (
                       <td
                         key={`total-${category.categoryName}`}
                         className="py-2 px-4 text-center"
                         style={{
-                          backgroundColor: getExpenseColor(categoryTotal, maxCategoryTotal)
+                          backgroundColor: getExpenseColor(categoryTotal, maxTotal)
                         }}
                       >
                         {categoryTotal} zł
                       </td>
                     );
                   })}
+                  <td className="py-2 px-4 text-center">
+                    {expenseTableData.periods.reduce((total, period) => {
+                      const periodTotal = expenseTableData.categories.reduce((sum, category) => {
+                        const periodData = category.periods.find(p => p.period === period);
+                        return sum + (periodData?.value || 0);
+                      }, 0);
+                      return total + periodTotal;
+                    }, 0)} zł
+                  </td>
                 </tr>
               </tbody>
             </table>
