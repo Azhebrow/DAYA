@@ -240,9 +240,9 @@ export default function Goals() {
             <h3 className="text-xl font-semibold mb-4">История изменений</h3>
             <div className="space-y-4">
               {history.map((entry) => (
-                <div key={entry.id} className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-400">{entry.date}</span>
+                <div key={entry.id} className="relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-lg font-medium text-gray-300">{entry.date}</span>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -252,18 +252,58 @@ export default function Goals() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="space-y-2">
+                  <div className="grid grid-cols-3 gap-4">
                     {entry.changes.map((change) => {
                       const goal = goals.find(g => g.id === change.goalId);
+                      if (!goal) return null;
+
                       const difference = change.newValue - change.previousValue;
                       const isPositive = difference > 0;
+
+                      // Рассчитываем изменение процента
+                      let previousProgress;
+                      let newProgress;
+                      if (goal.start !== undefined) {
+                        const totalRange = goal.target - goal.start;
+                        previousProgress = ((change.previousValue - goal.start) / totalRange) * 100;
+                        newProgress = ((change.newValue - goal.start) / totalRange) * 100;
+                      } else {
+                        previousProgress = (change.previousValue / goal.target) * 100;
+                        newProgress = (change.newValue / goal.target) * 100;
+                      }
+                      const progressDifference = newProgress - previousProgress;
+
                       return (
-                        <div key={`${entry.id}-${change.goalId}`} className="flex items-center justify-between">
-                          <span>{goal?.title}</span>
-                          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                            {isPositive ? '+' : ''}{difference} {goal?.unit}
-                          </span>
-                        </div>
+                        <motion.div
+                          key={`${entry.id}-${change.goalId}`}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="col-span-3 bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
+                        >
+                          <div className="grid grid-cols-3 items-center">
+                            {/* Иконка и название */}
+                            <div className="flex items-center gap-3 p-4">
+                              <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                                {goal.icon}
+                              </div>
+                              <span className="font-medium">{goal.title}</span>
+                            </div>
+
+                            {/* Изменение процента */}
+                            <div className="p-4 flex items-center justify-center">
+                              <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                                {progressDifference > 0 && '+'}{progressDifference.toFixed(1)}%
+                              </span>
+                            </div>
+
+                            {/* Изменение значения */}
+                            <div className="p-4 flex items-center justify-end">
+                              <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                                {isPositive && '+'}{difference} {goal.unit}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
                       );
                     })}
                   </div>
