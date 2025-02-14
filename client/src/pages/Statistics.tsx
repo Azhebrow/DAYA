@@ -493,12 +493,7 @@ export default function Statistics() {
                             opacity: 0.8
                           }}
                         >
-                          <div className="flex flex-col items-center gap-1">
-                            <span role="img" aria-label={task.name}>
-                              {task.emoji || '📝'}
-                            </span>
-                            <span>{task.name}</span>
-                          </div>
+                          {task.name}
                         </th>
                       ))
                     )}
@@ -638,12 +633,7 @@ export default function Statistics() {
                         className="py-2 px-4 text-center"
                         style={{ backgroundColor: '#6B728020' }}
                       >
-                        <div className="flex flex-col items-center gap-1">
-                          <span role="img" aria-label={category.name}>
-                            {category.emoji}
-                          </span>
-                          <span>{category.name}</span>
-                        </div>
+                        {category.emoji} {category.name}
                       </th>
                     ))}
                 </tr>
