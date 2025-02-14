@@ -4,7 +4,12 @@ import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Target, DollarSign, Book, Weight, Video, CodeSquare } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Target, DollarSign, Book, Weight, Video, CodeSquare, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
 interface Goal {
   id: number;
@@ -15,6 +20,16 @@ interface Goal {
   unit: string;
   icon: React.ReactNode;
   color: string;
+}
+
+interface HistoryEntry {
+  id: string;
+  date: string;
+  changes: {
+    goalId: number;
+    previousValue: number;
+    newValue: number;
+  }[];
 }
 
 const initialGoals: Goal[] = [
@@ -69,15 +84,15 @@ const initialGoals: Goal[] = [
 export default function Goals() {
   const [goals, setGoals] = useState<Goal[]>(initialGoals);
   const [newValues, setNewValues] = useState<{ [key: number]: string }>({});
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   const calculateProgress = (goal: Goal) => {
     if (goal.start !== undefined) {
-      // Для цели с весом
       const totalRange = goal.target - goal.start;
       const currentProgress = goal.current - goal.start;
       return (currentProgress / totalRange) * 100;
     }
-    // Для остальных целей
     return (goal.current / goal.target) * 100;
   };
 
@@ -90,13 +105,37 @@ export default function Goals() {
   };
 
   const handleUpdate = () => {
-    setGoals(prevGoals => 
-      prevGoals.map(goal => ({
+    const changes = [];
+    const updatedGoals = goals.map(goal => {
+      const newValue = newValues[goal.id] ? parseFloat(newValues[goal.id]) : goal.current;
+      if (newValue !== goal.current) {
+        changes.push({
+          goalId: goal.id,
+          previousValue: goal.current,
+          newValue: newValue
+        });
+      }
+      return {
         ...goal,
-        current: newValues[goal.id] ? parseFloat(newValues[goal.id]) : goal.current
-      }))
-    );
+        current: newValue
+      };
+    });
+
+    if (changes.length > 0) {
+      const newEntry: HistoryEntry = {
+        id: Date.now().toString(),
+        date: new Date().toLocaleDateString('ru-RU'),
+        changes
+      };
+      setHistory(prev => [newEntry, ...prev]);
+    }
+
+    setGoals(updatedGoals);
     setNewValues({});
+  };
+
+  const handleDeleteHistoryEntry = (entryId: string) => {
+    setHistory(prev => prev.filter(entry => entry.id !== entryId));
   };
 
   return (
@@ -118,33 +157,44 @@ export default function Goals() {
           </div>
         </div>
 
-        {/* Форма обновления показателей */}
-        <Card className="p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
-          <h3 className="text-xl font-semibold mb-4">Обновить показатели</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {goals.map(goal => (
-              <div key={`input-${goal.id}`} className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
-                  {goal.icon}
-                </div>
-                <Input
-                  type="number"
-                  placeholder={`Текущий показатель (${goal.unit})`}
-                  value={newValues[goal.id] || ''}
-                  onChange={(e) => handleInputChange(goal.id, e.target.value)}
-                  className="flex-1"
-                  step="0.1"
-                />
+        {/* Сворачиваемая форма обновления показателей */}
+        <Collapsible
+          open={isUpdateOpen}
+          onOpenChange={setIsUpdateOpen}
+          className="space-y-2"
+        >
+          <CollapsibleTrigger className="flex items-center justify-between w-full p-4 rounded-lg bg-black/40 border border-zinc-800 hover:bg-black/60 transition-colors">
+            <span className="text-lg font-semibold">Обновить показатели</span>
+            {isUpdateOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <Card className="p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {goals.map(goal => (
+                  <div key={`input-${goal.id}`} className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                      {goal.icon}
+                    </div>
+                    <Input
+                      type="number"
+                      placeholder={`Текущий показатель (${goal.unit})`}
+                      value={newValues[goal.id] || ''}
+                      onChange={(e) => handleInputChange(goal.id, e.target.value)}
+                      className="flex-1"
+                      step="0.1"
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <Button 
-            onClick={handleUpdate}
-            className="mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-          >
-            Обновить показатели
-          </Button>
-        </Card>
+              <Button 
+                onClick={handleUpdate}
+                className="mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              >
+                Обновить показатели
+              </Button>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {goals.map((goal, index) => (
@@ -183,6 +233,45 @@ export default function Goals() {
             </motion.div>
           ))}
         </div>
+
+        {/* История изменений */}
+        {history.length > 0 && (
+          <Card className="p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
+            <h3 className="text-xl font-semibold mb-4">История изменений</h3>
+            <div className="space-y-4">
+              {history.map((entry) => (
+                <div key={entry.id} className="p-4 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gray-400">{entry.date}</span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteHistoryEntry(entry.id)}
+                      className="h-8 w-8 text-gray-400 hover:text-red-400"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {entry.changes.map((change) => {
+                      const goal = goals.find(g => g.id === change.goalId);
+                      const difference = change.newValue - change.previousValue;
+                      const isPositive = difference > 0;
+                      return (
+                        <div key={`${entry.id}-${change.goalId}`} className="flex items-center justify-between">
+                          <span>{goal?.title}</span>
+                          <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                            {isPositive ? '+' : ''}{difference} {goal?.unit}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
       </motion.div>
     </div>
   );
