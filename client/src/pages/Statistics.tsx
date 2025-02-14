@@ -10,7 +10,7 @@ import {
 import { format, subDays, startOfDay, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { calculateDayScore } from '@/lib/utils';
-import { ActivitySquare, Flame, Clock, LineChart, DollarSign, FileText } from 'lucide-react';
+import { ActivitySquare, Flame, Clock, LineChart, DollarSign, FileText, BarChartIcon } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
@@ -18,6 +18,13 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Время': '#10B981',    // Зеленый
   'Спорт': '#F97316',    // Оранжевый
   'Привычки': '#F59E0B'  // Желтый
+};
+
+const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
+  'Разум': { bg: '#8B5CF620', text: '#ffffff' },
+  'Время': { bg: '#10B98120', text: '#ffffff' },
+  'Спорт': { bg: '#EF444420', text: '#ffffff' },
+  'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
 };
 
 type TimeRangeType = '7' | '14' | '30';
@@ -428,6 +435,234 @@ export default function Statistics() {
                     </tr>
                   );
                 }).filter(Boolean)}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+
+      {/* Add Task Success Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChartIcon className="h-5 w-5 text-primary" />
+            Успешность задач по дням
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border/20">
+                  <th className="py-2 px-4 text-left">Дата</th>
+                  <th className="py-2 px-4 text-center">Успех</th>
+                  {data[0]?.categories.map(category => (
+                    <th
+                      key={category.name}
+                      colSpan={category.tasks.length}
+                      className="py-2 px-4 text-center"
+                      style={{
+                        backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
+                        color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
+                      }}
+                    >
+                      {category.name}
+                    </th>
+                  ))}
+                </tr>
+                <tr className="border-b border-border/20">
+                  <th className="py-2 px-4"></th>
+                  <th className="py-2 px-4"></th>
+                  {data[0]?.categories.flatMap(category =>
+                    category.tasks.map(task => (
+                      <th
+                        key={`${category.name}-${task.name}`}
+                        className="py-2 px-4 text-center text-sm font-medium"
+                        style={{
+                          backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
+                          color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
+                          opacity: 0.8
+                        }}
+                      >
+                        {task.name}
+                      </th>
+                    ))
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map(day => {
+                  const dayScore = calculateDayScore(day);
+                  const maxScore = 100;
+
+                  return (
+                    <tr key={day.date} className="border-b border-border/10">
+                      <td className="py-2 px-4 font-medium">
+                        {format(new Date(day.date), 'dd.MM.yyyy')}
+                      </td>
+                      <td
+                        className="py-2 px-4 text-center"
+                        style={{
+                          backgroundColor: `rgba(16, 185, 129, ${0.1 + (dayScore / maxScore * 0.4)})`
+                        }}
+                      >
+                        {dayScore}%
+                      </td>
+                      {day.categories.flatMap(category =>
+                        category.tasks.map(task => {
+                          let displayValue = '';
+                          let bgColor = 'transparent';
+
+                          if (task.type === TaskType.CHECKBOX) {
+                            const value = task.completed ? 100 : 0;
+                            bgColor = `rgba(16, 185, 129, ${0.1 + (value / 100 * 0.4)})`;
+                            displayValue = task.completed ? '100%' : '0%';
+                          } else if (task.type === TaskType.TIME) {
+                            displayValue = formatTimeTotal(task.value || 0);
+                            bgColor = '#6B728020';
+                          } else if (task.type === TaskType.CALORIE) {
+                            displayValue = `${task.value || 0}`;
+                            bgColor = '#6B728020';
+                          }
+
+                          return (
+                            <td
+                              key={`${category.name}-${task.name}`}
+                              className="py-2 px-4 text-center"
+                              style={{ backgroundColor: bgColor }}
+                            >
+                              {displayValue}
+                            </td>
+                          );
+                        })
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Add Expense Categories Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-primary" />
+            Расходы по категориям
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border/20">
+                  <th className="py-2 px-4 text-left">Дата</th>
+                  <th className="py-2 px-4 text-center font-bold">Итого</th>
+                  {data[0]?.categories
+                    .filter(category => category.type === CategoryType.EXPENSE)
+                    .map(category => (
+                      <th
+                        key={category.name}
+                        className="py-2 px-4 text-center"
+                        style={{ backgroundColor: '#6B728020' }}
+                      >
+                        {category.emoji} {category.name}
+                      </th>
+                    ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map(day => {
+                  const expenseCategories = day.categories.filter(
+                    category => category.type === CategoryType.EXPENSE
+                  );
+
+                  const dayTotal = expenseCategories.reduce((sum, category) =>
+                    sum + category.tasks.reduce((catSum, task) =>
+                      catSum + (task.type === TaskType.EXPENSE ? (task.value || 0) : 0), 0), 0);
+
+                  const maxExpense = Math.max(...data.map(d =>
+                    d.categories
+                      .filter(c => c.type === CategoryType.EXPENSE)
+                      .reduce((sum, c) => sum + c.tasks.reduce((tSum, t) =>
+                        tSum + (t.type === TaskType.EXPENSE ? (t.value || 0) : 0), 0), 0)));
+
+                  return (
+                    <tr key={day.date} className="border-b border-border/10">
+                      <td className="py-2 px-4 font-medium">
+                        {format(new Date(day.date), 'dd.MM.yyyy')}
+                      </td>
+                      <td
+                        className="py-2 px-4 text-center font-bold"
+                        style={{
+                          backgroundColor: `rgba(249, 115, 22, ${0.1 + (dayTotal / maxExpense * 0.4)})`
+                        }}
+                      >
+                        {dayTotal} zł
+                      </td>
+                      {expenseCategories.map(category => {
+                        const categoryTotal = category.tasks.reduce((sum, task) =>
+                          sum + (task.type === TaskType.EXPENSE ? (task.value || 0) : 0), 0);
+
+                        return (
+                          <td
+                            key={category.name}
+                            className="py-2 px-4 text-center"
+                            style={{
+                              backgroundColor: `rgba(249, 115, 22, ${0.1 + (categoryTotal / maxExpense * 0.4)})`
+                            }}
+                          >
+                            {categoryTotal} zł
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+                {/* Add totals row */}
+                <tr className="border-t-2 border-border font-bold">
+                  <td className="py-2 px-4">Итого</td>
+                  <td className="py-2 px-4 text-center">
+                    {data.reduce((total, day) =>
+                      total + day.categories
+                        .filter(c => c.type === CategoryType.EXPENSE)
+                        .reduce((catSum, category) =>
+                          catSum + category.tasks.reduce((taskSum, task) =>
+                            taskSum + (task.type === TaskType.EXPENSE ? (task.value || 0) : 0), 0), 0), 0)} zł
+                  </td>
+                  {data[0]?.categories
+                    .filter(category => category.type === CategoryType.EXPENSE)
+                    .map(category => {
+                      const categoryTotal = data.reduce((total, day) => {
+                        const cat = day.categories.find(c => c.name === category.name);
+                        return total + (cat?.tasks.reduce((sum, task) =>
+                          sum + (task.type === TaskType.EXPENSE ? (task.value || 0) : 0), 0) || 0);
+                      }, 0);
+
+                      const maxTotal = Math.max(...data[0].categories
+                        .filter(c => c.type === CategoryType.EXPENSE)
+                        .map(c => data.reduce((total, day) => {
+                          const cat = day.categories.find(cat => cat.name === c.name);
+                          return total + (cat?.tasks.reduce((sum, task) =>
+                            sum + (task.type === TaskType.EXPENSE ? (task.value || 0) : 0), 0) || 0);
+                        }, 0)));
+
+                      return (
+                        <td
+                          key={`total-${category.name}`}
+                          className="py-2 px-4 text-center"
+                          style={{
+                            backgroundColor: `rgba(249, 115, 22, ${0.1 + (categoryTotal / maxTotal * 0.4)})`
+                          }}
+                        >
+                          {categoryTotal} zł
+                        </td>
+                      );
+                    })}
+                </tr>
               </tbody>
             </table>
           </div>
