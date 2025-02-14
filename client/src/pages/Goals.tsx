@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
@@ -82,10 +82,28 @@ const initialGoals: Goal[] = [
 ];
 
 export default function Goals() {
-  const [goals, setGoals] = useState<Goal[]>(initialGoals);
+  const [goals, setGoals] = useState<Goal[]>(() => {
+    const stored = localStorage.getItem('goals_data');
+    return stored ? JSON.parse(stored) : initialGoals;
+  });
+
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    const stored = localStorage.getItem('goals_history');
+    return stored ? JSON.parse(stored) : [];
+  });
+
   const [newValues, setNewValues] = useState<{ [key: number]: string }>({});
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+
+  // Сохраняем данные целей при их изменении
+  useEffect(() => {
+    localStorage.setItem('goals_data', JSON.stringify(goals));
+  }, [goals]);
+
+  // Сохраняем историю при её изменении
+  useEffect(() => {
+    localStorage.setItem('goals_history', JSON.stringify(history));
+  }, [history]);
 
   const calculateProgress = (goal: Goal) => {
     if (goal.start !== undefined) {

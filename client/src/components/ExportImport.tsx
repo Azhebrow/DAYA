@@ -4,6 +4,14 @@ import { storage } from '@/lib/storage';
 import { Download, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+interface ExportData {
+  settings: any;
+  goals?: {
+    goals: any[];
+    history: any[];
+  };
+}
+
 export function ExportImport() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -11,7 +19,18 @@ export function ExportImport() {
   const handleExport = () => {
     try {
       const data = storage.exportData();
-      const blob = new Blob([data], { type: 'application/json' });
+      // Получаем данные целей из localStorage
+      const goalsData = localStorage.getItem('goals_data');
+      const historyData = localStorage.getItem('goals_history');
+      const exportData: ExportData = {
+        settings: JSON.parse(data),
+        goals: {
+          goals: goalsData ? JSON.parse(goalsData) : [],
+          history: historyData ? JSON.parse(historyData) : []
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -20,12 +39,13 @@ export function ExportImport() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Экспорт завершен",
         description: "Данные успешно экспортированы",
       });
     } catch (error) {
+      console.error('Export error:', error);
       toast({
         title: "Ошибка экспорта",
         description: "Не удалось экспортировать данные",
@@ -42,18 +62,31 @@ export function ExportImport() {
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
-        storage.importData(content);
-        
+        const importedData: ExportData = JSON.parse(content);
+
+        // Импортируем настройки
+        storage.importData(JSON.stringify(importedData.settings));
+
+        // Импортируем данные целей, если они есть
+        if (importedData.goals) {
+          localStorage.setItem('goals_data', JSON.stringify(importedData.goals.goals));
+          localStorage.setItem('goals_history', JSON.stringify(importedData.goals.history));
+        }
+
         toast({
           title: "Импорт завершен",
           description: "Данные успешно импортированы",
         });
-        
+
         // Reset file input
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
+
+        // Перезагружаем страницу для применения импортированных данных
+        window.location.reload();
       } catch (error) {
+        console.error('Import error:', error);
         toast({
           title: "Ошибка импорта",
           description: "Неверный формат файла",
