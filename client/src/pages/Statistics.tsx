@@ -26,7 +26,7 @@ const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = 
   'Разум': { bg: '#8B5CF620', text: '#ffffff' },
   'Время': { bg: '#10B98120', text: '#ffffff' },
   'Спорт': { bg: '#EF444420', text: '#ffffff' },
-  'Привычки': { bg: '#F5NE0B20', text: '#ffffff' }
+  'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
 };
 
 type TimeRangeType = '7' | '14' | '30';
@@ -170,10 +170,11 @@ export default function Statistics() {
   const timeDistribution = calculateTimeDistribution();
   const expenseDistribution = calculateExpenseDistribution();
 
-  const formatTimeTotal = (minutes: number) => {
+  // Format time total function
+  const formatTimeTotal = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}ч ${remainingMinutes}м`;
+    const mins = minutes % 60;
+    return `${hours}ч ${mins}м`;
   };
 
   const calculateDayScoreFromHistory = (day: DayEntry) => {
