@@ -360,8 +360,8 @@ export default function Statistics() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-category-time" />
-              Время
+              <DollarSign className="h-5 w-5 text-primary" />
+              Расходы
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
@@ -380,12 +380,12 @@ export default function Statistics() {
                 />
                 <Area
                   type="monotone"
-                  dataKey="totalTime"
-                  stroke={CATEGORY_COLORS["Время"]}
-                  fill={CATEGORY_COLORS["Время"]}
-                  name="Часы"
+                  dataKey="expenses"
+                  stroke="#F59E0B"
+                  fill="#F59E0B"
+                  name="Расходы"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: CATEGORY_COLORS["Время"] }}
+                  label={{ position: "top", fill: "#F59E0B" }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -945,7 +945,7 @@ export default function Statistics() {
                           key={`total-${category.name}`}
                           className="py-2 px-4 text-center min-w-[90px]"
                           style={{
-                            backgroundColor: `rgba(249, 115, 22, ${0.1 + (categoryTotal / maxTotal) * 0.4})`,
+                            backgroundColor: `rgba(249, 115, 22, ${0.1 +(categoryTotal / maxTotal) * 0.4})`,
                           }}
                         >
                           {categoryTotal} zł

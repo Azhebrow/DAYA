@@ -534,8 +534,8 @@ export default function Ranges() {
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke={CATEGORY_COLORS['Расходы']}
-                  fill={CATEGORY_COLORS['Расходы']}
+                  stroke="#F59E0B"
+                  fill="#F59E0B"
                   name="Расходы"
                 />
               </AreaChart>
@@ -828,7 +828,7 @@ export default function Ranges() {
                           backgroundColor: getExpenseColor(categoryTotal, maxTotal)
                         }}
                       >
-                        {categoryTotal} zł
+                                                {categoryTotal} zł
                       </td>
                     );
                   })}                </tr>
