@@ -34,6 +34,84 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryN
     onChange(value);
   }, [onChange]);
 
+  if (task.type === TaskType.TIME) {
+    const currentValue = typeof task.value === 'number' ? task.value : 0;
+    return (
+      <div className="flex items-center justify-between px-4">
+        <span className="text-sm font-medium text-gray-300">{task.name}</span>
+        <Select
+          value={String(currentValue)}
+          onValueChange={(value) => handleChange(parseInt(value))}
+        >
+          <SelectTrigger
+            className={`w-[180px] h-8 ${currentValue > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-zinc-700 border-gray-700 flex items-center justify-center`}
+          >
+            <SelectValue placeholder="Выберите время" className="text-center w-full" />
+          </SelectTrigger>
+          <SelectContent align="center">
+            {TIME_OPTIONS.map((option) => (
+              <SelectItem 
+                key={option.value} 
+                value={String(option.value)} 
+                className="flex items-center justify-center"
+              >
+                <span className="text-center w-full">{option.label}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  if (task.type === TaskType.CALORIE) {
+    const currentValue = typeof task.value === 'number' ? task.value : 0;
+    return (
+      <div className="flex items-center justify-between px-4">
+        <span className="text-sm font-medium text-gray-300">{task.name}</span>
+        <Select
+          value={String(currentValue)}
+          onValueChange={(value) => handleChange(parseInt(value))}
+        >
+          <SelectTrigger
+            className={`w-[180px] h-8 ${currentValue > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-zinc-700 border-gray-700 flex items-center justify-center`}
+          >
+            <SelectValue placeholder="Выберите калории" className="text-center w-full" />
+          </SelectTrigger>
+          <SelectContent align="center">
+            {CALORIE_OPTIONS.map((option) => (
+              <SelectItem 
+                key={option.value} 
+                value={String(option.value)}
+                className="flex items-center justify-center"
+              >
+                <span className="text-center w-full">{option.label}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  if (task.type === TaskType.CHECKBOX) {
+    return (
+      <div className="flex items-center justify-between px-4">
+        <span className="text-sm font-medium text-gray-300">{task.name}</span>
+        <Button
+          variant={task.completed ? "default" : "outline"}
+          size="sm"
+          onClick={() => handleChange(!task.completed)}
+          className={`w-[180px] h-8 ${task.completed ? categoryColor : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
+        >
+          <span className="text-sm text-white font-medium">
+            {task.completed ? 'Выполнено' : 'Отметить'}
+          </span>
+        </Button>
+      </div>
+    );
+  }
+
   if (task.type === TaskType.EXPENSE) {
     return (
       <div className={`relative ${isExpenseCard ? 'w-full' : 'w-[180px]'}`}>
@@ -69,74 +147,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryN
           placeholder="Введите описание..."
           maxLength={255}
         />
-      </div>
-    );
-  }
-
-  if (task.type === TaskType.CHECKBOX) {
-    return (
-      <div className="flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-300">{task.name}</span>
-        <Button
-          variant={task.completed ? "default" : "outline"}
-          size="sm"
-          onClick={() => handleChange(!task.completed)}
-          className={`w-[180px] h-8 ${task.completed ? categoryColor : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
-        >
-          <span className="text-sm text-white font-medium">
-            {task.completed ? 'Выполнено' : 'Отметить'}
-          </span>
-        </Button>
-      </div>
-    );
-  }
-
-  if (task.type === TaskType.TIME) {
-    return (
-      <div className="flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-300">{task.name}</span>
-        <Select
-          value={String(task.value || 0)}
-          onValueChange={(value) => handleChange(parseInt(value))}
-        >
-          <SelectTrigger
-            className={`w-[180px] h-8 ${task.value ? categoryColor : 'bg-zinc-800'} hover:bg-zinc-700 border-gray-700`}
-          >
-            <SelectValue placeholder="Выберите время" />
-          </SelectTrigger>
-          <SelectContent>
-            {TIME_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={String(option.value)}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    );
-  }
-
-  if (task.type === TaskType.CALORIE) {
-    return (
-      <div className="flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-300">{task.name}</span>
-        <Select
-          value={String(task.value || 0)}
-          onValueChange={(value) => handleChange(parseInt(value))}
-        >
-          <SelectTrigger
-            className={`w-[180px] h-8 ${task.value ? categoryColor : 'bg-zinc-800'} hover:bg-zinc-700 border-gray-700`}
-          >
-            <SelectValue placeholder="Выберите калории" />
-          </SelectTrigger>
-          <SelectContent>
-            {CALORIE_OPTIONS.map((option) => (
-              <SelectItem key={option.value} value={String(option.value)}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
     );
   }
