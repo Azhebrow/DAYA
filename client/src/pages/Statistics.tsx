@@ -10,7 +10,7 @@ import {
 import { format, subDays, startOfDay, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { calculateDayScore } from '@/lib/utils';
-import { ActivitySquare, Flame, Clock, LineChart, DollarSign } from 'lucide-react';
+import { ActivitySquare, Flame, Clock, LineChart, DollarSign, FileText } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
