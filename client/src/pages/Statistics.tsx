@@ -16,9 +16,11 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#8B5CF6',    // Фиолетовый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#F97316',    // Оранжевый
-  'Привычки': '#F59E0B'  // Желтый
+  'Спорт': '#EF4444',    // Красный
+  'Привычки': '#F59E0B'  // Оранжевый
 };
+
+const CATEGORY_ORDER = ['Разум', 'Время', 'Спорт', 'Привычки'];
 
 const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
   'Разум': { bg: '#8B5CF620', text: '#ffffff' },
@@ -457,38 +459,44 @@ export default function Statistics() {
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4 text-left">Дата</th>
                   <th className="py-2 px-4 text-center">Успех</th>
-                  {data[0]?.categories.map(category => (
-                    <th
-                      key={category.name}
-                      colSpan={category.tasks.length}
-                      className="py-2 px-4 text-center"
-                      style={{
-                        backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
-                        color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
-                      }}
-                    >
-                      {category.name}
-                    </th>
-                  ))}
+                  {data[0]?.categories
+                    .filter(category => category.type !== CategoryType.EXPENSE)
+                    .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                    .map(category => (
+                      <th
+                        key={category.name}
+                        colSpan={category.tasks.length}
+                        className="py-2 px-4 text-center"
+                        style={{
+                          backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
+                          color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
+                        }}
+                      >
+                        {category.name}
+                      </th>
+                    ))}
                 </tr>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4"></th>
                   <th className="py-2 px-4"></th>
-                  {data[0]?.categories.flatMap(category =>
-                    category.tasks.map(task => (
-                      <th
-                        key={`${category.name}-${task.name}`}
-                        className="py-2 px-4 text-center text-sm font-medium"
-                        style={{
-                          backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
-                          color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
-                          opacity: 0.8
-                        }}
-                      >
-                        {task.name}
-                      </th>
-                    ))
-                  )}
+                  {data[0]?.categories
+                    .filter(category => category.type !== CategoryType.EXPENSE)
+                    .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                    .flatMap(category =>
+                      category.tasks.map(task => (
+                        <th
+                          key={`${category.name}-${task.name}`}
+                          className="py-2 px-4 text-center text-sm font-medium"
+                          style={{
+                            backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
+                            color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
+                            opacity: 0.8
+                          }}
+                        >
+                          {task.name}
+                        </th>
+                      ))
+                    )}
                 </tr>
               </thead>
               <tbody>
@@ -509,34 +517,37 @@ export default function Statistics() {
                       >
                         {dayScore}%
                       </td>
-                      {day.categories.flatMap(category =>
-                        category.tasks.map(task => {
-                          let displayValue = '';
-                          let bgColor = 'transparent';
+                      {day.categories
+                        .filter(category => category.type !== CategoryType.EXPENSE)
+                        .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                        .flatMap(category =>
+                          category.tasks.map(task => {
+                            let displayValue = '';
+                            let bgColor = 'transparent';
 
-                          if (task.type === TaskType.CHECKBOX) {
-                            const value = task.completed ? 100 : 0;
-                            bgColor = `rgba(16, 185, 129, ${0.1 + (value / 100 * 0.4)})`;
-                            displayValue = task.completed ? '100%' : '0%';
-                          } else if (task.type === TaskType.TIME) {
-                            displayValue = formatTimeTotal(task.value || 0);
-                            bgColor = '#6B728020';
-                          } else if (task.type === TaskType.CALORIE) {
-                            displayValue = `${task.value || 0}`;
-                            bgColor = '#6B728020';
-                          }
+                            if (task.type === TaskType.CHECKBOX) {
+                              const value = task.completed ? 100 : 0;
+                              bgColor = `rgba(16, 185, 129, ${0.1 + (value / 100 * 0.4)})`;
+                              displayValue = task.completed ? '100%' : '0%';
+                            } else if (task.type === TaskType.TIME) {
+                              displayValue = formatTimeTotal(task.value || 0);
+                              bgColor = '#6B728020';
+                            } else if (task.type === TaskType.CALORIE) {
+                              displayValue = `${task.value || 0}`;
+                              bgColor = '#6B728020';
+                            }
 
-                          return (
-                            <td
-                              key={`${category.name}-${task.name}`}
-                              className="py-2 px-4 text-center"
-                              style={{ backgroundColor: bgColor }}
-                            >
-                              {displayValue}
-                            </td>
-                          );
-                        })
-                      )}
+                            return (
+                              <td
+                                key={`${category.name}-${task.name}`}
+                                className="py-2 px-4 text-center"
+                                style={{ backgroundColor: bgColor }}
+                              >
+                                {displayValue}
+                              </td>
+                            );
+                          })
+                        )}
                     </tr>
                   );
                 })}
