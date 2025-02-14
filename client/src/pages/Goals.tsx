@@ -18,7 +18,7 @@ interface Goal {
   current: number;
   start?: number;
   unit: string;
-  icon: React.ReactNode;
+  iconName: string;
   color: string;
 }
 
@@ -32,6 +32,23 @@ interface HistoryEntry {
   }[];
 }
 
+const getIconByName = (name: string) => {
+  switch (name) {
+    case 'DollarSign':
+      return <DollarSign className="w-6 h-6" />;
+    case 'Book':
+      return <Book className="w-6 h-6" />;
+    case 'Weight':
+      return <Weight className="w-6 h-6" />;
+    case 'Video':
+      return <Video className="w-6 h-6" />;
+    case 'CodeSquare':
+      return <CodeSquare className="w-6 h-6" />;
+    default:
+      return <Target className="w-6 h-6" />;
+  }
+};
+
 const initialGoals: Goal[] = [
   {
     id: 1,
@@ -39,7 +56,7 @@ const initialGoals: Goal[] = [
     target: 5000,
     current: 0,
     unit: "злотых",
-    icon: <DollarSign className="w-6 h-6" />,
+    iconName: "DollarSign",
     color: "from-green-500 to-emerald-700"
   },
   {
@@ -48,17 +65,17 @@ const initialGoals: Goal[] = [
     target: 804,
     current: 0,
     unit: "страниц",
-    icon: <Book className="w-6 h-6" />,
+    iconName: "Book",
     color: "from-blue-500 to-indigo-700"
   },
   {
     id: 3,
     title: "Набрать вес",
     target: 82,
-    current: 72,
+    current: 0,
     start: 72,
     unit: "кг",
-    icon: <Weight className="w-6 h-6" />,
+    iconName: "Weight",
     color: "from-purple-500 to-violet-700"
   },
   {
@@ -67,7 +84,7 @@ const initialGoals: Goal[] = [
     target: 15,
     current: 0,
     unit: "видео",
-    icon: <Video className="w-6 h-6" />,
+    iconName: "Video",
     color: "from-red-500 to-rose-700"
   },
   {
@@ -76,7 +93,7 @@ const initialGoals: Goal[] = [
     target: 1500,
     current: 0,
     unit: "$",
-    icon: <CodeSquare className="w-6 h-6" />,
+    iconName: "CodeSquare",
     color: "from-yellow-500 to-orange-700"
   }
 ];
@@ -180,7 +197,6 @@ export default function Goals() {
           </div>
         </div>
 
-        {/* Сворачиваемая форма обновления показателей */}
         <Collapsible
           open={isUpdateOpen}
           onOpenChange={setIsUpdateOpen}
@@ -196,7 +212,7 @@ export default function Goals() {
                 {goals.map(goal => (
                   <div key={`input-${goal.id}`} className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
-                      {goal.icon}
+                      {getIconByName(goal.iconName)}
                     </div>
                     <Input
                       type="number"
@@ -233,7 +249,7 @@ export default function Goals() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
-                        {goal.icon}
+                        {getIconByName(goal.iconName)}
                       </div>
                       <h3 className="text-xl font-semibold">{goal.title}</h3>
                     </div>
@@ -257,7 +273,6 @@ export default function Goals() {
           ))}
         </div>
 
-        {/* История изменений */}
         {history.length > 0 && (
           <Card className="p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
             <h3 className="text-xl font-semibold mb-4">История изменений</h3>
@@ -311,12 +326,12 @@ export default function Goals() {
                       <div className="flex flex-col">
                         {/* Строка с иконками */}
                         <div className="flex items-center justify-around p-4">
-                          {changes.map(({ goal }, index) => (
+                          {changes.map(({ goal }) => (
                             <div
                               key={`icon-${goal.id}`}
                               className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}
                             >
-                              {goal.icon}
+                              {getIconByName(goal.iconName)}
                             </div>
                           ))}
                         </div>
