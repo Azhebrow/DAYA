@@ -244,7 +244,12 @@ export default function TenDayStats() {
                         className="py-2 px-4 text-center"
                         style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
                       >
-                        {matchingCategory?.emoji || '📝'} {category.categoryName}
+                        <div className="flex flex-col items-center gap-1">
+                          <span role="img" aria-label={category.categoryName}>
+                            {matchingCategory?.emoji || '📝'}
+                          </span>
+                          <span>{category.categoryName}</span>
+                        </div>
                       </th>
                     );
                   })}
