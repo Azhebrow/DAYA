@@ -486,7 +486,7 @@ export default function Statistics() {
                       category.tasks.map(task => (
                         <th
                           key={`${category.name}-${task.name}`}
-                          className="py-2 px-4 text-center text-sm font-medium min-w-[120px]"
+                          className="py-2 px-4 text-center text-sm font-medium min-w-[90px]"
                           style={{
                             backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
                             color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
@@ -540,7 +540,7 @@ export default function Statistics() {
                             return (
                               <td
                                 key={`${category.name}-${task.name}`}
-                                className="py-2 px-4 text-center min-w-[120px]"
+                                className="py-2 px-4 text-center min-w-[90px]"
                                 style={{ backgroundColor: bgColor }}
                               >
                                 {displayValue}
