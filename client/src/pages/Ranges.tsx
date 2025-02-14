@@ -12,19 +12,20 @@ import { calculateDayScore } from '@/lib/utils';
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChart as BarChartIcon } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
+// Обновляем цвета категорий
 const CATEGORY_COLORS: { [key: string]: string } = {
-  'Разум': '#6B7280',    // Серый
+  'Разум': '#8B5CF6',    // Фиолетовый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#6B7280',    // Серый для спорта
-  'Привычки': '#6B7280'  // Серый
+  'Спорт': '#EF4444',    // Красный
+  'Привычки': '#F59E0B'  // Оранжевый
 };
 
 // Special colors for table headers
 const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
-  'Разум': { bg: '#6B728020', text: '#6B7280' },
+  'Разум': { bg: '#8B5CF620', text: '#8B5CF6' },
   'Время': { bg: '#10B98120', text: '#10B981' },
-  'Спорт': { bg: '#6B728020', text: '#6B7280' },
-  'Привычки': { bg: '#6B728020', text: '#6B7280' }
+  'Спорт': { bg: '#EF444420', text: '#EF4444' },
+  'Привычки': { bg: '#F59E0B20', text: '#F59E0B' }
 };
 
 // Изменил функцию formatTimeTotal для правильного отображения времени
@@ -444,11 +445,12 @@ export default function Ranges() {
                 <Tooltip contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
                   itemStyle={{ color: '#ffffff' }}
                   labelStyle={{ color: '#ffffff' }} />
+                {/* Для графика "Показатель успеха" */}
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke="#82ca9d"
-                  fill="#82ca9d"
+                  stroke="#6B7280"
+                  fill="#6B7280"
                   name="Успех"
                 />
               </AreaChart>
@@ -472,11 +474,12 @@ export default function Ranges() {
                 <Tooltip contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
                   itemStyle={{ color: '#ffffff' }}
                   labelStyle={{ color: '#ffffff' }} />
+                {/* Для графика "Калории" */}
                 <Area
                   type="monotone"
                   dataKey="calories"
-                  stroke={CATEGORY_COLORS['Спорт']}
-                  fill={CATEGORY_COLORS['Спорт']}
+                  stroke="#EF4444"
+                  fill="#EF4444"
                   name="Калории"
                 />
               </AreaChart>
