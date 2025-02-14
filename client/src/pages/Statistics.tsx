@@ -17,7 +17,7 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
   'Спорт': '#6B7280',    // Серый для спорта (такой же как у других)
-  'Привычки': '#8B5CF6',  // Фиолетовый
+  'Привычки': '#6B7280',  // Серый для привычек
   'Расходы': '#F97316'    // Оранжевый
 };
 
@@ -416,6 +416,7 @@ export default function Statistics() {
   const tasksByCategory = taskSuccess.reduce((acc, task) => {
     if (!acc[task.categoryName]) {
       acc[task.categoryName] = {
+        // Use green only for 'Время', gray for everything else
         color: task.categoryName === 'Время' ? CATEGORY_COLORS['Время'] : '#6B7280',
         tasks: []
       };
@@ -797,7 +798,7 @@ export default function Statistics() {
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
-                  <td className="py-2 px-4 font-medium">Итого</td>
+                  <td className="py2 px-4 font-medium">Итого</td>
                   <td className="py-2 px-4 text-center">
                     {(() => {
                       const totalScore = Math.round(
@@ -833,7 +834,7 @@ export default function Statistics() {
                               ? getSuccessColor(totalValue, 100)
                               : task.type === TaskType.TIME || task.type === TaskType.CALORIE
                                 ? '#6B728020'  // Серый цвет для времени и калорий
-                                : `${category.color}20`
+                                : '#6B728020'  // Серый цвет для всех остальных
                           }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :

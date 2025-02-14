@@ -16,7 +16,7 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
   'Спорт': '#6B7280',    // Серый для спорта (такой же как у других)
-  'Привычки': '#8B5CF6',  // Фиолетовый
+  'Привычки': '#6B7280',  // Серый для привычек
   'Расходы': '#F97316'    // Оранжевый
 };
 
@@ -329,10 +329,10 @@ export default function Ranges() {
   const taskSuccess = calculateTaskSuccess();
   const expenseData = calculateExpenses();
 
-
   const tasksByCategory = taskSuccess.categories.reduce((acc, task) => {
     if (!acc[task.categoryName]) {
       acc[task.categoryName] = {
+        // Use green only for 'Время', gray for everything else
         color: task.categoryName === 'Время' ? CATEGORY_COLORS['Время'] : '#6B7280',
         tasks: []
       };
@@ -578,8 +578,8 @@ export default function Ranges() {
                                 backgroundColor: task.type === TaskType.CHECKBOX
                                   ? getSuccessColor(value, 100)
                                   : task.type === TaskType.TIME || task.type === TaskType.CALORIE
-                                    ? '#6B728020'
-                                    : `${category.color}20`
+                                    ? '#6B728020'  // Серый цвет для времени и калорий
+                                    : '#6B728020'  // Серый цвет для всех остальных
                               }}
                             >
                               {task.type === TaskType.CHECKBOX ? `${value}%` :
@@ -645,7 +645,7 @@ export default function Ranges() {
                               ? getSuccessColor(totalValue, 100)
                               : task.type === TaskType.TIME || task.type === TaskType.CALORIE
                                 ? '#6B728020'
-                                : `${category.color}20`
+                                : '#6B728020'
                           }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
