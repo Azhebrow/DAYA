@@ -9,8 +9,7 @@ import Ranges from "@/pages/Ranges";
 import Settings from "@/pages/Settings";
 import Oath from "@/pages/Oath";
 import Goals from "@/pages/Goals";
-import Pomodoro from "@/pages/Pomodoro";
-import { LayoutDashboard, LineChart, CalendarDays, Settings2, BarChart, Target, Scroll, Timer } from "lucide-react";
+import { LayoutDashboard, LineChart, CalendarDays, Settings2, BarChart, Target, Scroll } from "lucide-react";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
@@ -51,7 +50,6 @@ function App() {
               <NavLink href="/"><LayoutDashboard className="w-4 h-4" /> Дашборд</NavLink>
               <NavLink href="/oath"><Scroll className="w-4 h-4" /> Клятва</NavLink>
               <NavLink href="/goals"><Target className="w-4 h-4" /> Цели</NavLink>
-              <NavLink href="/pomodoro"><Timer className="w-4 h-4" /> Помодоро</NavLink>
               <NavLink href="/ranges"><BarChart className="w-4 h-4" /> Диапазоны</NavLink>
               <NavLink href="/statistics"><LineChart className="w-4 h-4" /> Статистика</NavLink>
               <NavLink href="/settings"><Settings2 className="w-4 h-4" /> Настройки</NavLink>
@@ -63,7 +61,6 @@ function App() {
             <Route path="/" component={Dashboard} />
             <Route path="/oath" component={Oath} />
             <Route path="/goals" component={Goals} />
-            <Route path="/pomodoro" component={Pomodoro} />
             <Route path="/ranges" component={Ranges} />
             <Route path="/statistics" component={Statistics} />
             <Route path="/settings" component={Settings} />
