@@ -15,9 +15,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный
+  'Спорт': '#EF4444',    // Красный (для активности)
   'Привычки': '#8B5CF6',  // Фиолетовый
-  'Расходы': '#F97316'    // Оранжевый
+  'Расходы': '#F97316',   // Оранжевый
+  'Спорт расходы': '#6B7280' // Серый (для категории расходов)
 };
 
 const getSuccessColor = (value: number, maxValue: number) => {
@@ -692,11 +693,13 @@ export default function Ranges() {
                       day.categories.find(c => c.name === category.categoryName)
                     )?.categories.find(c => c.name === category.categoryName);
 
+                    const colorKey = category.categoryName === 'Спорт' ? 'Спорт расходы' : category.categoryName;
+
                     return (
                       <th
                         key={category.categoryName}
                         className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
+                        style={{ backgroundColor: `${CATEGORY_COLORS[colorKey] || '#8884d8'}20` }}
                       >
                         {matchingCategory?.emoji || '📝'} {category.categoryName}
                       </th>
@@ -735,6 +738,8 @@ export default function Ranges() {
                       {expenseData.categories.map(category => {
                         const periodData = category.periods.find(p => p.period === period);
                         const value = periodData?.value || 0;
+                        const colorKey = category.categoryName === 'Спорт' ? 'Спорт расходы' : category.categoryName;
+
                         return (
                           <td
                             key={`${category.categoryName}-${period}`}
@@ -770,6 +775,7 @@ export default function Ranges() {
                         cat.periods.reduce((sum, p) => sum + (p.value || 0), 0)
                       )
                     );
+                    const colorKey = category.categoryName === 'Спорт' ? 'Спорт расходы' : category.categoryName;
                     return (
                       <td
                         key={`total-${category.categoryName}`}
