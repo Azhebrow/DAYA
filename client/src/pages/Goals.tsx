@@ -32,6 +32,13 @@ interface HistoryEntry {
   }[];
 }
 
+interface GoalChange {
+  goal: Goal;
+  difference: number;
+  isPositive: boolean;
+  progressDifference: number;
+}
+
 const getIconByName = (name: string) => {
   switch (name) {
     case 'DollarSign':
@@ -112,12 +119,10 @@ export default function Goals() {
   const [newValues, setNewValues] = useState<{ [key: number]: string }>({});
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
-  // Сохраняем данные целей при их изменении
   useEffect(() => {
     localStorage.setItem('goals_data', JSON.stringify(goals));
   }, [goals]);
 
-  // Сохраняем историю при её изменении
   useEffect(() => {
     localStorage.setItem('goals_history', JSON.stringify(history));
   }, [history]);
@@ -302,8 +307,8 @@ export default function Goals() {
                     difference,
                     isPositive,
                     progressDifference
-                  };
-                }).filter(Boolean);
+                  } as GoalChange;
+                }).filter((change): change is GoalChange => change !== null);
 
                 return (
                   <div key={entry.id} className="relative overflow-hidden">
@@ -324,7 +329,6 @@ export default function Goals() {
                       className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
                     >
                       <div className="flex flex-col">
-                        {/* Строка с иконками */}
                         <div className="flex items-center justify-around p-4">
                           {changes.map(({ goal }) => (
                             <div
@@ -336,10 +340,9 @@ export default function Goals() {
                           ))}
                         </div>
 
-                        {/* Строка с процентами изменений */}
                         <div className="grid grid-flow-col auto-cols-fr border-t border-zinc-800">
-                          {changes.map(({ progressDifference, isPositive, goal }) => (
-                            <div key={`progress-${goal.id}`} className="p-4 flex items-center justify-center">
+                          {changes.map(({ progressDifference, isPositive }, index) => (
+                            <div key={`progress-${index}`} className="p-4 flex items-center justify-center">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                                 {progressDifference > 0 && '+'}{progressDifference.toFixed(1)}%
                               </span>
@@ -347,10 +350,9 @@ export default function Goals() {
                           ))}
                         </div>
 
-                        {/* Строка с абсолютными изменениями */}
                         <div className="grid grid-flow-col auto-cols-fr border-t border-zinc-800">
-                          {changes.map(({ difference, isPositive, goal }) => (
-                            <div key={`value-${goal.id}`} className="p-4 flex items-center justify-center">
+                          {changes.map(({ difference, isPositive, goal }, index) => (
+                            <div key={`value-${index}`} className="p-4 flex items-center justify-center">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                                 {isPositive && '+'}{difference} {goal.unit}
                               </span>
