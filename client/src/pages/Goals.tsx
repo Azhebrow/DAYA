@@ -74,11 +74,6 @@ export default function Goals() {
     setCurrentValue(goal.current.toString());
   };
 
-  const getGradientStyle = (color: string) => {
-    const [start, end] = color.split('-');
-    return `bg-gradient-to-br from-${start}-500 to-${end}-700`;
-  };
-
   return (
     <div className="min-h-screen p-8 space-y-8">
       <motion.div
@@ -106,12 +101,13 @@ export default function Goals() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className={`relative overflow-hidden p-6 ${getGradientStyle(goal.color)} bg-opacity-10 border-0 shadow-xl`}>
-                <div className="absolute inset-0 bg-gradient-to-br from-black/60 to-black/20 backdrop-blur-sm" />
+              <Card className={`relative overflow-hidden p-6 bg-${goal.color.split('-')[0]}-500`}>
+                <div className={`absolute inset-0 bg-gradient-to-br from-${goal.color.split('-')[0]}-400 to-${goal.color.split('-')[1]}-700`} />
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
                 <div className="relative space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-3 rounded-xl ${getGradientStyle(goal.color)} shadow-lg ring-2 ring-${goal.color.split('-')[0]}-500/50 backdrop-blur-xl`}>
+                      <div className={`p-3 rounded-xl bg-gradient-to-br from-${goal.color.split('-')[0]}-300 to-${goal.color.split('-')[1]}-600 shadow-lg ring-2 ring-${goal.color.split('-')[0]}-400/50 backdrop-blur-xl`}>
                         {iconComponents[goal.icon]}
                       </div>
                       <h3 className="text-xl font-bold text-white">{goal.title}</h3>
@@ -122,13 +118,13 @@ export default function Goals() {
                           type="number"
                           value={currentValue}
                           onChange={(e) => setCurrentValue(e.target.value)}
-                          className="w-24 bg-black/50 border-white/20 text-white"
+                          className="w-24 bg-black/30 border-white/20 text-white"
                         />
                         <div className="flex gap-1">
                           <Button 
                             size="sm"
                             onClick={() => handleUpdateProgress(goal.id)}
-                            className={`${getGradientStyle(goal.color)} hover:opacity-90 text-white`}
+                            className={`bg-${goal.color.split('-')[0]}-400 hover:bg-${goal.color.split('-')[0]}-500 text-white shadow-lg`}
                           >
                             ✓
                           </Button>
@@ -136,7 +132,7 @@ export default function Goals() {
                             size="sm" 
                             variant="outline" 
                             onClick={() => setEditingId(null)}
-                            className="border-white/20 hover:bg-white/10 text-white"
+                            className="border-white/20 hover:bg-black/20 text-white"
                           >
                             ✕
                           </Button>
@@ -146,19 +142,19 @@ export default function Goals() {
                       <Button 
                         variant="ghost" 
                         onClick={() => startEditing(goal)}
-                        className="text-2xl font-bold hover:bg-white/10 text-white"
+                        className="text-2xl font-bold hover:bg-black/20 text-white"
                       >
                         {goal.current}/{goal.target}
-                        <span className="text-sm ml-1 opacity-70">{goal.unit}</span>
+                        <span className="text-sm ml-1 opacity-80">{goal.unit}</span>
                       </Button>
                     )}
                   </div>
                   <div className="space-y-2">
                     <Progress 
                       value={(goal.current / goal.target) * 100} 
-                      className="h-3 bg-black/30 overflow-hidden"
+                      className={`h-3 bg-black/30 overflow-hidden`}
                     />
-                    <p className="text-sm text-white/70 text-right">
+                    <p className="text-sm text-white/80 text-right">
                       {((goal.current / goal.target) * 100).toFixed(1)}%
                     </p>
                   </div>
