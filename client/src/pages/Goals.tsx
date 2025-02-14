@@ -285,26 +285,25 @@ export default function Goals() {
                           animate={{ opacity: 1, y: 0 }}
                           className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
                         >
-                          <div className="flex items-center justify-between">
-                            {/* Иконка и название */}
-                            <div className="flex items-center gap-3 p-4">
+                          <div className="flex flex-col">
+                            {/* Иконка */}
+                            <div className="flex items-center justify-center p-4">
                               <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
                                 {goal.icon}
                               </div>
-                              <span className="font-medium">{goal.title}</span>
-                            </div>
-
-                            {/* Изменение значения */}
-                            <div className="p-4 flex items-center">
-                              <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                                {isPositive && '+'}{difference} {goal.unit}
-                              </span>
                             </div>
 
                             {/* Изменение процента */}
-                            <div className="p-4 flex items-center">
+                            <div className="p-4 flex items-center justify-center border-t border-zinc-800">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                                 {progressDifference > 0 && '+'}{progressDifference.toFixed(1)}%
+                              </span>
+                            </div>
+
+                            {/* Изменение значения */}
+                            <div className="p-4 flex items-center justify-center border-t border-zinc-800">
+                              <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+                                {isPositive && '+'}{difference} {goal.unit}
                               </span>
                             </div>
                           </div>
