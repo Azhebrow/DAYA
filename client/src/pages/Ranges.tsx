@@ -246,7 +246,7 @@ export default function Ranges() {
     data.forEach(day => {
       const date = parseISO(day.date);
       const periodKey = viewMode === 'month'
-        ? format(date, 'MMM yyyy')
+        ? format(date, 'LLL yyyy', { locale: ru })
         : `Нед. ${getWeek(date)}`;
 
       if (!periods[periodKey]) {
@@ -260,9 +260,10 @@ export default function Ranges() {
       day.categories.forEach(category => {
         category.tasks.forEach(task => {
           if (task.type === TaskType.EXPENSE) {
+            const date = parseISO(day.date);
             const periodKey = viewMode === 'month'
-              ? format(parseISO(day.date), 'MMM yyyy')
-              : `Нед. ${getWeek(parseISO(day.date))}`;
+              ? format(date, 'LLL yyyy', { locale: ru })
+              : `Нед. ${getWeek(date)}`;
 
             const existingCategory = acc.find(c => c.categoryName === category.name);
             if (!existingCategory) {
@@ -290,19 +291,34 @@ export default function Ranges() {
       return acc;
     }, [] as { categoryName: string; periods: { period: string; value: number }[] }[]);
 
-    // Заполним нулями пропущенные периоды
-    const allPeriods = Object.keys(periods);
+    // Заполним нулями пропущенные периоды и отсортируем
+    const allPeriods = Object.keys(periods).sort((a, b) => {
+      if (viewMode === 'month') {
+        return new Date(b).getTime() - new Date(a).getTime();
+      } else {
+        // Для недель сравниваем номера недель
+        const weekA = parseInt(a.replace('Нед. ', ''));
+        const weekB = parseInt(b.replace('Нед. ', ''));
+        return weekB - weekA;
+      }
+    });
+
     expenseData.forEach(category => {
       allPeriods.forEach(period => {
         if (!category.periods.find(p => p.period === period)) {
           category.periods.push({ period, value: 0 });
         }
       });
+
       // Сортируем периоды
       category.periods.sort((a, b) => {
-        const periodIndexA = allPeriods.indexOf(a.period);
-        const periodIndexB = allPeriods.indexOf(b.period);
-        return periodIndexA - periodIndexB;
+        if (viewMode === 'month') {
+          return new Date(b.period).getTime() - new Date(a.period).getTime();
+        } else {
+          const weekA = parseInt(a.period.replace('Нед. ', ''));
+          const weekB = parseInt(b.period.replace('Нед. ', ''));
+          return weekB - weekA;
+        }
       });
     });
 

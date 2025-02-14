@@ -344,23 +344,25 @@ export default function Statistics() {
         category.tasks.forEach(task => {
           if (task.type === TaskType.EXPENSE) {
             const existingCategory = acc.find(c => c.categoryName === category.name);
+            const formattedDate = format(new Date(day.date), 'dd.MM.yyyy');
+
             if (!existingCategory) {
               acc.push({
                 categoryName: category.name,
                 periods: [{
-                  period: format(new Date(day.date), 'dd.MM'),
+                  period: formattedDate,
                   value: task.value || 0
                 }]
               });
             } else {
               const existingPeriod = existingCategory.periods.find(p =>
-                p.period === format(new Date(day.date), 'dd.MM')
+                p.period === formattedDate
               );
               if (existingPeriod) {
                 existingPeriod.value += task.value || 0;
               } else {
                 existingCategory.periods.push({
-                  period: format(new Date(day.date), 'dd.MM'),
+                  period: formattedDate,
                   value: task.value || 0
                 });
               }
@@ -371,19 +373,21 @@ export default function Statistics() {
       return acc;
     }, [] as { categoryName: string; periods: { period: string; value: number }[] }[]);
 
-    // Заполним нулями пропущенные периоды
-    const allPeriods = data.map(day => format(new Date(day.date), 'dd.MM'));
+    // Заполним нулями пропущенные периоды и отсортируем
+    const allPeriods = data.map(day => format(new Date(day.date), 'dd.MM.yyyy'))
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
     expenseData.forEach(category => {
       allPeriods.forEach(period => {
         if (!category.periods.find(p => p.period === period)) {
           category.periods.push({ period, value: 0 });
         }
       });
-      // Сортируем периоды по дате
+      // Сортируем периоды по дате в обратном порядке (новые сверху)
       category.periods.sort((a, b) => {
-        const dateA = new Date(data.find(d => format(new Date(d.date), 'dd.MM') === a.period)?.date || '');
-        const dateB = new Date(data.find(d => format(new Date(d.date), 'dd.MM') === b.period)?.date || '');
-        return dateA.getTime() - dateB.getTime();
+        const dateA = new Date(a.period.split('.').reverse().join('-'));
+        const dateB = new Date(b.period.split('.').reverse().join('-'));
+        return dateB.getTime() - dateA.getTime();
       });
     });
 
@@ -910,7 +914,7 @@ export default function Statistics() {
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
                       <td className="py-2 px-4 font-medium">
-                        {format(new Date(data.find(d => format(new Date(d.date), 'dd.MM') === period)?.date || ''),
+                        {format(new Date(data.find(d => format(new Date(d.date), 'dd.MM.yyyy') === period)?.date || ''),
                           'LLL', { locale: ru })}
                       </td>
                       <td
