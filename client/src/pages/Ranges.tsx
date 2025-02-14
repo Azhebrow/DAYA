@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { storage } from '@/lib/storage';
-import { DayEntry, CategoryType, TaskType } from '@shared/schema';
+import { DayEntry, CategoryType, TaskType, settingsSchema } from '@shared/schema';
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
@@ -15,35 +15,158 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный (для активности)
-  'Привычки': '#8B5CF6'  // Фиолетовый
+  'Спорт': '#6B7280',    // Серый для спорта
+  'Привычки': '#6B7280'  // Серый
 };
 
-const getSuccessColor = (value: number, maxValue: number) => {
-  // Если максимальное значение 0, возвращаем самый светлый оттенок
-  if (maxValue === 0) return 'rgba(16, 185, 129, 0.1)';
-
-  // Нормализуем значение от 0 до 1
-  const normalizedValue = value / maxValue;
-  // Преобразуем в значение прозрачности от 0.1 до 0.5
-  const opacity = 0.1 + (normalizedValue * 0.4);
-
-  return `rgba(16, 185, 129, ${opacity})`;
+// Special colors for table headers
+const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
+  'Разум': { bg: '#6B728020', text: '#6B7280' },
+  'Время': { bg: '#10B98120', text: '#10B981' },
+  'Спорт': { bg: '#6B728020', text: '#6B7280' },
+  'Привычки': { bg: '#6B728020', text: '#6B7280' }
 };
 
-const CATEGORY_ORDER = ['Разум', 'Привычки', 'Спорт', 'Время'];
-
+// Изменил функцию formatTimeTotal для правильного отображения времени
 const formatTimeTotal = (minutes: number): string => {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   return `${hours}ч ${mins}м`;
 };
 
-
 export default function Ranges() {
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState('');
-  const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
+  const [viewMode, setViewMode] = useState<'month' | 'week'>(() => {
+    try {
+      const stored = localStorage.getItem('ranges_view_mode');
+      return (stored as 'month' | 'week') || 'month';
+    } catch (error) {
+      return 'month';
+    }
+  });
+
+  // Добавил обработчик изменения режима просмотра
+  const handleViewModeChange = (value: string) => {
+    if (value && (value === 'month' || value === 'week')) {
+      setViewMode(value);
+      localStorage.setItem('ranges_view_mode', value);
+    }
+  };
+
+  // Update header styles
+  const getCategoryHeaderStyle = (categoryName: string) => {
+    const colors = CATEGORY_HEADER_COLORS[categoryName] || { bg: '#6B728020', text: '#6B7280' };
+    return {
+      backgroundColor: colors.bg,
+      color: colors.text
+    };
+  };
+
+  // Update sub-header styles
+  const getTaskHeaderStyle = (categoryName: string) => {
+    const colors = CATEGORY_HEADER_COLORS[categoryName] || { bg: '#6B728020', text: '#6B7280' };
+    return {
+      backgroundColor: colors.bg,
+      color: colors.text,
+      opacity: 0.8
+    };
+  };
+
+  const getSuccessColor = (value: number, maxValue: number) => {
+    if (maxValue === 0) return 'transparent';
+    const normalizedValue = value / maxValue;
+    const opacity = 0.1 + (normalizedValue * 0.4);
+    return `rgba(16, 185, 129, ${opacity})`;
+  };
+
+  // Update periods sorting in calculateExpenses
+  const calculateExpenses = () => {
+    if (!data.length) return { periods: [], categories: [] };
+
+    const periods: { [key: string]: DayEntry[] } = {};
+    data.forEach(day => {
+      const date = parseISO(day.date);
+      const periodKey = viewMode === 'month'
+        ? format(date, 'LLL yyyy', { locale: ru })
+        : `Неделя ${getWeek(date)}`;
+
+      if (!periods[periodKey]) {
+        periods[periodKey] = [];
+      }
+      periods[periodKey].push(day);
+    });
+
+    // Sort periods before processing expense data
+    const sortedPeriods = Object.keys(periods).sort((a, b) => {
+      if (viewMode === 'month') {
+        // For months, sort descending (newest first)
+        return new Date(b).getTime() - new Date(a).getTime();
+      } else {
+        // For weeks, sort ascending by week number
+        const weekA = parseInt(a.replace('Неделя ', ''));
+        const weekB = parseInt(b.replace('Неделя ', ''));
+        return weekA - weekB;
+      }
+    });
+
+    // Rest of the calculateExpenses function...
+    const expenseData = data.reduce((acc, day) => {
+      day.categories.forEach(category => {
+        category.tasks.forEach(task => {
+          if (task.type === TaskType.EXPENSE) {
+            const date = parseISO(day.date);
+            const periodKey = viewMode === 'month'
+              ? format(date, 'LLL yyyy', { locale: ru })
+              : `Неделя ${getWeek(date)}`;
+
+            const existingCategory = acc.find(c => c.categoryName === category.name);
+            if (!existingCategory) {
+              acc.push({
+                categoryName: category.name,
+                periods: [{
+                  period: periodKey,
+                  value: task.value || 0
+                }]
+              });
+            } else {
+              const existingPeriod = existingCategory.periods.find(p => p.period === periodKey);
+              if (existingPeriod) {
+                existingPeriod.value += task.value || 0;
+              } else {
+                existingCategory.periods.push({
+                  period: periodKey,
+                  value: task.value || 0
+                });
+              }
+            }
+          }
+        });
+      });
+      return acc;
+    }, [] as { categoryName: string; periods: { period: string; value: number }[] }[]);
+
+    // Fill missing periods with zeros and maintain sort order
+    expenseData.forEach(category => {
+      sortedPeriods.forEach(period => {
+        if (!category.periods.find(p => p.period === period)) {
+          category.periods.push({ period, value: 0 });
+        }
+      });
+
+      // Sort periods to match sortedPeriods order
+      category.periods.sort((a, b) => {
+        const indexA = sortedPeriods.indexOf(a.period);
+        const indexB = sortedPeriods.indexOf(b.period);
+        return indexA - indexB;
+      });
+    });
+
+    return {
+      categories: expenseData,
+      periods: sortedPeriods
+    };
+  };
 
   useEffect(() => {
     const endDate = endOfMonth(new Date());
@@ -239,95 +362,6 @@ export default function Ranges() {
     };
   };
 
-  const calculateExpenses = () => {
-    if (!data.length) return { periods: [], categories: [] };
-
-    const periods: { [key: string]: DayEntry[] } = {};
-    data.forEach(day => {
-      const date = parseISO(day.date);
-      const periodKey = viewMode === 'month'
-        ? format(date, 'LLL yyyy', { locale: ru })
-        : `Нед. ${getWeek(date)}`;
-
-      if (!periods[periodKey]) {
-        periods[periodKey] = [];
-      }
-      periods[periodKey].push(day);
-    });
-
-    // Соберем все задачи с типом EXPENSE из всех категорий
-    const expenseData = data.reduce((acc, day) => {
-      day.categories.forEach(category => {
-        category.tasks.forEach(task => {
-          if (task.type === TaskType.EXPENSE) {
-            const date = parseISO(day.date);
-            const periodKey = viewMode === 'month'
-              ? format(date, 'LLL yyyy', { locale: ru })
-              : `Нед. ${getWeek(date)}`;
-
-            const existingCategory = acc.find(c => c.categoryName === category.name);
-            if (!existingCategory) {
-              acc.push({
-                categoryName: category.name,
-                periods: [{
-                  period: periodKey,
-                  value: task.value || 0
-                }]
-              });
-            } else {
-              const existingPeriod = existingCategory.periods.find(p => p.period === periodKey);
-              if (existingPeriod) {
-                existingPeriod.value += task.value || 0;
-              } else {
-                existingCategory.periods.push({
-                  period: periodKey,
-                  value: task.value || 0
-                });
-              }
-            }
-          }
-        });
-      });
-      return acc;
-    }, [] as { categoryName: string; periods: { period: string; value: number }[] }[]);
-
-    // Заполним нулями пропущенные периоды и отсортируем
-    const allPeriods = Object.keys(periods).sort((a, b) => {
-      if (viewMode === 'month') {
-        return new Date(b).getTime() - new Date(a).getTime();
-      } else {
-        // Для недель сравниваем номера недель
-        const weekA = parseInt(a.replace('Нед. ', ''));
-        const weekB = parseInt(b.replace('Нед. ', ''));
-        return weekB - weekA;
-      }
-    });
-
-    expenseData.forEach(category => {
-      allPeriods.forEach(period => {
-        if (!category.periods.find(p => p.period === period)) {
-          category.periods.push({ period, value: 0 });
-        }
-      });
-
-      // Сортируем периоды
-      category.periods.sort((a, b) => {
-        if (viewMode === 'month') {
-          return new Date(b.period).getTime() - new Date(a.period).getTime();
-        } else {
-          const weekA = parseInt(a.period.replace('Нед. ', ''));
-          const weekB = parseInt(b.period.replace('Нед. ', ''));
-          return weekB - weekA;
-        }
-      });
-    });
-
-    return {
-      categories: expenseData,
-      periods: allPeriods
-    };
-  };
-
   const getExpenseColor = (value: number, maxValue: number) => {
     // Если максимальное значение 0, возвращаем самый светлый оттенок
     if (maxValue === 0) return 'rgba(249, 115, 22, 0.1)';
@@ -383,7 +417,7 @@ export default function Ranges() {
           <h1 className="text-2xl font-bold">Диапазоны</h1>
           <p className="text-sm text-muted-foreground">{dateRangeText}</p>
         </div>
-        <ToggleGroup type="single" value={viewMode} onValueChange={(value) => value && setViewMode(value as 'month' | 'week')}>
+        <ToggleGroup type="single" value={viewMode} onValueChange={handleViewModeChange}>
           <ToggleGroupItem value="month" aria-label="Месяцы">
             По месяцам
           </ToggleGroupItem>
@@ -526,7 +560,7 @@ export default function Ranges() {
                       key={category.name}
                       colSpan={category.tasks.length + (category.name === 'Время' ? category.timeTasks.length : 0)}
                       className="py-2 px-4 text-center"
-                      style={{ backgroundColor: `${category.color}20` }}
+                      style={getCategoryHeaderStyle(category.name)}
                     >
                       {category.name}
                     </th>
@@ -540,7 +574,7 @@ export default function Ranges() {
                       <th
                         key={task.taskName}
                         className="py-2 px-4 text-center text-sm font-medium"
-                        style={{ backgroundColor: `${category.color}10` }}
+                        style={getTaskHeaderStyle(category.name)}
                       >
                         {task.taskName}
                       </th>
@@ -549,7 +583,7 @@ export default function Ranges() {
                       <th
                         key={task.taskName}
                         className="py-2 px-4 text-center text-sm font-medium"
-                        style={{ backgroundColor: `${category.color}10` }}
+                        style={getTaskHeaderStyle(category.name)}
                       >
                         {task.taskName}
                       </th>
@@ -808,3 +842,5 @@ export default function Ranges() {
     </div>
   );
 }
+
+const CATEGORY_ORDER = ['Разум', 'Привычки', 'Спорт', 'Время'];

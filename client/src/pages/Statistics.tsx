@@ -31,7 +31,7 @@ const EXPENSE_CATEGORY_COLORS: { [key: string]: string } = {
 const CATEGORY_ORDER = ['Разум', 'Привычки', 'Спорт', 'Время'];
 
 const getSuccessColor = (value: number, maxValue: number) => {
-  if (maxValue === 0) return 'rgba(16, 185, 129, 0.1)';
+  if (maxValue === 0) return 'transparent';
   const normalizedValue = value / maxValue;
   const opacity = 0.1 + (normalizedValue * 0.4);
   return `rgba(16, 185, 129, ${opacity})`;
@@ -343,9 +343,9 @@ export default function Statistics() {
       day.categories.forEach(category => {
         category.tasks.forEach(task => {
           if (task.type === TaskType.EXPENSE) {
-            const existingCategory = acc.find(c => c.categoryName === category.name);
-            const formattedDate = format(new Date(day.date), 'dd.MM.yyyy');
+            const formattedDate = format(new Date(day.date), 'dd.MM');
 
+            const existingCategory = acc.find(c => c.categoryName === category.name);
             if (!existingCategory) {
               acc.push({
                 categoryName: category.name,
@@ -355,9 +355,7 @@ export default function Statistics() {
                 }]
               });
             } else {
-              const existingPeriod = existingCategory.periods.find(p =>
-                p.period === formattedDate
-              );
+              const existingPeriod = existingCategory.periods.find(p => p.period === formattedDate);
               if (existingPeriod) {
                 existingPeriod.value += task.value || 0;
               } else {
@@ -374,8 +372,14 @@ export default function Statistics() {
     }, [] as { categoryName: string; periods: { period: string; value: number }[] }[]);
 
     // Заполним нулями пропущенные периоды и отсортируем
-    const allPeriods = data.map(day => format(new Date(day.date), 'dd.MM.yyyy'))
-      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    const allPeriods = data.map(day => format(new Date(day.date), 'dd.MM'))
+      .sort((a, b) => {
+        const [dayA, monthA] = a.split('.');
+        const [dayB, monthB] = b.split('.');
+        const dateA = new Date(2000, parseInt(monthA) - 1, parseInt(dayA));
+        const dateB = new Date(2000, parseInt(monthB) - 1, parseInt(dayB));
+        return dateA.getTime() - dateB.getTime();
+      });
 
     expenseData.forEach(category => {
       allPeriods.forEach(period => {
@@ -383,11 +387,14 @@ export default function Statistics() {
           category.periods.push({ period, value: 0 });
         }
       });
-      // Сортируем периоды по дате в обратном порядке (новые сверху)
+
+      // Сортируем периоды по дате
       category.periods.sort((a, b) => {
-        const dateA = new Date(a.period.split('.').reverse().join('-'));
-        const dateB = new Date(b.period.split('.').reverse().join('-'));
-        return dateB.getTime() - dateA.getTime();
+        const [dayA, monthA] = a.period.split('.');
+        const [dayB, monthB] = b.period.split('.');
+        const dateA = new Date(2000, parseInt(monthA) - 1, parseInt(dayA));
+        const dateB = new Date(2000, parseInt(monthB) - 1, parseInt(dayB));
+        return dateA.getTime() - dateB.getTime();
       });
     });
 
@@ -777,8 +784,15 @@ export default function Statistics() {
                             <td
                               key={`${task.taskName}-${period}`}
                               className="py-2 px-4 text-center"
+                              style={{
+                                backgroundColor: task.type === TaskType.CHECKBOX
+                                  ? 'transparent'
+                                  : task.type === TaskType.TIME || task.type === TaskType.CALORIE
+                                    ? '#6B728020'
+                                    : '#6B728020'
+                              }}
                             >
-                              {task.type === TaskType.CHECKBOX ? `${value}%` :
+                              {task.type === TaskType.CHECKBOX ?`${value}%` :
                                 task.type === TaskType.CALORIE ? value : formatTimeTotal(value)}
                             </td>
                           );
@@ -791,6 +805,7 @@ export default function Statistics() {
                             <td
                               key={`${task.taskName}-${period}`}
                               className="py-2 px-4 text-center"
+                              style={{ backgroundColor: '#6B728020' }}
                             >
                               {formatTimeTotal(value)}
                             </td>
@@ -801,7 +816,7 @@ export default function Statistics() {
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
-                  <td className="py2 px-4 font-medium">Итого</td>
+                  <td className="py-2 px-4">Итого</td>
                   <td className="py-2 px-4 text-center">
                     {(() => {
                       const totalScore = Math.round(
@@ -809,7 +824,7 @@ export default function Statistics() {
                       );
                       return (
                         <div
-                          style={{ backgroundColor: getSuccessColor(totalScore, 100) }}
+                          style={{ backgroundColor: 'transparent' }}
                           className="px-2 py-1 rounded"
                         >
                           {totalScore}%
@@ -832,13 +847,7 @@ export default function Statistics() {
                         <td
                           key={`total-${task.taskName}`}
                           className="py-2 px-4 text-center"
-                          style={{
-                            backgroundColor: task.type === TaskType.CHECKBOX
-                              ? getSuccessColor(totalValue, 100)
-                              : task.type === TaskType.TIME || task.type === TaskType.CALORIE
-                                ? '#6B728020'  // Серый цвет для времени и калорий
-                                : '#6B728020'  // Серый цвет для всех остальных
-                          }}
+                          style={{ backgroundColor: '#6B728020' }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
                             task.type === TaskType.CALORIE ? totalValue : formatTimeTotal(totalValue)}
@@ -853,7 +862,7 @@ export default function Statistics() {
                         <td
                           key={`total-${task.taskName}`}
                           className="py-2 px-4 text-center"
-                          style={{ backgroundColor: `${category.color}20` }}
+                          style={{ backgroundColor: '#6B728020' }}
                         >
                           {formatTimeTotal(totalValue)}
                         </td>
@@ -866,7 +875,6 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -914,8 +922,8 @@ export default function Statistics() {
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
                       <td className="py-2 px-4 font-medium">
-                        {format(new Date(data.find(d => format(new Date(d.date), 'dd.MM.yyyy') === period)?.date || ''),
-                          'LLL', { locale: ru })}
+                        {format(new Date(data.find(d => format(new Date(d.date), 'dd.MM') === period)?.date || ''),
+                          'dd.MM', { locale: ru })}
                       </td>
                       <td
                         className="py-2 px-4 text-center font-bold"
