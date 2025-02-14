@@ -5,7 +5,7 @@ import { storage } from '@/lib/storage';
 import { DayEntry, CategoryType, TaskType, settingsSchema, Settings as SettingsType } from '@shared/schema';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, AreaChart, Area
+  PieChart, Pie, Cell, AreaChart, Area, LabelList
 } from 'recharts';
 import { format, subDays, startOfDay, startOfMonth, endOfMonth, addDays, eachDayOfInterval } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
@@ -787,7 +787,7 @@ export default function Statistics() {
                           return (
                             <td
                               key={`${task.taskName}-${period}`}
-                              className="py-2 px-4text-center"
+                              className="py-2px-4 text-center"
                               style={{
                                 backgroundColor: task.type === TaskType.CHECKBOX
                                   ? getSuccessColor(value, 100)
@@ -817,7 +817,7 @@ export default function Statistics() {
                     </tr>
                   );
                 })}
-                <tr className="border-t-2 border-border font-bold" style={{ backgroundColor: '#f9fafb' }}> {/* Added background color */}
+                <tr className="border-t-2 border-border font-bold" style={{ backgroundColor: '#f9fafb' }}>
                   <td className="py-2 px-4">Итого</td>
                   <td className="py-2 px-4 text-center">
                     {(() => {
@@ -826,7 +826,7 @@ export default function Statistics() {
                       );
                       return (
                         <div
-                          style={{ backgroundColor: 'transparent' }}
+                          style={{ backgroundColor: getSuccessColor(totalScore, 100) }}
                           className="px-2 py-1 rounded"
                         >
                           {totalScore}%
@@ -840,33 +840,27 @@ export default function Statistics() {
                       let totalValue = 0;
 
                       if (task.type === TaskType.CHECKBOX) {
-                        totalValue = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+                        totalValue = Math.round(
+                          values.reduce((sum, val) => sum + val, 0) / values.length
+                        );
                       } else {
-                        totalValue = values.reduce((a, b) => a + b, 0);
+                        totalValue = Math.round(
+                          values.reduce((sum, val) => sum + val, 0)
+                        );
                       }
 
                       return (
                         <td
                           key={`total-${task.taskName}`}
                           className="py-2 px-4 text-center"
-                          style={{ backgroundColor: '#6B728020' }}
+                          style={{
+                            backgroundColor: task.type === TaskType.CHECKBOX
+                              ? getSuccessColor(totalValue, 100)
+                              : '#6B728020'  // Серый цвет для всех не-checkbox значений
+                          }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
                             task.type === TaskType.CALORIE ? totalValue : formatTimeTotal(totalValue)}
-                        </td>
-                      );
-                    })
-                  )}
-                  {sortedCategories.filter(c => c.name === 'Время').flatMap(category =>
-                    category.timeTasks.map(task => {
-                      const totalValue = task.periods.reduce((sum, period) => sum + (period.value || 0), 0);
-                      return (
-                        <td
-                          key={`total-${task.taskName}`}
-                          className="py-2 px-4 text-center"
-                          style={{ backgroundColor: '#6B728020' }}
-                        >
-                          {formatTimeTotal(totalValue)}
                         </td>
                       );
                     })
@@ -877,6 +871,7 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -885,113 +880,23 @@ export default function Statistics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border/20">
-                  <th className="py-2 px-4 text-left">Период</th>
-                  <th className="py-2 px-4 text-center font-bold">Итого</th>
-                  {expenseTableData.categories.map(category => {
-                    const matchingCategory = data.find(day =>
-                      day.categories.find(c => c.name === category.categoryName)
-                    )?.categories.find(c => c.name === category.categoryName);
-
-                    return (
-                      <th
-                        key={category.categoryName}
-                        className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#6B7280'}20` }}
-                      >
-                        {matchingCategory?.emoji || '📝'} {category.categoryName}
-                      </th>
-                    );
-                  })}
-                </tr>
-              </thead>
-              <tbody>
-                {expenseTableData.periods.map((period, idx) => {
-                  const rowTotal = expenseTableData.categories.reduce((sum, category) => {
-                    const periodData = category.periods.find(p => p.period === period);
-                    return sum + (periodData?.value || 0);
-                  }, 0);
-
-                  const maxExpense = Math.max(
-                    ...expenseTableData.categories.flatMap(category =>
-                      category.periods.map(p => p.value)
-                    )
-                  );
-
-                  return (
-                    <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">
-                        {format(new Date(data.find(d => format(new Date(d.date), 'dd.MM') === period)?.date || ''),
-                          'dd.MM', { locale: ru })}
-                      </td>
-                      <td
-                        className="py-2 px-4 text-center font-bold"
-                        style={{
-                          backgroundColor: getExpenseColor(rowTotal, maxExpense)
-                        }}
-                      >
-                        {rowTotal} zł
-                      </td>
-                      {expenseTableData.categories.map(category => {
-                        const periodData = category.periods.find(p => p.period === period);
-                        const value = periodData?.value || 0;
-                        return (
-                          <td
-                            key={`${category.categoryName}-${period}`}
-                            className="py-2 px-4 text-center"
-                            style={{
-                              backgroundColor: getExpenseColor(value, maxExpense)
-                            }}
-                          >
-                            {value} zł
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-                <tr className="border-t-2 border-border font-bold">
-                  <td className="py-2 px-4">Итого</td>
-                  <td className="py-2 px-4 text-center">
-                    {expenseTableData.periods.reduce((total, period) => {
-                      const periodTotal = expenseTableData.categories.reduce((sum, category) => {
-                        const periodData = category.periods.find(p => p.period === period);
-                        return sum + (periodData?.value || 0);
-                      }, 0);
-                      return total + periodTotal;
-                    }, 0)} zł
-                  </td>
-                  {expenseTableData.categories.map(category => {
-                    const categoryTotal = category.periods.reduce((sum, period) => {
-                      return sum + (period.value || 0);
-                    }, 0);
-                    const maxTotal = Math.max(
-                      ...expenseTableData.categories.map(cat =>
-                        cat.periods.reduce((sum, p) => sum + (p.value || 0), 0)
-                      )
-                    );
-                    return (
-                      <td
-                        key={`total-${category.categoryName}`}
-                        className="py-2 px-4 text-center"
-                        style={{
-                          backgroundColor: getExpenseColor(categoryTotal, maxTotal)
-                        }}
-                      >
-                        {categoryTotal} zł
-                      </td>
-                    );
-                  })}
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={expenseDistribution.distribution}>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip
+                contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                itemStyle={{ color: '#ffffff' }}
+                labelStyle={{ color: '#ffffff' }}
+              />
+              <Bar dataKey="amount" fill="#6B7280" name="Сумма">
+                <LabelList dataKey="amount" position="top" />
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </CardContent>
       </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
