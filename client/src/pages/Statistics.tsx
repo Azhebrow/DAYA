@@ -8,6 +8,7 @@ import {
   PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import { format, subDays, startOfDay, startOfMonth, endOfMonth, addDays, eachDayOfInterval } from 'date-fns';
+import { ru } from 'date-fns/locale/ru';
 import { calculateDayScore } from '@/lib/utils';
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChart as BarChartIcon, FileText } from 'lucide-react';
 
@@ -15,7 +16,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный для трекера
+  'Спорт': '#6B7280',    // Серый для спорта
   'Привычки': '#8B5CF6',  // Фиолетовый
   'Расходы': '#F97316'    // Оранжевый
 };
@@ -714,28 +715,19 @@ export default function Statistics() {
                   {sortedCategories.map(category => (
                     <th
                       key={category.name}
-                      colSpan={category.tasks.length}
+                      colSpan={category.tasks.length + (category.name === 'Время' ? category.timeTasks.length : 0)}
                       className="py-2 px-4 text-center"
                       style={{ backgroundColor: `${category.color}20` }}
                     >
                       {category.name}
                     </th>
                   ))}
-                  {allTimeTasks.length > 0 && (
-                    <th
-                      colSpan={allTimeTasks.length}
-                      className="py-2 px-4 text-center"
-                      style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
-                    >
-                      Временные показатели
-                    </th>
-                  )}
                 </tr>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4"></th>
                   <th className="py-2 px-4"></th>
-                  {sortedCategories.flatMap(category =>
-                    category.tasks.map(task => (
+                  {sortedCategories.flatMap(category => [
+                    ...category.tasks.map(task => (
                       <th
                         key={task.taskName}
                         className="py-2 px-4 text-center text-sm font-medium"
@@ -743,17 +735,17 @@ export default function Statistics() {
                       >
                         {task.taskName}
                       </th>
-                    ))
-                  )}
-                  {allTimeTasks.map(task => (
-                    <th
-                      key={task.taskName}
-                      className="py-2 px-4 text-center text-sm font-medium"
-                      style={{ backgroundColor: `${CATEGORY_COLORS['Время']}10` }}
-                    >
-                      {task.taskName}
-                    </th>
-                  ))}
+                    )),
+                    ...(category.name === 'Время' ? category.timeTasks.map(task => (
+                      <th
+                        key={task.taskName}
+                        className="py-2 px-4 text-center text-sm font-medium"
+                        style={{ backgroundColor: `${category.color}10` }}
+                      >
+                        {task.taskName}
+                      </th>
+                    )) : [])
+                  ])}
                 </tr>
               </thead>
               <tbody>
@@ -783,28 +775,30 @@ export default function Statistics() {
                               className="py-2 px-4 text-center"
                             >
                               {task.type === TaskType.CHECKBOX ? `${value}%` :
-                                task.type === TaskType.CALORIE ? value : value}
+                                task.type === TaskType.CALORIE ? value : formatTimeTotal(value)}
                             </td>
                           );
                         })
                       )}
-                      {allTimeTasks.map(task => {
-                        const value = task.periods[idx]?.value || 0;
-                        return (
-                          <td
-                            key={`${task.taskName}-${period}`}
-                            className="py-2 px-4 text-center"
-                          >
-                            {`${value}m`}
-                          </td>
-                        );
-                      })}
+                      {sortedCategories.filter(c => c.name === 'Время').flatMap(category =>
+                        category.timeTasks.map(task => {
+                          const value = task.periods[idx]?.value || 0;
+                          return (
+                            <td
+                              key={`${task.taskName}-${period}`}
+                              className="py-2 px-4 text-center"
+                            >
+                              {formatTimeTotal(value)}
+                            </td>
+                          );
+                        })
+                      )}
                     </tr>
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
-                  <td className="py-2 px-4 text-center">
+                  <td className="py-2px-4 text-center">
                     {(() => {
                       const totalScore = Math.round(
                         data.reduce((total, day) => total + calculateDayScoreFromHistory(day), 0) / data.length
@@ -841,23 +835,25 @@ export default function Statistics() {
                           }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
-                            task.type === TaskType.CALORIE ? totalValue : totalValue}
+                            task.type === TaskType.CALORIE ? totalValue : formatTimeTotal(totalValue)}
                         </td>
                       );
                     })
                   )}
-                  {allTimeTasks.map(task => {
-                    const totalValue = task.periods.reduce((sum, period) => sum + (period.value || 0), 0);
-                    return (
-                      <td
-                        key={`total-${task.taskName}`}
-                        className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
-                      >
-                        {`${totalValue}m`}
-                      </td>
-                    );
-                  })}
+                  {sortedCategories.filter(c => c.name === 'Время').flatMap(category =>
+                    category.timeTasks.map(task => {
+                      const totalValue = task.periods.reduce((sum, period) => sum + (period.value || 0), 0);
+                      return (
+                        <td
+                          key={`total-${task.taskName}`}
+                          className="py-2 px-4 text-center"
+                          style={{ backgroundColor: `${category.color}20` }}
+                        >
+                          {formatTimeTotal(totalValue)}
+                        </td>
+                      );
+                    })
+                  )}
                 </tr>
               </tbody>
             </table>
@@ -878,6 +874,7 @@ export default function Statistics() {
               <thead>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4 text-left">Период</th>
+                  <th className="py-2 px-4 text-center font-bold">Итого</th>
                   {expenseTableData.categories.map(category => {
                     const matchingCategory = data.find(day =>
                       day.categories.find(c => c.name === category.categoryName)
@@ -893,7 +890,6 @@ export default function Statistics() {
                       </th>
                     );
                   })}
-                  <th className="py-2 px-4 text-center font-bold">Итого</th>
                 </tr>
               </thead>
               <tbody>
@@ -911,7 +907,18 @@ export default function Statistics() {
 
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">{period}</td>
+                      <td className="py-2 px-4 font-medium">
+                        {format(new Date(data.find(d => format(new Date(d.date), 'dd.MM') === period)?.date || ''),
+                          'LLL', { locale: ru })}
+                      </td>
+                      <td
+                        className="py-2 px-4 text-center font-bold"
+                        style={{
+                          backgroundColor: getExpenseColor(rowTotal, maxExpense)
+                        }}
+                      >
+                        {rowTotal} zł
+                      </td>
                       {expenseTableData.categories.map(category => {
                         const periodData = category.periods.find(p => p.period === period);
                         const value = periodData?.value || 0;
@@ -927,19 +934,20 @@ export default function Statistics() {
                           </td>
                         );
                       })}
-                      <td
-                        className="py-2 px-4 text-center font-bold"
-                        style={{
-                          backgroundColor: getExpenseColor(rowTotal, maxExpense)
-                        }}
-                      >
-                        {rowTotal} zł
-                      </td>
                     </tr>
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
+                  <td className="py-2 px-4 text-center">
+                    {expenseTableData.periods.reduce((total, period) => {
+                      const periodTotal = expenseTableData.categories.reduce((sum, category) => {
+                        const periodData = category.periods.find(p => p.period === period);
+                        return sum + (periodData?.value || 0);
+                      }, 0);
+                      return total + periodTotal;
+                    }, 0)} zł
+                  </td>
                   {expenseTableData.categories.map(category => {
                     const categoryTotal = category.periods.reduce((sum, period) => {
                       return sum + (period.value || 0);
@@ -961,15 +969,6 @@ export default function Statistics() {
                       </td>
                     );
                   })}
-                  <td className="py-2 px-4 text-center">
-                    {expenseTableData.periods.reduce((total, period) => {
-                      const periodTotal = expenseTableData.categories.reduce((sum, category) => {
-                        const periodData = category.periods.find(p => p.period === period);
-                        return sum + (periodData?.value || 0);
-                      }, 0);
-                      return total + periodTotal;
-                    }, 0)} zł
-                  </td>
                 </tr>
               </tbody>
             </table>

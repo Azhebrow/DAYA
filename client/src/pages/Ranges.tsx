@@ -7,6 +7,7 @@ import {
   AreaChart, Area
 } from 'recharts';
 import { format, subMonths, startOfMonth, endOfMonth, getWeek, startOfWeek, endOfWeek, parseISO } from 'date-fns';
+import { ru } from 'date-fns/locale/ru';
 import { calculateDayScore } from '@/lib/utils';
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChart as BarChartIcon } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -14,7 +15,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный для трекера
+  'Спорт': '#6B7280',    // Серый для спорта
   'Привычки': '#8B5CF6',  // Фиолетовый
   'Расходы': '#F97316'    // Оранжевый
 };
@@ -66,8 +67,8 @@ export default function Ranges() {
     data.forEach(day => {
       const date = parseISO(day.date);
       const periodKey = viewMode === 'month'
-        ? format(date, 'MMMM yyyy')
-        : `Неделя ${getWeek(date)}`;
+        ? format(date, 'MMM yyyy')
+        : `Нед. ${getWeek(date)}`;
 
       if (!periods[periodKey]) {
         periods[periodKey] = [];
@@ -127,8 +128,8 @@ export default function Ranges() {
     data.forEach(day => {
       const date = parseISO(day.date);
       const periodKey = viewMode === 'month'
-        ? format(date, 'MMMM yyyy')
-        : `Неделя ${getWeek(date)}`;
+        ? format(date, 'MMM yyyy')
+        : `Нед. ${getWeek(date)}`;
 
       if (!periods[periodKey]) {
         periods[periodKey] = [];
@@ -239,8 +240,8 @@ export default function Ranges() {
     data.forEach(day => {
       const date = parseISO(day.date);
       const periodKey = viewMode === 'month'
-        ? format(date, 'MMMM yyyy')
-        : `Неделя ${getWeek(date)}`;
+        ? format(date, 'MMM yyyy')
+        : `Нед. ${getWeek(date)}`;
 
       if (!periods[periodKey]) {
         periods[periodKey] = [];
@@ -254,8 +255,8 @@ export default function Ranges() {
         category.tasks.forEach(task => {
           if (task.type === TaskType.EXPENSE) {
             const periodKey = viewMode === 'month'
-              ? format(parseISO(day.date), 'MMMM yyyy')
-              : `Неделя ${getWeek(parseISO(day.date))}`;
+              ? format(parseISO(day.date), 'MMM yyyy')
+              : `Нед. ${getWeek(parseISO(day.date))}`;
 
             const existingCategory = acc.find(c => c.categoryName === category.name);
             if (!existingCategory) {
@@ -351,7 +352,6 @@ export default function Ranges() {
   const allTimeTasks = sortedCategories
     .flatMap(category => category?.timeTasks || [])
     .filter(Boolean);
-
 
 
   return (
@@ -502,28 +502,19 @@ export default function Ranges() {
                   {sortedCategories.map(category => (
                     <th
                       key={category.name}
-                      colSpan={category.tasks.length}
+                      colSpan={category.tasks.length + (category.name === 'Время' ? category.timeTasks.length : 0)}
                       className="py-2 px-4 text-center"
                       style={{ backgroundColor: `${category.color}20` }}
                     >
                       {category.name}
                     </th>
                   ))}
-                  {allTimeTasks.length > 0 && (
-                    <th
-                      colSpan={allTimeTasks.length}
-                      className="py-2 px-4 text-center"
-                      style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
-                    >
-                      Временные показатели
-                    </th>
-                  )}
                 </tr>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4"></th>
                   <th className="py-2 px-4"></th>
-                  {sortedCategories.flatMap(category =>
-                    category.tasks.map(task => (
+                  {sortedCategories.flatMap(category => [
+                    ...category.tasks.map(task => (
                       <th
                         key={task.taskName}
                         className="py-2 px-4 text-center text-sm font-medium"
@@ -531,17 +522,17 @@ export default function Ranges() {
                       >
                         {task.taskName}
                       </th>
-                    ))
-                  )}
-                  {allTimeTasks.map(task => (
-                    <th
-                      key={task.taskName}
-                      className="py-2 px-4 text-center text-sm font-medium"
-                      style={{ backgroundColor: `${CATEGORY_COLORS['Время']}10` }}
-                    >
-                      {task.taskName}
-                    </th>
-                  ))}
+                    )),
+                    ...(category.name === 'Время' ? category.timeTasks.map(task => (
+                      <th
+                        key={task.taskName}
+                        className="py-2 px-4 text-center text-sm font-medium"
+                        style={{ backgroundColor: `${category.color}10` }}
+                      >
+                        {task.taskName}
+                      </th>
+                    )) : [])
+                  ])}
                 </tr>
               </thead>
               <tbody>
@@ -558,38 +549,48 @@ export default function Ranges() {
 
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">{period}</td>
+                      <td className="py-2 px-4 font-medium">
+                        {viewMode === 'month'
+                          ? format(parseISO(data[idx].date), 'LLL', { locale: ru })
+                          : period.replace('Неделя', 'Нед.')}
+                      </td>
                       <td
                         className="py-2 px-4 text-center"
                         style={{ backgroundColor: getSuccessColor(averageScore, maxSuccessScore) }}
                       >
                         {averageScore}%
                       </td>
-                      {sortedCategories.flatMap(category =>
-                        category.tasks.map(task => {
+                      {sortedCategories.flatMap(category => [
+                        ...category.tasks.map(task => {
                           const value = task.periods[idx]?.value || 0;
                           return (
                             <td
                               key={`${task.taskName}-${period}`}
                               className="py-2 px-4 text-center"
+                              style={{
+                                backgroundColor: task.type === TaskType.CHECKBOX
+                                  ? getSuccessColor(value, 100)
+                                  : `${CATEGORY_COLORS[category.name]}20`
+                              }}
                             >
                               {task.type === TaskType.CHECKBOX ? `${value}%` :
                                 task.type === TaskType.CALORIE ? value : value}
                             </td>
                           );
-                        })
-                      )}
-                      {allTimeTasks.map(task => {
-                        const value = task.periods[idx]?.value || 0;
-                        return (
-                          <td
-                            key={`${task.taskName}-${period}`}
-                            className="py-2 px-4 text-center"
-                          >
-                            {`${value}m`}
-                          </td>
-                        );
-                      })}
+                        }),
+                        ...(category.name === 'Время' ? category.timeTasks.map(task => {
+                          const value = task.periods[idx]?.value || 0;
+                          return (
+                            <td
+                              key={`${task.taskName}-${period}`}
+                              className="py-2 px-4 text-center"
+                              style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
+                            >
+                              {`${value}m`}
+                            </td>
+                          );
+                        }) : [])
+                      ])}
                     </tr>
                   );
                 })}
@@ -633,7 +634,9 @@ export default function Ranges() {
                           style={{
                             backgroundColor: task.type === TaskType.CHECKBOX
                               ? getSuccessColor(totalValue, 100)
-                              : `${category.color}20`
+                              : task.type === TaskType.TIME || task.type === TaskType.CALORIE
+                                ? `${CATEGORY_COLORS['Разум']}20`  // Серый цвет для времени и калорий
+                                : `${category.color}20`
                           }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
@@ -642,7 +645,7 @@ export default function Ranges() {
                       );
                     })
                   )}
-                  {allTimeTasks.map(task => {
+                  {sortedCategories.filter(c => c.name === 'Время').flatMap(category => category.timeTasks.map(task => {
                     const totalValue = task.periods.reduce((sum, period) => sum + (period.value || 0), 0);
                     return (
                       <td
@@ -653,7 +656,7 @@ export default function Ranges() {
                         {`${totalValue}m`}
                       </td>
                     );
-                  })}
+                  }))}
                 </tr>
               </tbody>
             </table>
@@ -674,6 +677,7 @@ export default function Ranges() {
               <thead>
                 <tr className="border-b border-border/20">
                   <th className="py-2 px-4 text-left">Период</th>
+                  <th className="py-2 px-4 text-center font-bold">Итого</th>
                   {expenseData.categories.map(category => {
                     const matchingCategory = data.find(day =>
                       day.categories.find(c => c.name === category.categoryName)
@@ -689,7 +693,6 @@ export default function Ranges() {
                       </th>
                     );
                   })}
-                  <th className="py-2 px-4 text-center font-bold">Итого</th>
                 </tr>
               </thead>
               <tbody>
@@ -707,7 +710,19 @@ export default function Ranges() {
 
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">{period}</td>
+                      <td className="py-2 px-4 font-medium">
+                        {viewMode === 'month'
+                          ? format(parseISO(data[idx].date), 'LLL', { locale: ru })
+                          : period.replace('Неделя', 'Нед.')}
+                      </td>
+                      <td
+                        className="py-2 px-4 text-center font-bold"
+                        style={{
+                          backgroundColor: getExpenseColor(rowTotal, maxExpense)
+                        }}
+                      >
+                        {rowTotal} zł
+                      </td>
                       {expenseData.categories.map(category => {
                         const periodData = category.periods.find(p => p.period === period);
                         const value = periodData?.value || 0;
@@ -723,19 +738,20 @@ export default function Ranges() {
                           </td>
                         );
                       })}
-                      <td
-                        className="py-2 px-4 text-center font-bold"
-                        style={{
-                          backgroundColor: getExpenseColor(rowTotal, maxExpense)
-                        }}
-                      >
-                        {rowTotal} zł
-                      </td>
                     </tr>
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
+                  <td className="py-2 px-4 text-center">
+                    {expenseData.periods.reduce((total, period) => {
+                      const periodTotal = expenseData.categories.reduce((sum, category) => {
+                        const periodData = category.periods.find(p => p.period === period);
+                        return sum + (periodData?.value || 0);
+                      }, 0);
+                      return total + periodTotal;
+                    }, 0)} zł
+                  </td>
                   {expenseData.categories.map(category => {
                     const categoryTotal = category.periods.reduce((sum, period) => {
                       return sum + (period.value || 0);
@@ -757,15 +773,6 @@ export default function Ranges() {
                       </td>
                     );
                   })}
-                  <td className="py-2 px-4 text-center">
-                    {expenseData.periods.reduce((total, period) => {
-                      const periodTotal = expenseData.categories.reduce((sum, category) => {
-                        const periodData = category.periods.find(p => p.period === period);
-                        return sum + (periodData?.value || 0);
-                      }, 0);
-                      return total + periodTotal;
-                    }, 0)} zł
-                  </td>
                 </tr>
               </tbody>
             </table>
