@@ -37,7 +37,7 @@ const initialGoals: Goal[] = [
     id: 1,
     title: "Накопить",
     target: 5000,
-    current: 2500,
+    current: 0,
     unit: "злотых",
     icon: <DollarSign className="w-6 h-6" />,
     color: "from-green-500 to-emerald-700"
@@ -46,7 +46,7 @@ const initialGoals: Goal[] = [
     id: 2,
     title: "Изучить учебник",
     target: 804,
-    current: 350,
+    current: 0,
     unit: "страниц",
     icon: <Book className="w-6 h-6" />,
     color: "from-blue-500 to-indigo-700"
@@ -55,7 +55,7 @@ const initialGoals: Goal[] = [
     id: 3,
     title: "Набрать вес",
     target: 82,
-    current: 78,
+    current: 72,
     start: 72,
     unit: "кг",
     icon: <Weight className="w-6 h-6" />,
@@ -65,7 +65,7 @@ const initialGoals: Goal[] = [
     id: 4,
     title: "Сделать видео",
     target: 15,
-    current: 5,
+    current: 0,
     unit: "видео",
     icon: <Video className="w-6 h-6" />,
     color: "from-red-500 to-rose-700"
@@ -74,7 +74,7 @@ const initialGoals: Goal[] = [
     id: 5,
     title: "Заработать на фрилансе",
     target: 1500,
-    current: 500,
+    current: 0,
     unit: "$",
     icon: <CodeSquare className="w-6 h-6" />,
     color: "from-yellow-500 to-orange-700"
@@ -105,7 +105,12 @@ export default function Goals() {
   };
 
   const handleUpdate = () => {
-    const changes = [];
+    const changes: {
+      goalId: number;
+      previousValue: number;
+      newValue: number;
+    }[] = [];
+
     const updatedGoals = goals.map(goal => {
       const newValue = newValues[goal.id] ? parseFloat(newValues[goal.id]) : goal.current;
       if (newValue !== goal.current) {
@@ -252,7 +257,7 @@ export default function Goals() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     {entry.changes.map((change) => {
                       const goal = goals.find(g => g.id === change.goalId);
                       if (!goal) return null;
@@ -278,9 +283,9 @@ export default function Goals() {
                           key={`${entry.id}-${change.goalId}`}
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="col-span-3 bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
+                          className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
                         >
-                          <div className="grid grid-cols-3 items-center">
+                          <div className="flex items-center justify-between">
                             {/* Иконка и название */}
                             <div className="flex items-center gap-3 p-4">
                               <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
@@ -289,17 +294,17 @@ export default function Goals() {
                               <span className="font-medium">{goal.title}</span>
                             </div>
 
-                            {/* Изменение процента */}
-                            <div className="p-4 flex items-center justify-center">
+                            {/* Изменение значения */}
+                            <div className="p-4 flex items-center">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                                {progressDifference > 0 && '+'}{progressDifference.toFixed(1)}%
+                                {isPositive && '+'}{difference} {goal.unit}
                               </span>
                             </div>
 
-                            {/* Изменение значения */}
-                            <div className="p-4 flex items-center justify-end">
+                            {/* Изменение процента */}
+                            <div className="p-4 flex items-center">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                                {isPositive && '+'}{difference} {goal.unit}
+                                {progressDifference > 0 && '+'}{progressDifference.toFixed(1)}%
                               </span>
                             </div>
                           </div>

@@ -72,7 +72,8 @@ export const settingsSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").default('2025-02-07'),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format").default('2025-09-09'),
   viewMode: z.enum(['normal', 'weekly', 'monthly']).default('normal'),
-  timeRange: z.enum(['7', '14', '30']).default('7')
+  timeRange: z.enum(['7', '14', '30']).default('7'),
+  oathText: z.string().optional()
 });
 
 export type Task = z.infer<typeof taskSchema>;

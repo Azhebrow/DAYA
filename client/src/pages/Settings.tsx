@@ -12,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
+import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,15 +25,34 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+// Текст клятвы по умолчанию
+const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
+
+Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
+
+Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
+
+Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
+
+Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
+
 export default function SettingsPage() {
   const [settings, setSettings] = React.useState<Settings>(() => {
     try {
       const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({ startDate: '2025-02-07', endDate: '2025-09-09' });
+      if (!stored) return settingsSchema.parse({ 
+        startDate: '2025-02-07', 
+        endDate: '2025-09-09',
+        oathText: DEFAULT_OATH_TEXT 
+      });
       return settingsSchema.parse(JSON.parse(stored));
     } catch (error) {
       console.error('Error parsing settings:', error);
-      return settingsSchema.parse({ startDate: '2025-02-07', endDate: '2025-09-09' });
+      return settingsSchema.parse({ 
+        startDate: '2025-02-07', 
+        endDate: '2025-09-09',
+        oathText: DEFAULT_OATH_TEXT 
+      });
     }
   });
 
@@ -74,6 +94,26 @@ export default function SettingsPage() {
             Настройки
           </h1>
         </header>
+
+        {/* Карточка с текстом клятвы */}
+        <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+          <CardHeader>
+            <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Текст клятвы
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Label htmlFor="oathText">Отредактируйте текст клятвы</Label>
+              <Textarea
+                id="oathText"
+                value={settings.oathText || DEFAULT_OATH_TEXT}
+                onChange={(e) => handleSettingChange('oathText', e.target.value)}
+                className="min-h-[300px] font-medium"
+              />
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
           <CardHeader>
