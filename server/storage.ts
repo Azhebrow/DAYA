@@ -1,39 +1,25 @@
 import { db } from './db';
 import { 
-  tasks, categories, dayEntries,
-  type Task, type Category, type DayEntry, type Settings,
-  settingsSchema
+  tasks, categories, dayEntries, goals,
+  type Task, type Category, type DayEntry, type Settings, type Goal, type InsertGoal,
+  settingsSchema, CategoryType, TaskType
 } from '@shared/schema';
 import { eq } from 'drizzle-orm';
-import { users, type User, type InsertUser } from "@shared/schema";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
   getDayEntry(date: string): Promise<DayEntry | null>;
   saveDayEntry(entry: DayEntry): Promise<void>;
   removeDayEntry(date: string): Promise<void>;
   getSettings(): Settings;
   saveSettings(settings: Settings): void;
+  // Goals methods
+  getGoals(): Promise<Goal[]>;
+  getGoal(id: number): Promise<Goal | null>;
+  createGoal(goal: InsertGoal): Promise<Goal>;
+  updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
   async getDayEntry(date: string): Promise<DayEntry | null> {
     const [entry] = await db
       .select()
@@ -58,15 +44,15 @@ export class DatabaseStorage implements IStorage {
           id: cat.id.toString(),
           name: cat.name,
           emoji: cat.emoji,
-          type: cat.type,
+          type: cat.type as CategoryType,
           tasks: catTasks.map(t => ({
             id: t.id.toString(),
             name: t.name,
-            type: t.type,
+            type: t.type as TaskType,
             value: t.value || 0,
             textValue: t.textValue || '',
-            completed: t.completed,
-            createdAt: t.createdAt.toISOString()
+            completed: t.completed || false,
+            createdAt: t.createdAt?.toISOString() || new Date().toISOString()
           }))
         };
       })
@@ -163,6 +149,30 @@ export class DatabaseStorage implements IStorage {
 
   saveSettings(settings: Settings): void {
     localStorage.setItem('day_success_tracker_settings', JSON.stringify(settings));
+  }
+
+  async getGoals(): Promise<Goal[]> {
+    const allGoals = await db.select().from(goals);
+    return allGoals;
+  }
+
+  async getGoal(id: number): Promise<Goal | null> {
+    const [goal] = await db.select().from(goals).where(eq(goals.id, id));
+    return goal || null;
+  }
+
+  async createGoal(goal: InsertGoal): Promise<Goal> {
+    const [newGoal] = await db.insert(goals).values(goal).returning();
+    return newGoal;
+  }
+
+  async updateGoal(id: number, goal: Partial<InsertGoal>): Promise<Goal> {
+    const [updatedGoal] = await db
+      .update(goals)
+      .set(goal)
+      .where(eq(goals.id, id))
+      .returning();
+    return updatedGoal;
   }
 }
 
