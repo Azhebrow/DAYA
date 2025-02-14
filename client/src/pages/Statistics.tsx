@@ -444,7 +444,6 @@ export default function Statistics() {
         </CardContent>
       </Card>
 
-
       {/* Add Task Success Table */}
       <Card>
         <CardHeader>
@@ -458,8 +457,8 @@ export default function Statistics() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/20">
-                  <th className="py-2 px-4 text-left">Дата</th>
-                  <th className="py-2 px-4 text-center">Успех</th>
+                  <th className="py-2 px-4 text-left w-[120px]">Дата</th>
+                  <th className="py-2 px-4 text-center w-[100px]">Успех</th>
                   {data[0]?.categories
                     .filter(category => category.type !== CategoryType.EXPENSE)
                     .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
@@ -487,7 +486,7 @@ export default function Statistics() {
                       category.tasks.map(task => (
                         <th
                           key={`${category.name}-${task.name}`}
-                          className="py-2 px-4 text-center text-sm font-medium"
+                          className="py-2 px-4 text-center text-sm font-medium min-w-[120px]"
                           style={{
                             backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || '#6B728020',
                             color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
@@ -507,11 +506,11 @@ export default function Statistics() {
 
                   return (
                     <tr key={day.date} className="border-b border-border/10">
-                      <td className="py-2 px-4 font-medium">
+                      <td className="py-2 px-4 font-medium w-[120px]">
                         {format(new Date(day.date), 'dd.MM.yyyy')}
                       </td>
                       <td
-                        className="py-2 px-4 text-center"
+                        className="py-2 px-4 text-center w-[100px]"
                         style={{
                           backgroundColor: `rgba(16, 185, 129, ${0.1 + (dayScore / maxScore * 0.4)})`
                         }}
@@ -541,7 +540,7 @@ export default function Statistics() {
                             return (
                               <td
                                 key={`${category.name}-${task.name}`}
-                                className="py-2 px-4 text-center"
+                                className="py-2 px-4 text-center min-w-[120px]"
                                 style={{ backgroundColor: bgColor }}
                               >
                                 {displayValue}
