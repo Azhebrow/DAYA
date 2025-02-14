@@ -2,8 +2,15 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { storage } from '@/lib/storage';
 
-const OathText = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
+// Получаем текст клятвы из настроек
+const getOathText = () => {
+  const settings = storage.getSettings();
+  return settings.oathText || DEFAULT_OATH_TEXT;
+};
+
+const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
 
 Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
 
@@ -52,10 +59,16 @@ export default function Oath() {
   const [started, setStarted] = useState(false);
   const [showPledge, setShowPledge] = useState(false);
   const [, setLocation] = useLocation();
+  const [oathText, setOathText] = useState(getOathText());
+
+  // Обновляем текст клятвы при каждом посещении страницы
+  useEffect(() => {
+    setOathText(getOathText());
+  }, []);
 
   const handleStart = () => {
     setStarted(true);
-    setTimeout(() => setShowPledge(true), OathText.length * 50 + 1000);
+    setTimeout(() => setShowPledge(true), oathText.length * 50 + 1000);
   };
 
   const handlePledge = () => {
@@ -90,7 +103,7 @@ export default function Oath() {
               animate={{ opacity: 1 }}
               className="prose prose-lg dark:prose-invert mx-auto"
             >
-              <TypewriterText text={OathText} isVisible={started} />
+              <TypewriterText text={oathText} isVisible={started} />
             </motion.div>
           )}
 
