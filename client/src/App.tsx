@@ -7,6 +7,7 @@ import Dashboard from "@/pages/Dashboard";
 import Statistics from "@/pages/Statistics";
 import Ranges from "@/pages/Ranges";
 import Settings from "@/pages/Settings";
+import Oath from "@/pages/Oath";
 import { LayoutDashboard, LineChart, CalendarDays, Settings2, BarChart } from "lucide-react";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
@@ -55,6 +56,7 @@ function App() {
         <div className="pt-14">
           <Switch>
             <Route path="/" component={Dashboard} />
+            <Route path="/oath" component={Oath} />
             <Route path="/ranges" component={Ranges} />
             <Route path="/statistics" component={Statistics} />
             <Route path="/settings" component={Settings} />
