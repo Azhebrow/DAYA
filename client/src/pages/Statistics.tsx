@@ -20,13 +20,13 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Привычки': '#F59E0B'  // Оранжевый
 };
 
-const CATEGORY_ORDER = ['Разум', 'Время', 'Спорт', 'Привычки'];
+const CATEGORY_ORDER = ['Разум', 'Привычки', 'Спорт', 'Время'];
 
 const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
   'Разум': { bg: '#8B5CF620', text: '#ffffff' },
   'Время': { bg: '#10B98120', text: '#ffffff' },
   'Спорт': { bg: '#EF444420', text: '#ffffff' },
-  'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
+  'Привычки': { bg: '#F5NE0B20', text: '#ffffff' }
 };
 
 type TimeRangeType = '7' | '14' | '30';
