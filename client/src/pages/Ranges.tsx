@@ -629,9 +629,7 @@ export default function Ranges() {
                               style={{
                                 backgroundColor: task.type === TaskType.CHECKBOX
                                   ? getSuccessColor(value, 100)
-                                  : task.type === TaskType.TIME || task.type === TaskType.CALORIE
-                                    ? '#6B728020'  // Серый цвет для времени и калорий
-                                    : '#6B728020'  // Серый цвет для всех остальных
+                                  : '#6B728020'  // Серый цвет для всех не-checkbox значений
                               }}
                             >
                               {task.type === TaskType.CHECKBOX ? `${value}%` :
@@ -645,7 +643,7 @@ export default function Ranges() {
                             <td
                               key={`${task.taskName}-${period}`}
                               className="py-2 px-4 text-center"
-                              style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
+                              style={{ backgroundColor: '#6B728020' }}  // Изменено на серый
                             >
                               {`${value}m`}
                             </td>
@@ -695,9 +693,7 @@ export default function Ranges() {
                           style={{
                             backgroundColor: task.type === TaskType.CHECKBOX
                               ? getSuccessColor(totalValue, 100)
-                              : task.type === TaskType.TIME || task.type === TaskType.CALORIE
-                                ? '#6B728020'
-                                : '#6B728020'
+                              : '#6B728020'  // Серый цвет для всех не-checkbox значений
                           }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
@@ -712,7 +708,7 @@ export default function Ranges() {
                       <td
                         key={`total-${task.taskName}`}
                         className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${CATEGORY_COLORS['Время']}20` }}
+                        style={{ backgroundColor: '#6B728020' }}  // Изменено на серый
                       >
                         {`${totalValue}m`}
                       </td>
