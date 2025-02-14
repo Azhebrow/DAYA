@@ -551,6 +551,59 @@ export default function Statistics() {
                     </tr>
                   );
                 })}
+                {/* Add totals row */}
+                <tr className="border-t-2 border-border font-bold">
+                  <td className="py-2 px-4">Итого</td>
+                  <td className="py-2 px-4 text-center w-[100px]">
+                    {Math.round(data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length)}%
+                  </td>
+                  {data[0]?.categories
+                    .filter(category => category.type !== CategoryType.EXPENSE)
+                    .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                    .flatMap(category =>
+                      category.tasks.map(task => {
+                        let totalValue = '';
+                        let bgColor = 'transparent';
+
+                        if (task.type === TaskType.CHECKBOX) {
+                          const completedCount = data.reduce((sum, day) => {
+                            const cat = day.categories.find(c => c.name === category.name);
+                            const t = cat?.tasks.find(t => t.name === task.name);
+                            return sum + (t?.completed ? 1 : 0);
+                          }, 0);
+                          const percentage = Math.round((completedCount / data.length) * 100);
+                          bgColor = `rgba(16, 185, 129, ${0.1 + (percentage / 100 * 0.4)})`;
+                          totalValue = `${percentage}%`;
+                        } else if (task.type === TaskType.TIME) {
+                          const totalMinutes = data.reduce((sum, day) => {
+                            const cat = day.categories.find(c => c.name === category.name);
+                            const t = cat?.tasks.find(t => t.name === task.name);
+                            return sum + (t?.value || 0);
+                          }, 0);
+                          totalValue = formatTimeTotal(totalMinutes);
+                          bgColor = '#6B728020';
+                        } else if (task.type === TaskType.CALORIE) {
+                          const totalCalories = data.reduce((sum, day) => {
+                            const cat = day.categories.find(c => c.name === category.name);
+                            const t = cat?.tasks.find(t => t.name === task.name);
+                            return sum + (t?.value || 0);
+                          }, 0);
+                          totalValue = `${totalCalories}`;
+                          bgColor = '#6B728020';
+                        }
+
+                        return (
+                          <td
+                            key={`total-${category.name}-${task.name}`}
+                            className="py-2 px-4 text-center min-w-[90px]"
+                            style={{ backgroundColor: bgColor }}
+                          >
+                            {totalValue}
+                          </td>
+                        );
+                      })
+                    )}
+                </tr>
               </tbody>
             </table>
           </div>
