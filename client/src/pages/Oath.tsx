@@ -14,48 +14,18 @@ const TypewriterText = ({ text, isVisible }: { text: string; isVisible: boolean 
       return;
     }
 
-    let timeouts: NodeJS.Timeout[] = [];
-    let currentParaIndex = 0;
-    let currentCharIndex = 0;
-    let delay = 0;
-
-    const typeNextChar = () => {
-      if (currentParaIndex >= paragraphs.length) return;
-
-      const currentPara = paragraphs[currentParaIndex];
-      if (currentCharIndex === 0) {
-        setDisplayedText(prev => [...prev, '']);
+    let currentIndex = 0;
+    const interval = setInterval(() => {
+      if (currentIndex < paragraphs.length) {
+        setDisplayedText(prev => [...prev, paragraphs[currentIndex]]);
+        currentIndex++;
+      } else {
+        clearInterval(interval);
       }
+    }, 2000); // 2 seconds between paragraphs
 
-      const timeout = setTimeout(() => {
-        setDisplayedText(prev => {
-          const newText = [...prev];
-          newText[currentParaIndex] = currentPara.slice(0, currentCharIndex + 1);
-          return newText;
-        });
-
-        currentCharIndex++;
-        if (currentCharIndex < currentPara.length) {
-          typeNextChar();
-        } else {
-          currentParaIndex++;
-          currentCharIndex = 0;
-          if (currentParaIndex < paragraphs.length) {
-            setTimeout(typeNextChar, 800); // Пауза между параграфами
-          }
-        }
-      }, delay);
-
-      timeouts.push(timeout);
-      delay = 30; // Задержка между символами
-    };
-
-    typeNextChar();
-
-    return () => {
-      timeouts.forEach(clearTimeout);
-    };
-  }, [isVisible, paragraphs]);
+    return () => clearInterval(interval);
+  }, [isVisible, text]);
 
   return (
     <motion.div
@@ -76,24 +46,39 @@ const TypewriterText = ({ text, isVisible }: { text: string; isVisible: boolean 
           repeatType: "reverse",
         }}
       />
-      <motion.div
-        className="relative space-y-6"
-      >
+      <div className="relative space-y-6">
         {displayedText.map((paragraph, index) => (
           <motion.p
             key={index}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 1,
+              type: "spring",
+              stiffness: 100,
+              damping: 20
+            }}
             className="whitespace-pre-line text-lg leading-relaxed font-medium bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
             style={{
               textShadow: '0 0 20px rgba(255,255,255,0.1)',
             }}
           >
-            {paragraph}
+            {paragraph.split('').map((char, charIndex) => (
+              <motion.span
+                key={charIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.1,
+                  delay: charIndex * 0.03
+                }}
+              >
+                {char}
+              </motion.span>
+            ))}
           </motion.p>
         ))}
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
@@ -111,7 +96,7 @@ export default function Oath() {
 
   const handleStart = () => {
     setStarted(true);
-    setTimeout(() => setShowPledge(true), oathText.length * 30 + 5000);
+    setTimeout(() => setShowPledge(true), oathText.length * 50 + 5000);
   };
 
   const handlePledge = () => {
