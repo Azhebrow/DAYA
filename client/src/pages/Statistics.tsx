@@ -312,19 +312,15 @@ export default function Statistics() {
 
     data.forEach(day => {
       day.categories.forEach(category => {
-        // Check for expense-type tasks in any category
-        const hasExpenses = category.tasks.some(task => task.type === TaskType.EXPENSE);
-        if (hasExpenses) {
-          category.tasks.forEach(task => {
-            if (task.type === TaskType.EXPENSE && typeof task.value === 'number' && task.value > 0) {
-              if (!expensesByCategory[category.name]) {
-                expensesByCategory[category.name] = { amount: 0, emoji: category.emoji };
-              }
-              expensesByCategory[category.name].amount += task.value;
-              totalExpenses += task.value;
+        category.tasks.forEach(task => {
+          if (task.type === TaskType.EXPENSE && typeof task.value === 'number' && task.value > 0) {
+            if (!expensesByCategory[category.name]) {
+              expensesByCategory[category.name] = { amount: 0, emoji: category.emoji };
             }
-          });
-        }
+            expensesByCategory[category.name].amount += task.value;
+            totalExpenses += task.value;
+          }
+        });
       });
     });
 
@@ -332,7 +328,7 @@ export default function Statistics() {
       .map(([name, { amount, emoji }]) => ({
         name: `${emoji} ${name}`,
         amount,
-        color: EXPENSE_CATEGORY_COLORS[name] || '#6B7280'
+        color: CATEGORY_COLORS[name] || '#6B7280'
       }))
       .sort((a, b) => b.amount - a.amount);
 
@@ -341,12 +337,10 @@ export default function Statistics() {
 
   const calculateExpensesByPeriod = () => {
     const periodType = timeRange === '30' ? 'monthly' : timeRange === '14' ? 'decades' : 'daily';
-    const periods = aggregateDataByPeriod(periodType);
 
     const expenseCategories = new Set<string>();
     data.forEach(day => {
       day.categories.forEach(category => {
-        // Check for expense-type tasks in any category
         if (category.tasks.some(task => task.type === TaskType.EXPENSE)) {
           expenseCategories.add(category.name);
         }
@@ -355,9 +349,8 @@ export default function Statistics() {
 
     const expenseData = Array.from(expenseCategories).map(categoryName => {
       const periodValues = data.map(day => {
-        const dayDate = format(new Date(day.date), 'dd.MM');
-        let total = 0;
         const category = day.categories.find(c => c.name === categoryName);
+        let total = 0;
         if (category) {
           category.tasks.forEach(task => {
             if (task.type === TaskType.EXPENSE && typeof task.value === 'number') {
@@ -367,7 +360,7 @@ export default function Statistics() {
         }
 
         return {
-          period: dayDate,
+          period: format(new Date(day.date), 'dd.MM'),
           value: total
         };
       });
@@ -824,7 +817,7 @@ export default function Statistics() {
                       return (
                         <td
                           key={`total-${task.taskName}`}
-                          className="py-2 px-4 text-center"
+                          className="py-2 px4 text-center"
                           style={{
                             backgroundColor: task.type === TaskType.CHECKBOX
                               ? getSuccessColor(totalValue, 100)
