@@ -2,77 +2,72 @@ import { motion } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { Target, DollarSign, Book, Weight, Video, CodeSquare } from "lucide-react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 
-type Goal = {
+interface Goal {
   id: number;
   title: string;
   target: number;
   current: number;
   unit: string;
-  icon: string;
+  icon: React.ReactNode;
   color: string;
-};
+}
 
-const iconComponents: Record<string, React.ReactNode> = {
-  "dollar": <DollarSign className="w-6 h-6" />,
-  "book": <Book className="w-6 h-6" />,
-  "weight": <Weight className="w-6 h-6" />,
-  "video": <Video className="w-6 h-6" />,
-  "code": <CodeSquare className="w-6 h-6" />
+const goals: Goal[] = [
+  {
+    id: 1,
+    title: "Накопить",
+    target: 5000,
+    current: 2500,
+    unit: "злотых",
+    icon: <DollarSign className="w-6 h-6" />,
+    color: "from-green-500 to-emerald-700"
+  },
+  {
+    id: 2,
+    title: "Изучить учебник",
+    target: 804,
+    current: 350,
+    unit: "страниц",
+    icon: <Book className="w-6 h-6" />,
+    color: "from-blue-500 to-indigo-700"
+  },
+  {
+    id: 3,
+    title: "Набрать вес",
+    target: 82,
+    current: 78,
+    unit: "кг",
+    icon: <Weight className="w-6 h-6" />,
+    color: "from-purple-500 to-violet-700"
+  },
+  {
+    id: 4,
+    title: "Сделать видео",
+    target: 15,
+    current: 5,
+    unit: "видео",
+    icon: <Video className="w-6 h-6" />,
+    color: "from-red-500 to-rose-700"
+  },
+  {
+    id: 5,
+    title: "Заработать на фрилансе",
+    target: 1500,
+    current: 500,
+    unit: "$",
+    icon: <CodeSquare className="w-6 h-6" />,
+    color: "from-yellow-500 to-orange-700"
+  }
+];
+
+const calculateTotalProgress = () => {
+  const individualProgress = goals.map(goal => (goal.current / goal.target) * 100);
+  return individualProgress.reduce((acc, curr) => acc + curr, 0) / goals.length;
 };
 
 export default function Goals() {
-  const { toast } = useToast();
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [currentValue, setCurrentValue] = useState<string>("");
-
-  const { data: goals = [] } = useQuery<Goal[]>({
-    queryKey: ['/api/goals'],
-  });
-
-  const updateGoalMutation = useMutation({
-    mutationFn: async ({ id, current }: { id: number; current: number }) => {
-      const res = await apiRequest("PATCH", `/api/goals/${id}`, { current });
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/goals'] });
-      toast({
-        title: "Прогресс обновлен",
-        description: "Ваш прогресс был успешно сохранен",
-      });
-      setEditingId(null);
-    },
-    onError: () => {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось обновить прогресс",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const totalProgress = goals.length > 0
-    ? goals.reduce((acc, goal) => acc + (goal.current / goal.target) * 100, 0) / goals.length
-    : 0;
-
-  const handleUpdateProgress = (id: number) => {
-    const numValue = Number(currentValue);
-    if (!isNaN(numValue)) {
-      updateGoalMutation.mutate({ id, current: numValue });
-    }
-  };
-
-  const startEditing = (goal: Goal) => {
-    setEditingId(goal.id);
-    setCurrentValue(goal.current.toString());
-  };
+  const totalProgress = calculateTotalProgress();
 
   return (
     <div className="min-h-screen p-8 space-y-8">
@@ -101,60 +96,27 @@ export default function Goals() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className={`relative overflow-hidden p-6 bg-${goal.color.split('-')[0]}-500`}>
-                <div className={`absolute inset-0 bg-gradient-to-br from-${goal.color.split('-')[0]}-400 to-${goal.color.split('-')[1]}-700`} />
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+              <Card className="relative overflow-hidden p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
+                <div className={`absolute inset-0 bg-gradient-to-br ${goal.color} opacity-10`} />
                 <div className="relative space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-3 rounded-xl bg-gradient-to-br from-${goal.color.split('-')[0]}-300 to-${goal.color.split('-')[1]}-600 shadow-lg ring-2 ring-${goal.color.split('-')[0]}-400/50 backdrop-blur-xl`}>
-                        {iconComponents[goal.icon]}
+                      <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                        {goal.icon}
                       </div>
-                      <h3 className="text-xl font-bold text-white">{goal.title}</h3>
+                      <h3 className="text-xl font-semibold">{goal.title}</h3>
                     </div>
-                    {editingId === goal.id ? (
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          value={currentValue}
-                          onChange={(e) => setCurrentValue(e.target.value)}
-                          className="w-24 bg-black/30 border-white/20 text-white"
-                        />
-                        <div className="flex gap-1">
-                          <Button 
-                            size="sm"
-                            onClick={() => handleUpdateProgress(goal.id)}
-                            className={`bg-${goal.color.split('-')[0]}-400 hover:bg-${goal.color.split('-')[0]}-500 text-white shadow-lg`}
-                          >
-                            ✓
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => setEditingId(null)}
-                            className="border-white/20 hover:bg-black/20 text-white"
-                          >
-                            ✕
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <Button 
-                        variant="ghost" 
-                        onClick={() => startEditing(goal)}
-                        className="text-2xl font-bold hover:bg-black/20 text-white"
-                      >
-                        {goal.current}/{goal.target}
-                        <span className="text-sm ml-1 opacity-80">{goal.unit}</span>
-                      </Button>
-                    )}
+                    <p className="text-2xl font-bold">
+                      {goal.current}/{goal.target}
+                      <span className="text-sm ml-1 text-gray-400">{goal.unit}</span>
+                    </p>
                   </div>
                   <div className="space-y-2">
                     <Progress 
                       value={(goal.current / goal.target) * 100} 
-                      className={`h-3 bg-black/30 overflow-hidden`}
+                      className="h-2"
                     />
-                    <p className="text-sm text-white/80 text-right">
+                    <p className="text-sm text-gray-400 text-right">
                       {((goal.current / goal.target) * 100).toFixed(1)}%
                     </p>
                   </div>

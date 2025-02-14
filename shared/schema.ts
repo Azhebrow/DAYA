@@ -87,28 +87,3 @@ export const insertDayEntrySchema = createInsertSchema(dayEntries);
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertDayEntry = z.infer<typeof insertDayEntrySchema>;
-
-export const goals = pgTable('goals', {
-  id: serial('id').primaryKey(),
-  title: text('title').notNull(),
-  target: integer('target').notNull(),
-  current: integer('current').notNull().default(0),
-  unit: text('unit').notNull(),
-  icon: text('icon').notNull(),
-  color: text('color').notNull()
-});
-
-export const goalSchema = z.object({
-  id: z.number(),
-  title: z.string().min(1, "Title is required"),
-  target: z.number().min(1, "Target value is required"),
-  current: z.number().min(0),
-  unit: z.string(),
-  icon: z.string(),
-  color: z.string()
-});
-
-export const insertGoalSchema = createInsertSchema(goals);
-
-export type Goal = z.infer<typeof goalSchema>;
-export type InsertGoal = z.infer<typeof insertGoalSchema>;
