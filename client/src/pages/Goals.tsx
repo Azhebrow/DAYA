@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Target, DollarSign, Book, Weight, Video, CodeSquare } from "lucide-react";
 
 interface Goal {
@@ -8,12 +11,13 @@ interface Goal {
   title: string;
   target: number;
   current: number;
+  start?: number;
   unit: string;
   icon: React.ReactNode;
   color: string;
 }
 
-const goals: Goal[] = [
+const initialGoals: Goal[] = [
   {
     id: 1,
     title: "Накопить",
@@ -37,6 +41,7 @@ const goals: Goal[] = [
     title: "Набрать вес",
     target: 82,
     current: 78,
+    start: 72,
     unit: "кг",
     icon: <Weight className="w-6 h-6" />,
     color: "from-purple-500 to-violet-700"
@@ -61,13 +66,38 @@ const goals: Goal[] = [
   }
 ];
 
-const calculateTotalProgress = () => {
-  const individualProgress = goals.map(goal => (goal.current / goal.target) * 100);
-  return individualProgress.reduce((acc, curr) => acc + curr, 0) / goals.length;
-};
-
 export default function Goals() {
-  const totalProgress = calculateTotalProgress();
+  const [goals, setGoals] = useState<Goal[]>(initialGoals);
+  const [newValues, setNewValues] = useState<{ [key: number]: string }>({});
+
+  const calculateProgress = (goal: Goal) => {
+    if (goal.start !== undefined) {
+      // Для цели с весом
+      const totalRange = goal.target - goal.start;
+      const currentProgress = goal.current - goal.start;
+      return (currentProgress / totalRange) * 100;
+    }
+    // Для остальных целей
+    return (goal.current / goal.target) * 100;
+  };
+
+  const calculateTotalProgress = () => {
+    return goals.reduce((acc, goal) => acc + calculateProgress(goal), 0) / goals.length;
+  };
+
+  const handleInputChange = (goalId: number, value: string) => {
+    setNewValues(prev => ({ ...prev, [goalId]: value }));
+  };
+
+  const handleUpdate = () => {
+    setGoals(prevGoals => 
+      prevGoals.map(goal => ({
+        ...goal,
+        current: newValues[goal.id] ? parseFloat(newValues[goal.id]) : goal.current
+      }))
+    );
+    setNewValues({});
+  };
 
   return (
     <div className="min-h-screen p-8 space-y-8">
@@ -82,11 +112,39 @@ export default function Goals() {
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-xl opacity-20 blur-xl" />
             <div className="relative space-y-2">
               <p className="text-2xl font-semibold">Общий прогресс</p>
-              <Progress value={totalProgress} className="w-96 h-4" />
-              <p className="text-sm text-gray-400">{totalProgress.toFixed(1)}%</p>
+              <Progress value={calculateTotalProgress()} className="w-96 h-4" />
+              <p className="text-sm text-gray-400">{calculateTotalProgress().toFixed(1)}%</p>
             </div>
           </div>
         </div>
+
+        {/* Форма обновления показателей */}
+        <Card className="p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
+          <h3 className="text-xl font-semibold mb-4">Обновить показатели</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {goals.map(goal => (
+              <div key={`input-${goal.id}`} className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                  {goal.icon}
+                </div>
+                <Input
+                  type="number"
+                  placeholder={`Текущий показатель (${goal.unit})`}
+                  value={newValues[goal.id] || ''}
+                  onChange={(e) => handleInputChange(goal.id, e.target.value)}
+                  className="flex-1"
+                  step="0.1"
+                />
+              </div>
+            ))}
+          </div>
+          <Button 
+            onClick={handleUpdate}
+            className="mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+          >
+            Обновить показатели
+          </Button>
+        </Card>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {goals.map((goal, index) => (
@@ -113,11 +171,11 @@ export default function Goals() {
                   </div>
                   <div className="space-y-2">
                     <Progress 
-                      value={(goal.current / goal.target) * 100} 
+                      value={calculateProgress(goal)} 
                       className="h-2"
                     />
                     <p className="text-sm text-gray-400 text-right">
-                      {((goal.current / goal.target) * 100).toFixed(1)}%
+                      {calculateProgress(goal).toFixed(1)}%
                     </p>
                   </div>
                 </div>
