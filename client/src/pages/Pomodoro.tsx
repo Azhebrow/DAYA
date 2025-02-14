@@ -13,16 +13,45 @@ interface TimerState {
   isRunning: boolean;
   currentTask: string;
   totalTimeTracked: number;
+  startTime?: number;
 }
 
+const STORAGE_KEY = 'pomodoro_state';
+
 export default function Pomodoro() {
-  const [timerState, setTimerState] = useState<TimerState>({
-    timeLeft: 25 * 60, // 25 минут
-    isRunning: false,
-    currentTask: 'work',
-    totalTimeTracked: 0
+  const [timerState, setTimerState] = useState<TimerState>(() => {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Если таймер был запущен при закрытии страницы, восстанавливаем время с учетом прошедшего
+      if (parsed.isRunning && parsed.startTime) {
+        const elapsed = Math.floor((Date.now() - parsed.startTime) / 1000);
+        const newTimeLeft = Math.max(0, parsed.timeLeft - elapsed);
+        return {
+          ...parsed,
+          timeLeft: newTimeLeft,
+          totalTimeTracked: parsed.totalTimeTracked + elapsed
+        };
+      }
+      return parsed;
+    }
+    return {
+      timeLeft: 25 * 60,
+      isRunning: false,
+      currentTask: 'work',
+      totalTimeTracked: 0,
+      startTime: undefined
+    };
   });
   const { toast } = useToast();
+
+  // Сохранение состояния в localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      ...timerState,
+      startTime: timerState.isRunning ? Date.now() : undefined
+    }));
+  }, [timerState]);
 
   // Форматирование времени в мм:сс
   const formatTime = (seconds: number) => {
@@ -43,16 +72,23 @@ export default function Pomodoro() {
           totalTimeTracked: prev.totalTimeTracked + 1
         }));
       }, 1000);
+    } else if (timerState.timeLeft === 0 && timerState.isRunning) {
+      // Если время вышло, показываем уведомление
+      toast({
+        title: "Время вышло!",
+        description: "Сессия помодоро завершена.",
+      });
+      setTimerState(prev => ({ ...prev, isRunning: false }));
     }
 
     return () => clearInterval(interval);
-  }, [timerState.isRunning]);
+  }, [timerState.isRunning, timerState.timeLeft]);
 
   // Сохранение времени в трекер дня
   const saveTimeToTracker = async () => {
     const today = format(new Date(), 'yyyy-MM-dd');
     const entry = storage.getDayEntry(today);
-    
+
     if (entry) {
       const timeCategory = entry.categories.find(c => c.name === 'Время');
       if (timeCategory) {
@@ -101,18 +137,27 @@ export default function Pomodoro() {
   };
 
   const handleStart = () => {
-    setTimerState(prev => ({ ...prev, isRunning: true }));
+    setTimerState(prev => ({ 
+      ...prev, 
+      isRunning: true,
+      startTime: Date.now()
+    }));
   };
 
   const handlePause = () => {
-    setTimerState(prev => ({ ...prev, isRunning: false }));
+    setTimerState(prev => ({ 
+      ...prev, 
+      isRunning: false,
+      startTime: undefined
+    }));
   };
 
   const handleReset = () => {
     setTimerState(prev => ({
       ...prev,
       timeLeft: 25 * 60,
-      isRunning: false
+      isRunning: false,
+      startTime: undefined
     }));
   };
 
