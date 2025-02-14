@@ -5,14 +5,14 @@ import { storage } from '@/lib/storage';
 import { DayEntry, CategoryType, TaskType, settingsSchema } from '@shared/schema';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area
+  AreaChart, Area, PieChart, Pie, Cell, ScatterChart, Scatter, ZAxis
 } from 'recharts';
 import {
   format, eachMonthOfInterval, eachWeekOfInterval,
   startOfMonth, endOfMonth, subMonths,
   startOfWeek, endOfWeek, subWeeks
 } from 'date-fns';
-import { ActivitySquare, Flame, Clock, LineChart, DollarSign } from 'lucide-react';
+import { ActivitySquare, Flame, Clock, LineChart, DollarSign, Target, PieChart as PieChartIcon } from 'lucide-react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
@@ -140,8 +140,74 @@ export default function MonthlyStats() {
     return `${hours}ч ${mins}м`;
   };
 
+  const calculateCorrelation = (x: number[], y: number[]): number => {
+    const n = x.length;
+    const sum_x = x.reduce((a, b) => a + b, 0);
+    const sum_y = y.reduce((a, b) => a + b, 0);
+    const sum_xy = x.reduce((acc, curr, i) => acc + curr * y[i], 0);
+    const sum_x2 = x.reduce((a, b) => a + b * b, 0);
+    const sum_y2 = y.reduce((a, b) => a + b * b, 0);
+
+    const correlation = (n * sum_xy - sum_x * sum_y) /
+      Math.sqrt((n * sum_x2 - sum_x * sum_x) * (n * sum_y2 - sum_y * sum_y));
+
+    return isNaN(correlation) ? 0 : correlation;
+  };
+
+  const calculateTimeDistribution = () => {
+    const distribution: { name: string; value: number }[] = [];
+    data.forEach(day => {
+      day.categories.forEach(category => {
+        if (category.type === CategoryType.TIME) {
+          category.tasks.forEach(task => {
+            const existingEntry = distribution.find(d => d.name === task.name);
+            if (existingEntry) {
+              existingEntry.value += (task.value as number) || 0;
+            } else {
+              distribution.push({
+                name: task.name,
+                value: (task.value as number) || 0
+              });
+            }
+          });
+        }
+      });
+    });
+    return distribution;
+  };
+
+  const calculateGoalAchievement = () => {
+    const goals = [
+      { name: 'Активность', target: 30, actual: 0 }, // 30 mins per day
+      { name: 'Калории', target: 300, actual: 0 }, // 300 cal per day
+      { name: 'Задачи', target: 80, actual: 0 } // 80% completion rate
+    ];
+
+    data.forEach(day => {
+      day.categories.forEach(category => {
+        category.tasks.forEach(task => {
+          if (task.type === CategoryType.TIME) {
+            goals[0].actual += (task.value as number) || 0;
+          }
+          if (task.type === CategoryType.CALORIE) {
+            goals[1].actual += (task.value as number) || 0;
+          }
+          if (task.type === TaskType.CHECKBOX) {
+            goals[2].actual += task.completed ? 1 : 0;
+          }
+        });
+      });
+    });
+
+    return goals.map(goal => ({
+      ...goal,
+      actual: goal.name === 'Задачи'
+        ? (goal.actual / (data.length * 3)) * 100 // Assuming 3 checkbox tasks per day
+        : goal.actual / data.length // Average per day for other metrics
+    }));
+  };
+
   const dailyStats = aggregateDataByPeriod();
-  // Placeholder data - replace with actual data fetching and processing
   const monthlyExpenses = {
     categories: [
       { categoryName: 'Продукты', periods: [{ value: 100 }, { value: 120 }, { value: 150 }] },
@@ -304,106 +370,165 @@ export default function MonthlyStats() {
                 <Area
                   type="stepAfter"
                   dataKey="expenses"
-                  stroke={CATEGORY_COLORS['Спорт']}  {/* Changed to use 'Спорт' color as a fallback */}
-                  fill={CATEGORY_COLORS['Спорт']}  {/* Changed to use 'Спорт' color as a fallback */}
+                  stroke={CATEGORY_COLORS['Привычки']}
+                  fill={CATEGORY_COLORS['Привычки']}
                   name="Расходы"
                   connectNulls={true}
                   dot={{ r: 4 }}
                   label={{
                     position: 'top',
-                    fill: CATEGORY_COLORS['Спорт'],  {/* Changed to use 'Спорт' color as a fallback */}
-                    formatter: (value: any) => value ? `${value}` : ''
+                    fill: CATEGORY_COLORS['Привычки'],
+                    formatter: (value: any) => value ? `${value} zł` : ''
                   }}
                 />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Достижение целей
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={calculateGoalAchievement()} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                <XAxis type="number" domain={[0, 100]} unit="%" />
+                <YAxis dataKey="name" type="category" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.8)', border: 'none' }}
+                  formatter={(value: any) => `${Math.round(value)}%`}
+                />
+                <Bar dataKey="actual" fill={CATEGORY_COLORS['Время']}>
+                  {calculateGoalAchievement().map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={entry.actual >= entry.target ? CATEGORY_COLORS['Время'] : CATEGORY_COLORS['Привычки']}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5 text-primary" />
+              Распределение времени
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={calculateTimeDistribution()}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label={({ name, value }) => `${name}: ${formatTime(value)}`}
+                >
+                  {calculateTimeDistribution().map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value: any) => formatTime(value)} />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Monthly Expenses Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-            <table>
-              <thead>
-                <tr>
-                  <th className="py-2 px-4 text-center">Период</th>
-                  {monthlyExpenses.categories.map(category => {
-                    const matchingCategory = data.find(day =>
-                      day.categories.find(c => c.name === category.categoryName)
-                    )?.categories.find(c => c.name === category.categoryName);
+              <table>
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 text-center">Период</th>
+                    {monthlyExpenses.categories.map(category => {
+                      const matchingCategory = data.find(day =>
+                        day.categories.find(c => c.name === category.categoryName)
+                      )?.categories.find(c => c.name === category.categoryName);
 
-                    return (
-                      <th
-                        key={category.categoryName}
-                        className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
-                      >
-                        {matchingCategory?.emoji || '📝'} {category.categoryName}
-                      </th>
-                    );
-                  })}
-                  <th className="py-2 px-4 text-center font-bold">Итого</th>
-                </tr>
-              </thead>
-              <tbody>
-                {monthlyExpenses.periods.map((period, idx) => {
-                  const rowTotal = monthlyExpenses.categories.reduce((sum, category) => {
-                    return sum + (category.periods[idx]?.value || 0);
-                  }, 0);
-
-                  return (
-                    <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">{period}</td>
-                      {monthlyExpenses.categories.map(category => {
-                        const value = category.periods[idx]?.value || 0;
-                        return (
-                          <td
-                            key={`${category.categoryName}-${period}`}
-                            className="py-2 px-4 text-center"
-                            style={{
-                              backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
-                            }}
-                          >
-                            {value} zł
-                          </td>
-                        );
-                      })}
-                      <td className="py-2 px-4 text-center font-bold">{rowTotal} zł</td>
-                    </tr>
-                  );
-                })}
-                {/* Итоговая строка */}
-                <tr className="border-t-2 border-border font-bold">
-                  <td className="py-2 px-4">Итого</td>
-                  {monthlyExpenses.categories.map(category => {
-                    const categoryTotal = category.periods.reduce((sum, period) => {
-                      return sum + (period.value || 0);
+                      return (
+                        <th
+                          key={category.categoryName}
+                          className="py-2 px-4 text-center"
+                          style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
+                        >
+                          {matchingCategory?.emoji || '📝'} {category.categoryName}
+                        </th>
+                      );
+                    })}
+                    <th className="py-2 px-4 text-center font-bold">Итого</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthlyExpenses.periods.map((period, idx) => {
+                    const rowTotal = monthlyExpenses.categories.reduce((sum, category) => {
+                      return sum + (category.periods[idx]?.value || 0);
                     }, 0);
+
                     return (
-                      <td
-                        key={`total-${category.categoryName}`}
-                        className="py-2 px-4 text-center"
-                        style={{
-                          backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
-                        }}
-                      >
-                        {categoryTotal} zł
-                      </td>
+                      <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
+                        <td className="py-2 px-4 font-medium">{period}</td>
+                        {monthlyExpenses.categories.map(category => {
+                          const value = category.periods[idx]?.value || 0;
+                          return (
+                            <td
+                              key={`${category.categoryName}-${period}`}
+                              className="py-2 px-4 text-center"
+                              style={{
+                                backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                              }}
+                            >
+                              {value} zł
+                            </td>
+                          );
+                        })}
+                        <td className="py-2 px-4 text-center font-bold">{rowTotal} zł</td>
+                      </tr>
                     );
                   })}
-                  <td className="py-2 px-4 text-center">
-                    {monthlyExpenses.periods.reduce((total, _, periodIdx) => {
-                      const periodTotal = monthlyExpenses.categories.reduce((sum, category) => {
-                        return sum + (category.periods[periodIdx]?.value || 0);
+                  {/* Итоговая строка */}
+                  <tr className="border-t-2 border-border font-bold">
+                    <td className="py-2 px-4">Итого</td>
+                    {monthlyExpenses.categories.map(category => {
+                      const categoryTotal = category.periods.reduce((sum, period) => {
+                        return sum + (period.value || 0);
                       }, 0);
-                      return total + periodTotal;
-                    }, 0)} zł
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      return (
+                        <td
+                          key={`total-${category.categoryName}`}
+                          className="py-2 px-4 text-center"
+                          style={{
+                            backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
+                          }}
+                        >
+                          {categoryTotal} zł
+                        </td>
+                      );
+                    })}
+                    <td className="py-2 px-4 text-center">
+                      {monthlyExpenses.periods.reduce((total, _, periodIdx) => {
+                        const periodTotal = monthlyExpenses.categories.reduce((sum, category) => {
+                          return sum + (category.periods[periodIdx]?.value || 0);
+                        }, 0);
+                        return total + periodTotal;
+                      }, 0)} zł
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>
