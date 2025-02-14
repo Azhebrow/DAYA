@@ -20,7 +20,6 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Привычки': '#6B7280',  // Серый для привычек
   'Расходы': '#F97316'    // Оранжевый
 };
-
 const EXPENSE_CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#6B7280',    // Серый
@@ -887,7 +886,7 @@ export default function Statistics() {
                       <th
                         key={category.categoryName}
                         className="py-2 px-4 text-center"
-                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
+                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#6B7280'}20` }}
                       >
                         {matchingCategory?.emoji || '📝'} {category.categoryName}
                       </th>

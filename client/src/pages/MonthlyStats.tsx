@@ -18,9 +18,8 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный
-  'Привычки': '#8B5CF6',  // Фиолетовый
-  'Расходы': '#F97316'    // Оранжевый
+  'Спорт': '#EF4444',    // Красный (для активности)
+  'Привычки': '#8B5CF6'  // Фиолетовый
 };
 
 type ViewType = 'weekly' | 'monthly';
@@ -305,14 +304,14 @@ export default function MonthlyStats() {
                 <Area
                   type="stepAfter"
                   dataKey="expenses"
-                  stroke={CATEGORY_COLORS['Расходы']}
-                  fill={CATEGORY_COLORS['Расходы']}
+                  stroke={CATEGORY_COLORS['Спорт']}  {/* Changed to use 'Спорт' color as a fallback */}
+                  fill={CATEGORY_COLORS['Спорт']}  {/* Changed to use 'Спорт' color as a fallback */}
                   name="Расходы"
                   connectNulls={true}
                   dot={{ r: 4 }}
                   label={{
                     position: 'top',
-                    fill: CATEGORY_COLORS['Расходы'],
+                    fill: CATEGORY_COLORS['Спорт'],  {/* Changed to use 'Спорт' color as a fallback */}
                     formatter: (value: any) => value ? `${value}` : ''
                   }}
                 />
@@ -405,7 +404,7 @@ export default function MonthlyStats() {
                 </tr>
               </tbody>
             </table>
-          </div>
+            </div>
           </CardContent>
         </Card>
       </div>

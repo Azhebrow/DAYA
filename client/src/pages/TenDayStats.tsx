@@ -9,10 +9,10 @@ import {
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 
 const CATEGORY_COLORS: { [key: string]: string } = {
-  'Разум': '#FF6B6B',
-  'Время': '#4ECDC4',
-  'Спорт': '#45B7D1',
-  'Привычки': '#96CEB4'
+  'Разум': '#6B7280',    // Серый
+  'Время': '#10B981',    // Зеленый
+  'Спорт': '#EF4444',    // Красный (для активности)
+  'Привычки': '#8B5CF6'  // Фиолетовый
 };
 
 type TimeRangeType = 'monthly';
@@ -266,9 +266,7 @@ export default function TenDayStats() {
                           <td
                             key={`${category.categoryName}-${period}`}
                             className="py-2 px-4 text-center"
-                            style={{
-                              backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
-                            }}
+                            style={{ backgroundColor: '#6B728020' }}
                           >
                             {value} zł
                           </td>
@@ -289,9 +287,7 @@ export default function TenDayStats() {
                       <td
                         key={`total-${category.categoryName}`}
                         className="py-2 px-4 text-center"
-                        style={{
-                          backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20`
-                        }}
+                        style={{ backgroundColor: `${CATEGORY_COLORS[category.categoryName] || '#8884d8'}20` }}
                       >
                         {categoryTotal} zł
                       </td>
