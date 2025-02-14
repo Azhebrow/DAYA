@@ -556,13 +556,13 @@ export default function Ranges() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/20">
-                  <th className="py-2 px-4 text-left">Период</th>
-                  <th className="py-2 px-4 text-center">Успех</th>
+                  <th className="py-2 px-4 text-left min-w-[90px]">Период</th>
+                  <th className="py-2 px-4 text-center min-w-[90px]">Успех</th>
                   {sortedCategories.map(category => (
                     <th
                       key={category.name}
                       colSpan={category.tasks.length + (category.name === 'Время' ? category.timeTasks.length : 0)}
-                      className="py-2 px-4 text-center"
+                      className="py-2 px-4 text-center min-w-[90px]"
                       style={getCategoryHeaderStyle(category.name)}
                     >
                       {category.name}
@@ -570,13 +570,13 @@ export default function Ranges() {
                   ))}
                 </tr>
                 <tr className="border-b border-border/20">
-                  <th className="py-2 px-4"></th>
-                  <th className="py-2 px-4"></th>
+                  <th className="py-2 px-4 min-w-[90px]"></th>
+                  <th className="py-2 px-4 min-w-[90px]"></th>
                   {sortedCategories.flatMap(category => [
                     ...category.tasks.map(task => (
                       <th
                         key={task.taskName}
-                        className="py-2 px-4 text-center text-sm font-medium"
+                        className="py-2 px-4 text-center text-sm font-medium min-w-[90px]"
                         style={getTaskHeaderStyle(category.name)}
                       >
                         {task.taskName}
@@ -585,7 +585,7 @@ export default function Ranges() {
                     ...(category.name === 'Время' ? category.timeTasks.map(task => (
                       <th
                         key={task.taskName}
-                        className="py-2 px-4 text-center text-sm font-medium"
+                        className="py-2 px-4 text-center text-sm font-medium min-w-[90px]"
                         style={getTaskHeaderStyle(category.name)}
                       >
                         {task.taskName}
@@ -608,13 +608,13 @@ export default function Ranges() {
 
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">
+                      <td className="py-2 px-4 font-medium min-w-[90px]">
                         {viewMode === 'month'
                           ? format(parseISO(data[idx].date), 'LLL', { locale: ru })
                           : period.replace('Неделя', 'Нед.')}
                       </td>
                       <td
-                        className="py-2 px-4 text-center"
+                        className="py-2 px-4 text-center min-w-[90px]"
                         style={{ backgroundColor: getSuccessColor(averageScore, maxSuccessScore) }}
                       >
                         {averageScore}%
@@ -625,7 +625,7 @@ export default function Ranges() {
                           return (
                             <td
                               key={`${task.taskName}-${period}`}
-                              className="py-2 px-4 text-center"
+                              className="py-2 px-4 text-center min-w-[90px]"
                               style={{
                                 backgroundColor: task.type === TaskType.CHECKBOX
                                   ? getSuccessColor(value, 100)
@@ -642,7 +642,7 @@ export default function Ranges() {
                           return (
                             <td
                               key={`${task.taskName}-${period}`}
-                              className="py-2 px-4 text-center"
+                              className="py-2 px-4 text-center min-w-[90px]"
                               style={{ backgroundColor: '#6B728020' }}  // Изменено на серый
                             >
                               {`${value}m`}
@@ -654,8 +654,8 @@ export default function Ranges() {
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
-                  <td className="py-2 px-4">Итого</td>
-                  <td className="py-2 px-4 text-center">
+                  <td className="py-2 px-4 min-w-[90px]">Итого</td>
+                  <td className="py-2 px-4 text-center min-w-[90px]">
                     {(() => {
                       const totalScore = Math.round(
                         Object.values(taskSuccess.periodScores || {}).reduce((sum, period) => {
@@ -689,7 +689,7 @@ export default function Ranges() {
                       return (
                         <td
                           key={`total-${task.taskName}`}
-                          className="py-2 px-4 text-center"
+                          className="py-2 px-4 text-center min-w-[90px]"
                           style={{
                             backgroundColor: task.type === TaskType.CHECKBOX
                               ? getSuccessColor(totalValue, 100)
@@ -707,7 +707,7 @@ export default function Ranges() {
                     return (
                       <td
                         key={`total-${task.taskName}`}
-                        className="py-2 px-4 text-center"
+                        className="py-2 px-4 text-center min-w-[90px]"
                         style={{ backgroundColor: '#6B728020' }}  // Изменено на серый
                       >
                         {`${totalValue}m`}
@@ -733,8 +733,8 @@ export default function Ranges() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-border/20">
-                  <th className="py-2 px-4 text-left">Период</th>
-                  <th className="py-2 px-4 text-center font-bold">Итого</th>
+                  <th className="py-2 px-4 text-left min-w-[90px]">Период</th>
+                  <th className="py-2 px-4 text-center font-bold min-w-[90px]">Итого</th>
                   {expenseData.categories.map(category => {
                     const matchingCategory = data.find(day =>
                       day.categories.find(c => c.name === category.categoryName)
@@ -743,7 +743,7 @@ export default function Ranges() {
                     return (
                       <th
                         key={category.categoryName}
-                        className="py-2 px-4 text-center"
+                        className="py-2 px-4 text-center min-w-[90px]"
                         style={{ backgroundColor: '#6B728020' }}
                       >
                         {matchingCategory?.emoji || '📝'} {category.categoryName}
@@ -767,13 +767,13 @@ export default function Ranges() {
 
                   return (
                     <tr key={period} className={idx % 2 === 0 ? 'bg-muted/50' : ''}>
-                      <td className="py-2 px-4 font-medium">
+                      <td className="py-2 px-4 font-medium min-w-[90px]">
                         {viewMode === 'month'
                           ? format(parseISO(data[idx].date), 'LLL', { locale: ru })
                           : period.replace('Неделя', 'Нед.')}
                       </td>
                       <td
-                        className="py-2 px-4 text-center font-bold"
+                        className="py-2 px-4 text-center font-bold min-w-[90px]"
                         style={{
                           backgroundColor: getExpenseColor(rowTotal, maxExpense)
                         }}
@@ -787,7 +787,7 @@ export default function Ranges() {
                         return (
                           <td
                             key={`${category.categoryName}-${period}`}
-                            className="py-2 px-4 text-center"
+                            className="py-2 px-4 text-center min-w-[90px]"
                             style={{
                               backgroundColor: getExpenseColor(value, maxExpense)
                             }}
@@ -800,8 +800,8 @@ export default function Ranges() {
                   );
                 })}
                 <tr className="border-t-2 border-border font-bold">
-                  <td className="py-2 px-4">Итого</td>
-                  <td className="py-2 px-4 text-center">
+                  <td className="py-2 px-4 min-w-[90px]">Итого</td>
+                  <td className="py-2 px-4 text-center min-w-[90px]">
                     {expenseData.periods.reduce((total, period) => {
                       const periodTotal = expenseData.categories.reduce((sum, category) => {
                         const periodData = category.periods.find(p => p.period === period);
@@ -823,7 +823,7 @@ export default function Ranges() {
                     return (
                       <td
                         key={`total-${category.categoryName}`}
-                        className="py-2 px-4 text-center"
+                        className="py-2 px-4 text-center min-w-[90px]"
                         style={{
                           backgroundColor: getExpenseColor(categoryTotal, maxTotal)
                         }}
@@ -831,8 +831,7 @@ export default function Ranges() {
                         {categoryTotal} zł
                       </td>
                     );
-                  })}
-                </tr>
+                  })}                </tr>
               </tbody>
             </table>
           </div>
