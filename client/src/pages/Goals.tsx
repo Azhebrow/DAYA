@@ -191,7 +191,7 @@ export default function Goals() {
                   </div>
                 ))}
               </div>
-              <Button 
+              <Button
                 onClick={handleUpdate}
                 className="mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
               >
@@ -225,8 +225,8 @@ export default function Goals() {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Progress 
-                      value={calculateProgress(goal)} 
+                    <Progress
+                      value={calculateProgress(goal)}
                       className="h-2"
                     />
                     <p className="text-sm text-gray-400 text-right">
@@ -244,75 +244,91 @@ export default function Goals() {
           <Card className="p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
             <h3 className="text-xl font-semibold mb-4">История изменений</h3>
             <div className="space-y-4">
-              {history.map((entry) => (
-                <div key={entry.id} className="relative overflow-hidden">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-lg font-medium text-gray-300">{entry.date}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteHistoryEntry(entry.id)}
-                      className="h-8 w-8 text-gray-400 hover:text-red-400"
+              {history.map((entry) => {
+                const changes = entry.changes.map(change => {
+                  const goal = goals.find(g => g.id === change.goalId);
+                  if (!goal) return null;
+
+                  const difference = change.newValue - change.previousValue;
+                  const isPositive = difference > 0;
+
+                  let previousProgress;
+                  let newProgress;
+                  if (goal.start !== undefined) {
+                    const totalRange = goal.target - goal.start;
+                    previousProgress = ((change.previousValue - goal.start) / totalRange) * 100;
+                    newProgress = ((change.newValue - goal.start) / totalRange) * 100;
+                  } else {
+                    previousProgress = (change.previousValue / goal.target) * 100;
+                    newProgress = (change.newValue / goal.target) * 100;
+                  }
+                  const progressDifference = newProgress - previousProgress;
+
+                  return {
+                    goal,
+                    difference,
+                    isPositive,
+                    progressDifference
+                  };
+                }).filter(Boolean);
+
+                return (
+                  <div key={entry.id} className="relative overflow-hidden">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-lg font-medium text-gray-300">{entry.date}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteHistoryEntry(entry.id)}
+                        className="h-8 w-8 text-gray-400 hover:text-red-400"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4">
-                    {entry.changes.map((change) => {
-                      const goal = goals.find(g => g.id === change.goalId);
-                      if (!goal) return null;
-
-                      const difference = change.newValue - change.previousValue;
-                      const isPositive = difference > 0;
-
-                      // Рассчитываем изменение процента
-                      let previousProgress;
-                      let newProgress;
-                      if (goal.start !== undefined) {
-                        const totalRange = goal.target - goal.start;
-                        previousProgress = ((change.previousValue - goal.start) / totalRange) * 100;
-                        newProgress = ((change.newValue - goal.start) / totalRange) * 100;
-                      } else {
-                        previousProgress = (change.previousValue / goal.target) * 100;
-                        newProgress = (change.newValue / goal.target) * 100;
-                      }
-                      const progressDifference = newProgress - previousProgress;
-
-                      return (
-                        <motion.div
-                          key={`${entry.id}-${change.goalId}`}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="bg-zinc-900/50 rounded-lg border border-zinc-800 overflow-hidden"
-                        >
-                          <div className="flex flex-col">
-                            {/* Иконка */}
-                            <div className="flex items-center justify-center p-4">
-                              <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
-                                {goal.icon}
-                              </div>
+                      <div className="flex flex-col">
+                        {/* Строка с иконками */}
+                        <div className="flex items-center justify-around p-4">
+                          {changes.map(({ goal }, index) => (
+                            <div
+                              key={`icon-${goal.id}`}
+                              className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}
+                            >
+                              {goal.icon}
                             </div>
+                          ))}
+                        </div>
 
-                            {/* Изменение процента */}
-                            <div className="p-4 flex items-center justify-center border-t border-zinc-800">
+                        {/* Строка с процентами изменений */}
+                        <div className="grid grid-flow-col auto-cols-fr border-t border-zinc-800">
+                          {changes.map(({ progressDifference, isPositive, goal }) => (
+                            <div key={`progress-${goal.id}`} className="p-4 flex items-center justify-center">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                                 {progressDifference > 0 && '+'}{progressDifference.toFixed(1)}%
                               </span>
                             </div>
+                          ))}
+                        </div>
 
-                            {/* Изменение значения */}
-                            <div className="p-4 flex items-center justify-center border-t border-zinc-800">
+                        {/* Строка с абсолютными изменениями */}
+                        <div className="grid grid-flow-col auto-cols-fr border-t border-zinc-800">
+                          {changes.map(({ difference, isPositive, goal }) => (
+                            <div key={`value-${goal.id}`} className="p-4 flex items-center justify-center">
                               <span className={`font-medium ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                                 {isPositive && '+'}{difference} {goal.unit}
                               </span>
                             </div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </Card>
         )}
