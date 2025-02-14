@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Category, CategoryType } from '@shared/schema';
+import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 
@@ -11,19 +11,6 @@ interface TaskCardProps {
   onTaskUpdate: (taskId: string, value: number | boolean | string) => void;
   isExpenseCard?: boolean;
 }
-
-const formatTimeValue = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (hours === 0) return `${mins} мин`;
-  return `${hours} ч ${mins > 0 ? `${mins} мин` : ''}`;
-};
-
-const TimeDisplay = ({ value }: { value: number }) => (
-  <div className="flex items-center justify-center w-full h-16 bg-zinc-800/50 rounded-lg">
-    <span className="text-xl font-mono font-bold">{formatTimeValue(value)}</span>
-  </div>
-);
 
 export const TaskCard = React.memo(({ 
   category, 
@@ -68,20 +55,12 @@ export const TaskCard = React.memo(({
         </div>
         <CardContent className="space-y-3 p-4 pt-2">
           {category.tasks.map((task) => (
-            <div key={task.id}>
-              {category.type === CategoryType.TIME ? (
-                <div className="flex items-center justify-between px-4">
-                  <span className="text-sm text-gray-300">{task.name}</span>
-                  <TimeDisplay value={task.value || 0} />
-                </div>
-              ) : (
-                <TaskInput
-                  task={task}
-                  onChange={(value) => handleTaskUpdate(task.id, value)}
-                  isExpenseCard={isExpenseCard}
-                />
-              )}
-            </div>
+            <TaskInput
+              key={task.id}
+              task={task}
+              onChange={(value) => handleTaskUpdate(task.id, value)}
+              isExpenseCard={isExpenseCard}
+            />
           ))}
         </CardContent>
       </Card>

@@ -1,27 +1,21 @@
 import { db } from './db';
 import { 
-  tasks, categories, dayEntries, pomodoroSessions,
-  type Task, type Category, type DayEntry, type Settings, type PomodoroSession,
-  settingsSchema, PomodoroPhase
+  tasks, categories, dayEntries,
+  type Task, type Category, type DayEntry, type Settings,
+  settingsSchema
 } from '@shared/schema';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
+import { users, type User, type InsertUser } from "@shared/schema";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  getDayEntry(date: string): DayEntry | null;
-  saveDayEntry(entry: DayEntry): void;
-  removeDayEntry(date: string): void;
+  getDayEntry(date: string): Promise<DayEntry | null>;
+  saveDayEntry(entry: DayEntry): Promise<void>;
+  removeDayEntry(date: string): Promise<void>;
   getSettings(): Settings;
   saveSettings(settings: Settings): void;
-  // New Pomodoro methods
-  getPomodoroSessions(date: string): Promise<PomodoroSession[]>;
-  savePomodoroSession(session: PomodoroSession): Promise<void>;
-  updatePomodoroSession(id: number, session: Partial<PomodoroSession>): Promise<void>;
-  deletePomodoroSession(id: number): Promise<void>;
-  // Sync time data
-  syncPomodoroTime(date: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -40,7 +34,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getDayEntry(date: string): DayEntry | null {
+  async getDayEntry(date: string): Promise<DayEntry | null> {
     const [entry] = await db
       .select()
       .from(dayEntries)
@@ -71,8 +65,8 @@ export class DatabaseStorage implements IStorage {
             type: t.type,
             value: t.value || 0,
             textValue: t.textValue || '',
-            completed: t.completed || false,
-            createdAt: t.createdAt?.toISOString() || new Date().toISOString()
+            completed: t.completed,
+            createdAt: t.createdAt.toISOString()
           }))
         };
       })
@@ -158,109 +152,6 @@ export class DatabaseStorage implements IStorage {
       await db
         .delete(dayEntries)
         .where(eq(dayEntries.id, entry.id));
-    }
-  }
-
-  // New Pomodoro methods
-  async getPomodoroSessions(date: string): Promise<PomodoroSession[]> {
-    const sessions = await db
-      .select()
-      .from(pomodoroSessions)
-      .where(eq(pomodoroSessions.date, date))
-      .orderBy(desc(pomodoroSessions.createdAt));
-
-    return sessions.map(session => ({
-      id: session.id,
-      date: session.date,
-      duration: session.duration,
-      phase: session.phase as PomodoroPhase,
-      taskType: session.taskType,
-      createdAt: session.createdAt?.toISOString() || new Date().toISOString()
-    }));
-  }
-
-  async savePomodoroSession(session: PomodoroSession): Promise<void> {
-    await db.insert(pomodoroSessions).values({
-      date: session.date,
-      duration: session.duration,
-      phase: session.phase,
-      taskType: session.taskType
-    });
-
-    await this.syncPomodoroTime(session.date);
-  }
-
-  async updatePomodoroSession(id: number, session: Partial<PomodoroSession>): Promise<void> {
-    await db
-      .update(pomodoroSessions)
-      .set({
-        date: session.date,
-        duration: session.duration,
-        phase: session.phase,
-        taskType: session.taskType
-      })
-      .where(eq(pomodoroSessions.id, id));
-
-    if (session.date) {
-      await this.syncPomodoroTime(session.date);
-    }
-  }
-
-  async deletePomodoroSession(id: number): Promise<void> {
-    const [session] = await db
-      .select()
-      .from(pomodoroSessions)
-      .where(eq(pomodoroSessions.id, id));
-
-    if (session) {
-      await db
-        .delete(pomodoroSessions)
-        .where(eq(pomodoroSessions.id, id));
-
-      await this.syncPomodoroTime(session.date);
-    }
-  }
-
-  async syncPomodoroTime(date: string): Promise<void> {
-    // Get all work sessions for the day
-    const sessions = await db
-      .select()
-      .from(pomodoroSessions)
-      .where(
-        and(
-          eq(pomodoroSessions.date, date),
-          eq(pomodoroSessions.phase, PomodoroPhase.WORK)
-        )
-      );
-
-    // Calculate total time for each task type
-    const timeByTask = sessions.reduce((acc, session) => {
-      acc[session.taskType] = (acc[session.taskType] || 0) + session.duration;
-      return acc;
-    }, {} as Record<string, number>);
-
-    // Get or create day entry
-    let dayEntry = await this.getDayEntry(date);
-    if (!dayEntry) {
-      dayEntry = { date, categories: [] };
-    }
-
-    // Update time category tasks
-    const timeCategory = dayEntry.categories.find(c => c.name === 'Время');
-    if (timeCategory) {
-      timeCategory.tasks = timeCategory.tasks.map(task => {
-        let taskType = '';
-        if (task.name === '💼 Работа') taskType = 'work';
-        else if (task.name === '📚 Учёба') taskType = 'study';
-        else if (task.name === '🎯 Проект') taskType = 'project';
-
-        return {
-          ...task,
-          value: timeByTask[taskType] || 0
-        };
-      });
-
-      await this.saveDayEntry(dayEntry);
     }
   }
 

@@ -18,21 +18,6 @@ export enum TaskType {
   EXPENSE_NOTE = 'expense_note'
 }
 
-export enum PomodoroPhase {
-  WORK = 'work',
-  SHORT_BREAK = 'shortBreak',
-  LONG_BREAK = 'longBreak'
-}
-
-export const pomodoroSessions = pgTable('pomodoro_sessions', {
-  id: serial('id').primaryKey(),
-  date: text('date').notNull(),
-  duration: integer('duration').notNull(),
-  phase: text('phase').notNull(),
-  taskType: text('task_type').notNull(),
-  createdAt: timestamp('created_at').defaultNow()
-});
-
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
@@ -55,15 +40,6 @@ export const categories = pgTable('categories', {
 export const dayEntries = pgTable('day_entries', {
   id: serial('id').primaryKey(),
   date: text('date').notNull(),
-});
-
-export const pomodoroSessionSchema = z.object({
-  id: z.number().optional(),
-  date: z.string(),
-  duration: z.number(),
-  phase: z.nativeEnum(PomodoroPhase),
-  taskType: z.string(),
-  createdAt: z.string()
 });
 
 export const taskSchema = z.object({
@@ -100,18 +76,15 @@ export const settingsSchema = z.object({
   oathText: z.string().optional()
 });
 
-export type PomodoroSession = z.infer<typeof pomodoroSessionSchema>;
 export type Task = z.infer<typeof taskSchema>;
 export type Category = z.infer<typeof categorySchema>;
 export type DayEntry = z.infer<typeof dayEntrySchema>;
 export type Settings = z.infer<typeof settingsSchema>;
 
-export const insertPomodoroSessionSchema = createInsertSchema(pomodoroSessions);
 export const insertTaskSchema = createInsertSchema(tasks);
 export const insertCategorySchema = createInsertSchema(categories);
 export const insertDayEntrySchema = createInsertSchema(dayEntries);
 
-export type InsertPomodoroSession = z.infer<typeof insertPomodoroSessionSchema>;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertDayEntry = z.infer<typeof insertDayEntrySchema>;
