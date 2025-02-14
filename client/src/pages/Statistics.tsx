@@ -16,14 +16,13 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#8B5CF6',    // Фиолетовый
   'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный
+  'Спорт': '#F97316',    // Красный (changed to orange)
   'Привычки': '#F59E0B'  // Оранжевый
 };
-
 const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
   'Разум': { bg: '#8B5CF620', text: '#ffffff' },
   'Время': { bg: '#10B98120', text: '#ffffff' },
-  'Спорт': { bg: '#EF444420', text: '#ffffff' },
+  'Спорт': { bg: '#F9731620', text: '#ffffff' }, // Changed to orange
   'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
 };
 
@@ -788,9 +787,10 @@ export default function Statistics() {
                           return (
                             <td
                               key={`${task.taskName}-${period}`}
-                              className="py-2 px-4 text-center"
+                              className="py-2 px-4text-center"
                               style={{
-                                backgroundColor: task.type === TaskType.CHECKBOX                                  ? getSuccessColor(value, 100)
+                                backgroundColor: task.type === TaskType.CHECKBOX
+                                  ? getSuccessColor(value, 100)
                                   : '#6B728020'  // Серый цвет для всех не-checkbox значений
                               }}
                             >
@@ -817,7 +817,7 @@ export default function Statistics() {
                     </tr>
                   );
                 })}
-                <tr className="border-t-2 border-border font-bold">
+                <tr className="border-t-2 border-border font-bold" style={{ backgroundColor: '#f9fafb' }}> {/* Added background color */}
                   <td className="py-2 px-4">Итого</td>
                   <td className="py-2 px-4 text-center">
                     {(() => {
