@@ -546,7 +546,6 @@ export default function Statistics() {
         </CardContent>
       </Card>
 
-      {/* Add Task Success Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -555,201 +554,182 @@ export default function Statistics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border/20">
-                  <th className="py-2 px-4 text-left w-[120px]">Дата</th>
-                  <th className="py-2 px-4 text-center w-[100px]">Успех</th>
-                  {data[0]?.categories
-                    .filter(
-                      (category) => category.type !== CategoryType.EXPENSE,
-                    )
-                    .sort(
-                      (a, b) =>
-                        CATEGORY_ORDER.indexOf(a.name) -
-                        CATEGORY_ORDER.indexOf(b.name),
-                    )
-                    .map((category) => (
-                      <th
-                        key={category.name}
-                        colSpan={category.tasks.length}
-                        className="py-2 px-4 text-center"
-                        style={{
-                          backgroundColor:
-                            CATEGORY_HEADER_COLORS[category.name]?.bg ||
-                            "#6B728020",
-                          color:
-                            CATEGORY_HEADER_COLORS[category.name]?.text ||
-                            "#ffffff",
-                        }}
-                      >
-                        {category.name}
-                      </th>
-                    ))}
-                </tr>
-                <tr className="border-b border-border/20">
-                  <th className="py-2 px-4"></th>
-                  <th className="py-2 px-4"></th>
-                  {data[0]?.categories
-                    .filter(
-                      (category) => category.type !== CategoryType.EXPENSE,
-                    )
-                    .sort(
-                      (a, b) =>
-                        CATEGORY_ORDER.indexOf(a.name) -
-                        CATEGORY_ORDER.indexOf(b.name),
-                    )
-                    .flatMap((category) =>
-                      category.tasks.map((task) => (
+          <div className="relative w-full overflow-auto">
+            <div className="max-h-[600px] overflow-y-auto">
+              <table className="w-full border-collapse">
+                <thead className="sticky top-0 bg-background z-10">
+                  <tr className="border-b border-border/20">
+                    <th className="sticky left-0 bg-background py-2 px-4 text-left w-[100px]">Дата</th>
+                    <th className="sticky left-[100px] bg-background py-2 px-4 text-center w-[80px]">Успех</th>
+                    {data[0]?.categories
+                      .filter((category) => category.type !== CategoryType.EXPENSE)
+                      .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                      .map((category) => (
                         <th
-                          key={`${category.name}-${task.name}`}
-                          className="py-2 px-4 text-center text-sm font-medium min-w-[80px]"
+                          key={category.name}
+                          colSpan={category.tasks.length}
+                          className="py-2 px-4 text-center"
                           style={{
-                            backgroundColor:
-                              CATEGORY_HEADER_COLORS[category.name]?.bg ||
-                              "#6B728020",
-                            color:
-                              CATEGORY_HEADER_COLORS[category.name]?.text ||
-                              "#ffffff",
-                            opacity: 0.8,
+                            backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || "#6B728020",
+                            color: CATEGORY_HEADER_COLORS[category.name]?.text || "#ffffff",
                           }}
                         >
-                          {task.name}
+                          {category.name}
                         </th>
-                      )),
-                    )}
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((day) => {
-                  const dayScore = calculateDayScore(day);
-                  const maxScore = 100;
+                      ))}
+                  </tr>
+                  <tr className="border-b border-border/20">
+                    <th className="sticky left-0 bg-background"></th>
+                    <th className="sticky left-[100px] bg-background"></th>
+                    {data[0]?.categories
+                      .filter((category) => category.type !== CategoryType.EXPENSE)
+                      .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                      .flatMap((category) =>
+                        category.tasks.map((task) => (
+                          <th
+                            key={`${category.name}-${task.name}`}
+                            className="py-2 px-4 text-center text-sm font-medium whitespace-nowrap"
+                            style={{
+                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || "#6B728020",
+                              color: CATEGORY_HEADER_COLORS[category.name]?.text || "#ffffff",
+                              opacity: 0.8,
+                              minWidth: "80px",
+                            }}
+                          >
+                            {task.name}
+                          </th>
+                        ))
+                      )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((day) => {
+                    const dayScore = calculateDayScore(day);
+                    return (
+                      <tr key={day.date} className="border-b border-border/10">
+                        <td className="sticky left-0 bg-background py-2 px-4 font-medium">
+                          {format(new Date(day.date), "dd.MM")}
+                        </td>
+                        <td
+                          className="sticky left-[100px] bg-background py-2 px-4 text-center"
+                          style={{
+                            backgroundColor: `rgba(16, 185, 129, ${0.1 + (dayScore / 100) * 0.4})`,
+                          }}
+                        >
+                          {dayScore}%
+                        </td>
+                        {day.categories
+                          .filter(
+                            (category) => category.type !== CategoryType.EXPENSE,
+                          )
+                          .sort(
+                            (a, b) =>
+                              CATEGORY_ORDER.indexOf(a.name) -
+                              CATEGORY_ORDER.indexOf(b.name),
+                          )
+                          .flatMap((category) =>
+                            category.tasks.map((task) => {
+                              let displayValue = "";
+                              let bgColor = "transparent";
 
-                  return (
-                    <tr key={day.date} className="border-b border-border/10">
-                      <td className="py-2 px-4 font-medium w-[120px]">
-                        {format(new Date(day.date), "dd.MM")}
-                      </td>
-                      <td
-                        className="py-2 px-4 text-center w-[100px]"
-                        style={{
-                          backgroundColor: `rgba(16, 185, 129, ${0.1 + (dayScore / maxScore) * 0.4})`,
-                        }}
-                      >
-                        {dayScore}%
-                      </td>
-                      {day.categories
-                        .filter(
-                          (category) => category.type !== CategoryType.EXPENSE,
-                        )
-                        .sort(
-                          (a, b) =>
-                            CATEGORY_ORDER.indexOf(a.name) -
-                            CATEGORY_ORDER.indexOf(b.name),
-                        )
-                        .flatMap((category) =>
-                          category.tasks.map((task) => {
-                            let displayValue = "";
-                            let bgColor = "transparent";
+                              if (task.type === TaskType.CHECKBOX) {
+                                const value = task.completed ? 100 : 0;
+                                return (
+                                  <td
+                                    key={`${category.name}-${task.name}`}
+                                    className="py-2 px-4 text-center min-w-[80px]"
+                                  >
+                                    {task.completed ? (
+                                      <CheckIcon className="h-4 w-4 mx-auto text-green-500" />
+                                    ) : (
+                                      <X className="h-4 w-4 mx-auto text-red-500" />
+                                    )}
+                                  </td>
+                                );
+                              } else if (task.type === TaskType.TIME) {
+                                displayValue = formatTimeTotal(task.value || 0);
+                                bgColor = "#6B728020";
+                              } else if (task.type === TaskType.CALORIE) {
+                                displayValue = `${task.value || 0}`;
+                                bgColor = "#6B728020";
+                              }
 
-                            if (task.type === TaskType.CHECKBOX) {
-                              const value = task.completed ? 100 : 0;
                               return (
                                 <td
                                   key={`${category.name}-${task.name}`}
                                   className="py-2 px-4 text-center min-w-[80px]"
+                                  style={{ backgroundColor: bgColor }}
                                 >
-                                  {task.completed ? (
-                                    <CheckIcon className="h-4 w-4 mx-auto text-green-500" />
-                                  ) : (
-                                    <X className="h-4 w-4 mx-auto text-red-500" />
-                                  )}
+                                  {displayValue}
                                 </td>
                               );
-                            } else if (task.type === TaskType.TIME) {
-                              displayValue = formatTimeTotal(task.value || 0);
-                              bgColor = "#6B728020";
-                            } else if (task.type === TaskType.CALORIE) {
-                              displayValue = `${task.value || 0}`;
-                              bgColor = "#6B728020";
-                            }
+                            }),
+                          )}
+                      </tr>
+                    );
+                  })}
+                  {/* Add totals row */}
+                  <tr className="border-t-2 border-border font-bold">
+                    <td className="py-2 px-4">Итого</td>
+                    <td className="py-2 px-4 text-center w-[100px]">
+                      {Math.round(
+                        data.reduce(
+                          (sum, day) => sum + calculateDayScore(day),
+                          0,
+                        ) / data.length,
+                      )}
+                      %
+                    </td>
+                    {data[0]?.categories
+                      .filter((category) => category.type !== CategoryType.EXPENSE)
+                      .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                      .flatMap((category) =>
+                        category.tasks.map((task) => {
+                          let totalValue = "";
+                          let bgColor = "transparent";
 
-                            return (
-                              <td
-                                key={`${category.name}-${task.name}`}
-                                className="py-2 px-4 text-center min-w-[80px]"
-                                style={{ backgroundColor: bgColor }}
-                              >
-                                {displayValue}
-                              </td>
-                            );
-                          }),
-                        )}
-                    </tr>
-                  );
-                })}
-                {/* Add totals row */}
-                <tr className="border-t-2 border-border font-bold">
-                  <td className="py-2 px-4">Итого</td>
-                  <td className="py-2 px-4 text-center w-[100px]">
-                    {Math.round(
-                      data.reduce(
-                        (sum, day) => sum + calculateDayScore(day),
-                        0,
-                      ) / data.length,
-                    )}
-                    %
-                  </td>
-                  {data[0]?.categories
-                    .filter((category) => category.type !== CategoryType.EXPENSE)
-                    .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
-                    .flatMap((category) =>
-                      category.tasks.map((task) => {
-                        let totalValue = "";
-                        let bgColor = "transparent";
+                          if (task.type === TaskType.CHECKBOX) {
+                            const completedCount = data.reduce((sum, day) => {
+                              const cat = day.categories.find((c) => c.name === category.name);
+                              const t = cat?.tasks.find((t) => t.name === task.name);
+                              return sum + (t?.completed ? 1 : 0);
+                            }, 0);
+                            const percentage = Math.round((completedCount / data.length) * 100);
+                            bgColor = `rgba(16, 185, 129, ${0.1 + (percentage / 100) * 0.4})`;
+                            totalValue = `${percentage}%`;
+                          } else if (task.type === TaskType.TIME) {
+                            const totalMinutes = data.reduce((sum, day) => {
+                              const cat = day.categories.find((c) => c.name === category.name);
+                              const t = cat?.tasks.find((t) => t.name === task.name);
+                              return sum + (t?.value || 0);
+                            }, 0);
+                            totalValue = formatTimeTotal(totalMinutes);
+                            bgColor = "#6B728020";
+                          } else if (task.type === TaskType.CALORIE) {
+                            const totalCalories = data.reduce((sum, day) => {
+                              const cat = day.categories.find((c) => c.name === category.name);
+                              const t = cat?.tasks.find((t) => t.name === task.name);
+                              return sum + (t?.value || 0);
+                            }, 0);
+                            totalValue = `${totalCalories}`;
+                            bgColor = "#6B728020";
+                          }
 
-                        if (task.type === TaskType.CHECKBOX) {
-                          const completedCount = data.reduce((sum, day) => {
-                            const cat = day.categories.find((c) => c.name === category.name);
-                            const t = cat?.tasks.find((t) => t.name === task.name);
-                            return sum + (t?.completed ? 1 : 0);
-                          }, 0);
-                          const percentage = Math.round((completedCount / data.length) * 100);
-                          bgColor = `rgba(16, 185, 129, ${0.1 + (percentage / 100) * 0.4})`;
-                          totalValue = `${percentage}%`;
-                        } else if (task.type === TaskType.TIME) {
-                          const totalMinutes = data.reduce((sum, day) => {
-                            const cat = day.categories.find((c) => c.name === category.name);
-                            const t = cat?.tasks.find((t) => t.name === task.name);
-                            return sum + (t?.value || 0);
-                          }, 0);
-                          totalValue = formatTimeTotal(totalMinutes);
-                          bgColor = "#6B728020";
-                        } else if (task.type === TaskType.CALORIE) {
-                          const totalCalories = data.reduce((sum, day) => {
-                            const cat = day.categories.find((c) => c.name === category.name);
-                            const t = cat?.tasks.find((t) => t.name === task.name);
-                            return sum + (t?.value || 0);
-                          }, 0);
-                          totalValue = `${totalCalories}`;
-                          bgColor = "#6B728020";
-                        }
-
-                        return (
-                          <td
-                            key={`total-${category.name}-${task.name}`}
-                            className="py-2 px-4 text-center min-w-[80px]"
-                            style={{ backgroundColor: bgColor }}
-                          >
-                            {totalValue}
-                          </td>
-                        );
-                      })
-                    )}
-                </tr>
-              </tbody>
-            </table>
+                          return (
+                            <td
+                              key={`total-${category.name}-${task.name}`}
+                              className="py-2 px-4 text-center min-w-[80px]"
+                              style={{ backgroundColor: bgColor }}
+                            >
+                              {totalValue}
+                            </td>
+                          );
+                        })
+                      )}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -923,8 +903,7 @@ export default function Statistics() {
                                 (cat?.tasks.reduce(
                                   (sum, task) =>
                                     sum +
-                                    (task.type === TaskType.EXPENSE
-                                      ? task.value || 0
+                                    (task.type === TaskType.EXPENSE                                      ? task.value || 0
                                       : 0),
                                   0
                                 ) || 0)
@@ -936,7 +915,7 @@ export default function Statistics() {
                       return (
                         <td
                           key={`total-${category.name}`}
-                          className="py-2 px-4 textcenter min-w-[90px]"
+                          className="py-2 px-4 text-center min-w-[90px]"
                           style={{
                             backgroundColor: `rgba(249, 15, 22, ${0.1 +(categoryTotal / maxTotal) * 0.4})`,
                           }}
