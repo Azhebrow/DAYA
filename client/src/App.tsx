@@ -3,6 +3,7 @@ import { Switch, Route, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
+import { MobileNav } from "@/components/MobileNav";
 import Dashboard from "@/pages/Dashboard";
 import Statistics from "@/pages/Statistics";
 import Ranges from "@/pages/Ranges";
@@ -18,7 +19,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <button 
       onClick={() => setLocation(href)}
-      className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium flex items-center gap-2
+      className={`px-4 py-2 rounded-lg transition-all duration-200 font-medium flex items-center gap-2 text-sm md:text-base
         ${isActive 
           ? 'bg-zinc-800 text-gray-200 shadow-lg scale-105' 
           : 'hover:bg-zinc-800/20 hover:text-gray-200 text-gray-400'}`}
@@ -43,10 +44,16 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-black">
-        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+      <div className="min-h-screen bg-black text-sm sm:text-base">
+        {/* Mobile Navigation */}
+        <div className="md:hidden">
+          <MobileNav />
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="fixed top-0 left-0 right-0 z-50 border-b border-zinc-800 backdrop-blur supports-[backdrop-filter]:bg-black/60 hidden md:block">
           <div className="flex h-14 items-center justify-center">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 lg:space-x-4">
               <NavLink href="/"><LayoutDashboard className="w-4 h-4" /> Дашборд</NavLink>
               <NavLink href="/oath"><Scroll className="w-4 h-4" /> Клятва</NavLink>
               <NavLink href="/goals"><Target className="w-4 h-4" /> Цели</NavLink>
@@ -56,7 +63,8 @@ function App() {
             </div>
           </div>
         </nav>
-        <div className="pt-14">
+
+        <div className="pt-14 px-4 md:px-6 lg:px-8">
           <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="/oath" component={Oath} />

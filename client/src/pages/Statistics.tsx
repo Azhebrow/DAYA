@@ -41,6 +41,7 @@ import {
   FileText,
   BarChartIcon,
   CheckIcon,
+  X,
 } from "lucide-react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
@@ -662,7 +663,7 @@ export default function Statistics() {
                                   {task.completed ? (
                                     <CheckIcon className="h-4 w-4 mx-auto text-green-500" />
                                   ) : (
-                                    <CheckIcon className="h-4 w-4 mx-auto text-gray-500" />
+                                    <X className="h-4 w-4 mx-auto text-red-500" />
                                   )}
                                 </td>
                               );
@@ -935,7 +936,7 @@ export default function Statistics() {
                       return (
                         <td
                           key={`total-${category.name}`}
-                          className="py-2 px-4 text-center min-w-[90px]"
+                          className="py-2 px-4 textcenter min-w-[90px]"
                           style={{
                             backgroundColor: `rgba(249, 15, 22, ${0.1 +(categoryTotal / maxTotal) * 0.4})`,
                           }}
