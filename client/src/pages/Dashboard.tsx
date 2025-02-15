@@ -455,7 +455,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {dayEntry.categories.slice(0, 4).map((category) => (
             <TaskCard
               key={category.id}
@@ -485,51 +485,61 @@ export default function Dashboard() {
 
         <div className="flex items-center justify-between mt-8 mb-4">
           <div className="flex-grow">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-4">
-                <CalendarIcon2 className="w-5 h-5 text-primary" />
-                <h2 className="text-xl font-bold">ДНИ</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+              <div className="flex items-center gap-2">
+                <CalendarIcon2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <h2 className="text-lg sm:text-xl font-bold">ДНИ</h2>
+              </div>
+              <div className="flex flex-wrap gap-2 sm:gap-4">
                 <Button
                   onClick={handleSave}
                   variant="outline"
-                  className="border-primary text-primary hover:bg-primary/20"
+                  size="sm"
+                  className="flex-1 sm:flex-none border-primary text-primary hover:bg-primary/20"
                 >
-                  <Save className="w-4 h-4 mr-2" />
-                  Сохранить
+                  <Save className="h-4 w-4 mr-2" />
+                  <span className="text-sm sm:text-base">Сохранить</span>
                 </Button>
                 <Button
                   onClick={handleReset}
                   variant="outline"
-                  className="border-destructive text-destructive hover:bg-destructive/20"
+                  size="sm"
+                  className="flex-1 sm:flex-none border-destructive text-destructive hover:bg-destructive/20"
                 >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  Сбросить
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  <span className="text-sm sm:text-base">Сбросить</span>
                 </Button>
                 <Select value={groupingMode} onValueChange={handleGroupingModeChange}>
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="flex-1 sm:flex-none sm:w-[140px] text-sm sm:text-base">
                     <SelectValue placeholder="Группировка" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="normal">Обычная</SelectItem>
-                    <SelectItem value="weekly">По Неделям</SelectItem>
-                    <SelectItem value="monthly">По Месяцам</SelectItem>
+                    <SelectItem value="normal">
+                      <span className="text-sm sm:text-base">Обычная</span>
+                    </SelectItem>
+                    <SelectItem value="weekly">
+                      <span className="text-sm sm:text-base">По Неделям</span>
+                    </SelectItem>
+                    <SelectItem value="monthly">
+                      <span className="text-sm sm:text-base">По Месяцам</span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                <span className="text-sm text-gray-400">
-                  {(() => {
-                    const startDate = new Date(settings.startDate);
-                    const endDate = new Date(settings.endDate);
-                    const currentDate = new Date();
-
-                    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-                    const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-                    const adjustedDaysPassed = Math.max(0, Math.min(daysPassed, totalDays));
-                    const progress = Math.round((adjustedDaysPassed / totalDays) * 100);
-
-                    return `${adjustedDaysPassed} из ${totalDays} дней (${progress}%)`;
-                  })()}
-                </span>
               </div>
+              <span className="text-xs sm:text-sm text-gray-400 sm:ml-auto">
+                {(() => {
+                  const startDate = new Date(settings.startDate);
+                  const endDate = new Date(settings.endDate);
+                  const currentDate = new Date();
+
+                  const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                  const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+                  const adjustedDaysPassed = Math.max(0, Math.min(daysPassed, totalDays));
+                  const progress = Math.round((adjustedDaysPassed / totalDays) * 100);
+
+                  return `${adjustedDaysPassed} из ${totalDays} дней (${progress}%)`;
+                })()}
+              </span>
             </div>
             <div className="w-full">
               <Progress
