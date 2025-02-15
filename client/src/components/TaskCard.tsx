@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Category } from '@shared/schema';
+import { Category, CategoryType } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 
@@ -26,6 +26,8 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
+  const categoryColor = getCategoryColor(category.name, category.type);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -38,10 +40,10 @@ export const TaskCard = React.memo(({
           {/* Header row with category name and progress bar */}
           <div className="flex items-center h-[3.5rem]">
             <div className="w-1/2 px-4 flex items-center gap-2">
-              <span className="text-xl" role="img" aria-label={category.name}>
+              <span className="text-2xl" role="img" aria-label={category.name}>
                 {category.emoji}
               </span>
-              <span className="text-sm font-medium text-gray-200">
+              <span className="text-base font-medium text-gray-200">
                 {category.name}
               </span>
             </div>
@@ -49,7 +51,7 @@ export const TaskCard = React.memo(({
               {!isExpenseCard && (
                 <Progress 
                   value={progress} 
-                  className="h-2 bg-gray-800"
+                  className={`h-2.5 bg-gray-800 ${categoryColor}`}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
@@ -57,17 +59,19 @@ export const TaskCard = React.memo(({
           </div>
 
           {/* Task rows */}
-          {category.tasks.map((task) => (
+          {category.tasks.map((task, index) => (
             <div key={task.id} className="flex items-center h-[3.5rem]">
               <div className="w-1/2 px-4">
-                <span className="text-sm text-gray-400">{task.name}</span>
+                {(!isExpenseCard || index === 0) && (
+                  <span className="text-base text-gray-400">{task.name}</span>
+                )}
               </div>
               <div className="w-1/2 px-4">
                 <TaskInput
                   task={task}
                   onChange={(value) => handleTaskUpdate(task.id, value)}
                   isExpenseCard={isExpenseCard}
-                  hideLabel={true}
+                  categoryColor={categoryColor}
                 />
               </div>
             </div>
@@ -77,6 +81,25 @@ export const TaskCard = React.memo(({
     </motion.div>
   );
 });
+
+const getCategoryColor = (name: string, type: CategoryType): string => {
+  if (type === CategoryType.EXPENSE) {
+    return 'bg-orange-500/90';
+  }
+
+  switch (name) {
+    case 'Разум':
+      return 'bg-blue-500/90';
+    case 'Время':
+      return 'bg-green-500/90';
+    case 'Спорт':
+      return 'bg-red-500/90';
+    case 'Привычки':
+      return 'bg-purple-500/90';
+    default:
+      return 'bg-primary';
+  }
+};
 
 TaskCard.displayName = 'TaskCard';
 

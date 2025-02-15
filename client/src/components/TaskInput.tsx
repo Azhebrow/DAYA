@@ -25,20 +25,22 @@ interface TaskInputProps {
   task: Task;
   onChange: (value: number | boolean | string) => void;
   isExpenseCard?: boolean;
+  categoryColor?: string;
 }
 
-const TaskInput = React.memo(({ task, onChange, isExpenseCard = false }: TaskInputProps) => {
+const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor = 'bg-primary' }: TaskInputProps) => {
   const handleChange = useCallback((value: number | boolean | string) => {
     onChange(value);
   }, [onChange]);
 
   if (task.type === TaskType.TIME) {
+    const value = task.value || 0;
     return (
       <Select
-        value={String(task.value || 0)}
+        value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger className="w-full h-9 bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-80 border-gray-700`}>
           <SelectValue placeholder="Время" />
         </SelectTrigger>
         <SelectContent>
@@ -53,12 +55,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false }: TaskInp
   }
 
   if (task.type === TaskType.CALORIE) {
+    const value = task.value || 0;
     return (
       <Select
-        value={String(task.value || 0)}
+        value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger className="w-full h-9 bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-80 border-gray-700`}>
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
@@ -78,9 +81,9 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false }: TaskInp
         variant={task.completed ? "default" : "outline"}
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        className={`w-full h-9 ${
-          task.completed ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'
-        } border-gray-700`}
+        className={`w-full h-9 text-base ${
+          task.completed ? categoryColor : 'bg-zinc-800'
+        } hover:bg-opacity-80 border-gray-700`}
       >
         {task.completed ? 'Выполнено' : 'Отметить'}
       </Button>
@@ -94,10 +97,12 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false }: TaskInp
           type="number"
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          className="w-full h-9 bg-zinc-800 border-gray-700 pr-8 text-right"
+          className={`w-full h-9 ${task.value ? 'bg-orange-500 text-white' : 'bg-zinc-800'} 
+            border-0 text-right pr-8 text-base font-medium transition-colors
+            focus:ring-1 focus:ring-orange-400 hover:bg-opacity-80`}
           placeholder="0"
         />
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-white">
           zł
         </span>
       </div>
@@ -110,7 +115,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false }: TaskInp
         type="text"
         value={task.textValue || ''}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full h-9 bg-zinc-800 border-gray-700"
+        className="w-full h-9 bg-zinc-800 border-gray-700 text-base"
         placeholder="Описание..."
         maxLength={255}
       />
