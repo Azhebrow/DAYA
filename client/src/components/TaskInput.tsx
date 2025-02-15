@@ -25,10 +25,10 @@ interface TaskInputProps {
   task: Task;
   onChange: (value: number | boolean | string) => void;
   isExpenseCard?: boolean;
-  categoryName?: string;
+  hideLabel?: boolean;
 }
 
-const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryName }: TaskInputProps) => {
+const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, hideLabel = false }: TaskInputProps) => {
   const handleChange = useCallback((value: number | boolean | string) => {
     onChange(value);
   }, [onChange]);
@@ -84,9 +84,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryN
             task.completed ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'
           } border-gray-700`}
         >
-          <span className="text-sm text-gray-300">
-            {task.completed ? 'Выполнено' : 'Отметить'}
-          </span>
+          {task.completed ? 'Выполнено' : 'Отметить'}
         </Button>
       );
     }
@@ -125,11 +123,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryN
   };
 
   return (
-    <div className="flex flex-col gap-1">
-      {!isExpenseCard && (
-        <span className="text-xs text-gray-400 mb-1">{task.name}</span>
+    <div className="flex items-center w-full">
+      {!hideLabel && !isExpenseCard && (
+        <span className="text-sm text-gray-400 mr-3">{task.name}</span>
       )}
-      {renderInput()}
+      <div className="flex-1">
+        {renderInput()}
+      </div>
     </div>
   );
 });
