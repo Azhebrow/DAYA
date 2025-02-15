@@ -121,30 +121,30 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
         return (
           <div key={group.title} className="space-y-2">
             {group.title && (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 ml-2">
-                <h3 className="text-base sm:text-lg font-semibold text-primary">{group.title}</h3>
-                <div className="flex items-center gap-3 sm:gap-6">
-                  <div className="flex items-center gap-2 bg-zinc-900/50 px-2 sm:px-3 py-1 rounded-md">
-                    <LineChart className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
-                    <span className="text-xs sm:text-sm font-medium text-white">{averageSuccess}%</span>
+              <div className="flex items-center gap-4 ml-2">
+                <h3 className="text-lg font-semibold text-primary">{group.title}</h3>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 bg-zinc-900/50 px-3 py-1 rounded-md">
+                    <LineChart className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium text-white">{averageSuccess}%</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-zinc-900/50 px-2 sm:px-3 py-1 rounded-md">
-                    <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-[rgb(249,115,22)]" />
-                    <span className="text-xs sm:text-sm font-medium text-white">{totalExpenses}zł</span>
+                  <div className="flex items-center gap-2 bg-zinc-900/50 px-3 py-1 rounded-md">
+                    <DollarSign className="h-4 w-4 text-[rgb(249,115,22)]" />
+                    <span className="text-sm font-medium text-white">{totalExpenses}zł</span>
                   </div>
                 </div>
               </div>
             )}
             {(groupingMode === 'weekly' || groupingMode === 'monthly') && (
-              <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-1">
+              <div className="grid grid-cols-7 gap-2 mb-1">
                 {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) => (
-                  <div key={day} className="text-[8px] sm:text-[10px] text-gray-500 text-center font-medium">
+                  <div key={day} className="text-[10px] text-gray-500 text-center font-medium">
                     {day}
                   </div>
                 ))}
               </div>
             )}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+            <div className="grid grid-cols-7 gap-2">
               {group.days.map((day) => {
                 const isCurrentDay = isToday(new Date(day.date));
                 const isSelected = selectedDate && isSameDay(new Date(day.date), selectedDate);
@@ -154,8 +154,8 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                 const date = new Date(day.date);
 
                 return (
-                  <div key={day.date} className="relative">
-                    <div className="text-[8px] sm:text-[10px] text-gray-500 text-center absolute -top-4 left-0 right-0">
+                  <div key={day.date} className="space-y-1">
+                    <div className="text-[10px] text-gray-500 text-center">
                       {format(date, 'dd.MM')}
                     </div>
                     <Card
@@ -165,14 +165,14 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                       onClick={() => onDayClick(day.date)}
                     >
                       <CardContent className="p-0.5">
-                        <div className="grid grid-rows-2 h-[40px] sm:h-[50px] rounded-sm overflow-hidden">
+                        <div className="grid grid-rows-2 h-[50px] rounded-sm overflow-hidden">
                           <div className={`flex items-center justify-center ${getSuccessColor(score, hasData)}`}>
-                            <span className="text-xs sm:text-sm font-bold text-white">
+                            <span className="text-sm font-bold text-white">
                               {hasData ? `${score}%` : '?'}
                             </span>
                           </div>
                           <div className={`flex items-center justify-center ${getExpenseColor(expenses, maxExpenseInGroup)}`}>
-                            <span className="text-xs sm:text-sm font-bold text-white">
+                            <span className="text-sm font-bold text-white">
                               {hasData ? `${expenses}zł` : '?'}
                             </span>
                           </div>
