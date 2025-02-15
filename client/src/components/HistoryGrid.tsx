@@ -39,13 +39,13 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
   };
 
   const getExpenseColor = (expense: number, maxExpense: number) => {
-    if (maxExpense === 0) return 'bg-orange-100/10';
+    if (maxExpense === 0) return 'bg-orange-500/10';
     const ratio = expense / maxExpense;
-    if (ratio === 0) return 'bg-orange-100/10';
-    if (ratio <= 0.3) return 'rgba(249, 115, 22, 0.3)';
-    if (ratio <= 0.6) return 'rgba(249, 115, 22, 0.5)';
-    if (ratio <= 0.8) return 'rgba(249, 115, 22, 0.7)';
-    return 'rgba(249, 115, 22, 0.9)';
+    if (ratio === 0) return 'bg-orange-500/10';
+    if (ratio <= 0.3) return 'bg-orange-500/30';
+    if (ratio <= 0.6) return 'bg-orange-500/50';
+    if (ratio <= 0.8) return 'bg-orange-500/70';
+    return 'bg-orange-500/90';
   };
 
   const calculateGroupStats = (groupDays: DayEntry[]) => {
