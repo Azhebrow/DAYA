@@ -26,132 +26,112 @@ interface TaskInputProps {
   onChange: (value: number | boolean | string) => void;
   isExpenseCard?: boolean;
   categoryName?: string;
-  categoryColor?: string;
 }
 
-const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryName, categoryColor }: TaskInputProps) => {
+const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryName }: TaskInputProps) => {
   const handleChange = useCallback((value: number | boolean | string) => {
     onChange(value);
   }, [onChange]);
 
-  if (task.type === TaskType.TIME) {
-    const currentValue = typeof task.value === 'number' ? task.value : 0;
-    return (
-      <div className="flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-300">{task.name}</span>
+  const renderInput = () => {
+    if (task.type === TaskType.TIME) {
+      return (
         <Select
-          value={String(currentValue)}
+          value={String(task.value || 0)}
           onValueChange={(value) => handleChange(parseInt(value))}
         >
-          <SelectTrigger
-            className={`w-[180px] h-8 ${currentValue > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-zinc-700 border-gray-700 flex items-center justify-center`}
-          >
-            <SelectValue placeholder="Выберите время" className="text-center w-full" />
+          <SelectTrigger className="h-8 w-full bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+            <SelectValue placeholder="Время" />
           </SelectTrigger>
-          <SelectContent align="center">
+          <SelectContent>
             {TIME_OPTIONS.map((option) => (
-              <SelectItem 
-                key={option.value} 
-                value={String(option.value)} 
-                className="flex items-center justify-center"
-              >
-                <span className="text-center w-full">{option.label}</span>
+              <SelectItem key={option.value} value={String(option.value)}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (task.type === TaskType.CALORIE) {
-    const currentValue = typeof task.value === 'number' ? task.value : 0;
-    return (
-      <div className="flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-300">{task.name}</span>
+    if (task.type === TaskType.CALORIE) {
+      return (
         <Select
-          value={String(currentValue)}
+          value={String(task.value || 0)}
           onValueChange={(value) => handleChange(parseInt(value))}
         >
-          <SelectTrigger
-            className={`w-[180px] h-8 ${currentValue > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-zinc-700 border-gray-700 flex items-center justify-center`}
-          >
-            <SelectValue placeholder="Выберите калории" className="text-center w-full" />
+          <SelectTrigger className="h-8 w-full bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+            <SelectValue placeholder="Калории" />
           </SelectTrigger>
-          <SelectContent align="center">
+          <SelectContent>
             {CALORIE_OPTIONS.map((option) => (
-              <SelectItem 
-                key={option.value} 
-                value={String(option.value)}
-                className="flex items-center justify-center"
-              >
-                <span className="text-center w-full">{option.label}</span>
+              <SelectItem key={option.value} value={String(option.value)}>
+                {option.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (task.type === TaskType.CHECKBOX) {
-    return (
-      <div className="flex items-center justify-between px-4">
-        <span className="text-sm font-medium text-gray-300">{task.name}</span>
+    if (task.type === TaskType.CHECKBOX) {
+      return (
         <Button
           variant={task.completed ? "default" : "outline"}
           size="sm"
           onClick={() => handleChange(!task.completed)}
-          className={`w-[180px] h-8 ${task.completed ? categoryColor : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
+          className={`w-full h-8 ${
+            task.completed ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'
+          } border-gray-700`}
         >
-          <span className="text-sm text-white font-medium">
+          <span className="text-sm text-gray-300">
             {task.completed ? 'Выполнено' : 'Отметить'}
           </span>
         </Button>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (task.type === TaskType.EXPENSE) {
-    return (
-      <div className={`relative ${isExpenseCard ? 'w-full' : 'w-[180px]'}`}>
-        <Input
-          type="number"
-          value={task.value || ''}
-          onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          className={`w-full h-10 ${task.value ? 'bg-orange-500 text-white' : 'bg-zinc-800/50'} 
-            border-0 text-right pr-8 text-base font-medium transition-colors
-            focus:ring-1 focus:ring-primary/30 focus:bg-orange-500
-            placeholder:text-gray-500 hover:bg-orange-500 hover:text-white
-            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
-          placeholder="0"
-        />
-        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-          <span className={`text-sm font-medium ${task.value ? 'text-white' : 'text-gray-400'}`}>zł</span>
+    if (task.type === TaskType.EXPENSE) {
+      return (
+        <div className="relative w-full">
+          <Input
+            type="number"
+            value={task.value || ''}
+            onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+            className="w-full h-8 bg-zinc-800 border-gray-700 pr-8 text-right"
+            placeholder="0"
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+            zł
+          </span>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
-  if (task.type === TaskType.EXPENSE_NOTE) {
-    return (
-      <div className="w-full">
+    if (task.type === TaskType.EXPENSE_NOTE) {
+      return (
         <Input
           type="text"
           value={task.textValue || ''}
           onChange={(e) => handleChange(e.target.value)}
-          className={`w-full h-10 bg-zinc-800/50 border-0 
-            text-base font-medium transition-colors
-            focus:ring-1 focus:ring-primary/30 focus:bg-zinc-800/80
-            placeholder:text-gray-500 hover:bg-zinc-800/80`}
-          placeholder="Введите описание..."
+          className="w-full h-8 bg-zinc-800 border-gray-700"
+          placeholder="Описание..."
           maxLength={255}
         />
-      </div>
-    );
-  }
+      );
+    }
 
-  return null;
+    return null;
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      {!isExpenseCard && (
+        <span className="text-xs text-gray-400 mb-1">{task.name}</span>
+      )}
+      {renderInput()}
+    </div>
+  );
 });
 
 TaskInput.displayName = 'TaskInput';

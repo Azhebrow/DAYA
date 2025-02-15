@@ -26,8 +26,6 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  const categoryColor = getCategoryColor(category.name, category.type);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -35,38 +33,42 @@ export const TaskCard = React.memo(({
       transition={{ duration: 0.3 }}
       layout
     >
-      <Card className="bg-zinc-900/50 border-gray-800">
-        <div className="flex items-center p-4 pb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xl" role="img" aria-label={category.name}>
-              {category.emoji}
-            </span>
-            <span className="text-sm font-medium text-gray-200">
-              {category.name}
-            </span>
-          </div>
-          {!isExpenseCard && (
-            <div className="ml-4 flex-grow">
-              <Progress 
-                value={progress} 
-                className="h-2 bg-gray-800"
-                aria-label={`Progress for ${category.name}`}
-              />
+      <Card className="bg-zinc-900/50 border-gray-800 h-[180px]">
+        <div className="flex h-full">
+          {/* Left Column - Information */}
+          <div className="w-1/2 p-4 flex flex-col border-r border-gray-800">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl" role="img" aria-label={category.name}>
+                {category.emoji}
+              </span>
+              <span className="text-sm font-medium text-gray-200">
+                {category.name}
+              </span>
             </div>
-          )}
+            {!isExpenseCard && (
+              <div className="mt-auto">
+                <Progress 
+                  value={progress} 
+                  className="h-2 bg-gray-800"
+                  aria-label={`Progress for ${category.name}`}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Controls */}
+          <div className="w-1/2 p-4 space-y-3">
+            {category.tasks.map((task) => (
+              <TaskInput
+                key={task.id}
+                task={task}
+                onChange={(value) => handleTaskUpdate(task.id, value)}
+                isExpenseCard={isExpenseCard}
+                categoryName={category.name}
+              />
+            ))}
+          </div>
         </div>
-        <CardContent className="space-y-3 p-4 pt-2">
-          {category.tasks.map((task) => (
-            <TaskInput
-              key={task.id}
-              task={task}
-              onChange={(value) => handleTaskUpdate(task.id, value)}
-              isExpenseCard={isExpenseCard}
-              categoryName={category.name}
-              categoryColor={categoryColor}
-            />
-          ))}
-        </CardContent>
       </Card>
     </motion.div>
   );
