@@ -734,7 +734,6 @@ export default function Statistics() {
         </CardContent>
       </Card>
 
-      {/* Add Expense Categories Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -832,7 +831,9 @@ export default function Statistics() {
                             key={category.name}
                             className="py-2 px-4 text-center min-w-[90px]"
                             style={{
-                              backgroundColor: `rgba(249, 115, 22, ${0.1 + (categoryTotal / maxExpense) * 0.4})`,
+                              backgroundColor: `rgba(249, 115, 22, ${
+                                0.1 + (categoryTotal / maxExpense) * 0.4
+                              })`,
                             }}
                           >
                             {categoryTotal} zł
@@ -860,11 +861,11 @@ export default function Statistics() {
                                   (task.type === TaskType.EXPENSE
                                     ? task.value || 0
                                     : 0),
-                                0,
+                                0
                               ),
-                            0,
+                            0
                           ),
-                      0,
+                      0
                     )}{" "}
                     zł
                   </td>
@@ -873,51 +874,51 @@ export default function Statistics() {
                       (category) => category.type === CategoryType.EXPENSE,
                     )
                     .map((category) => {
-                      const categoryTotal = data.reduce((total, day) => {
+                      const categoryTotal = data.reduce((sum, day) => {
                         const cat = day.categories.find(
-                          (c) => c.name === category.name,
+                          (c) => c.name === category.name
                         );
                         return (
-                          total +
+                          sum +
                           (cat?.tasks.reduce(
-                            (sum, task) =>
-                              sum +
+                            (taskSum, task) =>
+                              taskSum +
                               (task.type === TaskType.EXPENSE
                                 ? task.value || 0
                                 : 0),
-                            0,
+                            0
                           ) || 0)
                         );
                       }, 0);
 
                       const maxTotal = Math.max(
-                        ...data[0].categories
-                          .filter((c) => c.type === CategoryType.EXPENSE)
-                          .map((c) =>
-                            data.reduce((total, day) => {
-                              const cat = day.categories.find(
-                                (cat) => cat.name === c.name,
-                              );
-                              return (
-                                total +
-                                (cat?.tasks.reduce(
-                                  (sum, task) =>
-                                    sum +
-                                    (task.type === TaskType.EXPENSE                                      ? task.value || 0
+                        ...data.map((d) =>
+                          d.categories
+                            .filter((c) => c.type === CategoryType.EXPENSE)
+                            .reduce(
+                              (sum, c) =>
+                                sum +
+                                c.tasks.reduce(
+                                  (tSum, t) =>
+                                    tSum +
+                                    (t.type === TaskType.EXPENSE
+                                      ? t.value || 0
                                       : 0),
                                   0
-                                ) || 0)
-                              );
-                            }, 0)
-                          )
+                                ),
+                              0
+                            )
+                        )
                       );
 
                       return (
                         <td
                           key={`total-${category.name}`}
-                          className="py-2 px-4 text-center min-w-[90px]"
+                          className="py2 px-4 text-center min-w-[90px]"
                           style={{
-                            backgroundColor: `rgba(249, 15, 22, ${0.1 +(categoryTotal / maxTotal) * 0.4})`,
+                            backgroundColor: `rgba(249, 115, 22, ${
+                              0.1 + (categoryTotal / maxTotal) * 0.4
+                            })`,
                           }}
                         >
                           {categoryTotal} zł
