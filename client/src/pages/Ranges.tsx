@@ -301,6 +301,7 @@ export default function Ranges() {
       let periodCount = 0;
 
       days.forEach(day => {
+        // Используем единую формулу расчета показателя успеха
         const dayScore = calculateDayScore(day);
         if (dayScore > 0) {
           periodTotal += dayScore;
@@ -359,7 +360,7 @@ export default function Ranges() {
     return {
       periods: Object.keys(periods),
       categories: taskData,
-      periodScores // Добавляем средние показатели успеха по периодам
+      periodScores
     };
   };
 
@@ -828,10 +829,11 @@ export default function Ranges() {
                           backgroundColor: getExpenseColor(categoryTotal, maxTotal)
                         }}
                       >
-                                                {categoryTotal} zł
+                        {categoryTotal} zł
                       </td>
                     );
-                  })}                </tr>
+                  })}
+                </tr>
               </tbody>
             </table>
           </div>

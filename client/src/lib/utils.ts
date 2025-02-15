@@ -22,7 +22,7 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
 
   const progressParts = [];
 
-  // Calculate checkbox progress (already maxed at 100%)
+  // Расчет прогресса для CHECKBOX задач
   if (checkboxTasks.length) {
     const checkboxProgress =
       (checkboxTasks.reduce((sum, task) => sum + (task.completed ? 1 : 0), 0) /
@@ -31,40 +31,42 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
     progressParts.push(Math.min(100, checkboxProgress));
   }
 
-  // Calculate calorie progress
+  // Расчет прогресса для калорий
   if (calorieTasks.length) {
     const totalCalories = calorieTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
     const calorieProgress = calculateTaskProgress(totalCalories, settings.calorieTarget);
     progressParts.push(Math.min(100, calorieProgress));
   }
 
-  // Calculate time progress
+  // Расчет прогресса для времени
   if (timeTasks.length && type === CategoryType.TIME) {
     const totalTime = timeTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
     const timeProgress = calculateTaskProgress(totalTime, settings.timeTarget);
     progressParts.push(Math.min(100, timeProgress));
   }
 
-  // Calculate average progress, ensuring it doesn't exceed 100
+  // Вычисляем средний прогресс
   return progressParts.length
     ? Math.min(100, progressParts.reduce((a, b) => a + b) / progressParts.length)
     : 0;
 }
 
 export function calculateDayScore(day: { categories: Category[] } | Category[]): number {
-  // Handle both array of categories and object with categories property
+  // Обрабатываем оба варианта входных данных
   const categories = Array.isArray(day) ? day : day.categories;
   if (!Array.isArray(categories) || categories.length === 0) return 0;
 
-  const activityCategories = categories.slice(0, 4); // Only consider activity tracker categories
+  // Учитываем только категории активности (первые 4)
+  const activityCategories = categories.slice(0, 4);
   if (!activityCategories.length) return 0;
 
+  // Считаем общий прогресс по всем категориям
   const totalProgress = activityCategories.reduce(
     (sum, category) => sum + calculateCategoryProgress(category.tasks, category.type),
     0
   );
 
-  // Ensure the final day score is also capped at 100
+  // Возвращаем среднее значение прогресса, округленное до целых
   return Math.min(100, Math.round(totalProgress / activityCategories.length));
 }
 

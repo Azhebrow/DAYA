@@ -13,6 +13,7 @@ import {
   startOfWeek, endOfWeek, subWeeks
 } from 'date-fns';
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign } from 'lucide-react';
+import { calculateDayScore } from '@/lib/utils';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const CATEGORY_COLORS: { [key: string]: string } = {
@@ -64,19 +65,6 @@ export default function MonthlyStats() {
     setData(days);
   }, [viewType]);
 
-  const calculateDayScore = (categories: { tasks: { completed: boolean; type: TaskType; value?: number }[] }[]) => {
-    let totalTasks = 0;
-    let completedTasks = 0;
-    categories.forEach(category => {
-      category.tasks.forEach(task => {
-        if (task.type === TaskType.CHECKBOX) {
-          totalTasks++;
-          if (task.completed) completedTasks++;
-        }
-      });
-    });
-    return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
-  };
 
   const aggregateDataByPeriod = () => {
     if (!data.length) return [];
@@ -105,9 +93,12 @@ export default function MonthlyStats() {
       let daysWithData = 0;
 
       days.forEach(day => {
-        const score = calculateDayScore(day.categories);
-        scoresSum += score;
-        daysWithData++;
+        // Используем единую формулу расчета показателя успеха
+        const score = calculateDayScore(day);
+        if (score > 0) {
+          scoresSum += score;
+          daysWithData++;
+        }
 
         day.categories.forEach(category => {
           category.tasks.forEach(task => {
@@ -129,7 +120,7 @@ export default function MonthlyStats() {
         totalTime,
         calories,
         expenses,
-        score: Math.round(scoresSum / daysWithData)
+        score: daysWithData > 0 ? Math.round(scoresSum / daysWithData) : 0
       };
     });
   };
@@ -304,14 +295,14 @@ export default function MonthlyStats() {
                 <Area
                   type="stepAfter"
                   dataKey="expenses"
-                  stroke={CATEGORY_COLORS['Спорт']}  {/* Changed to use 'Спорт' color as a fallback */}
-                  fill={CATEGORY_COLORS['Спорт']}  {/* Changed to use 'Спорт' color as a fallback */}
+                  stroke={CATEGORY_COLORS['Спорт']}
+                  fill={CATEGORY_COLORS['Спорт']}
                   name="Расходы"
                   connectNulls={true}
                   dot={{ r: 4 }}
                   label={{
                     position: 'top',
-                    fill: CATEGORY_COLORS['Спорт'],  {/* Changed to use 'Спорт' color as a fallback */}
+                    fill: CATEGORY_COLORS['Спорт'],
                     formatter: (value: any) => value ? `${value}` : ''
                   }}
                 />
