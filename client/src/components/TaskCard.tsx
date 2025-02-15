@@ -87,20 +87,20 @@ export const TaskCard = React.memo(({
 
 const getCategoryColor = (name: string, type: CategoryType): string => {
   if (type === CategoryType.EXPENSE) {
-    return 'rgba(249, 115, 22, 0.9)'; // Orange color for expenses
+    return 'bg-orange-500';
   }
 
   switch (name) {
     case 'Разум':
-      return 'rgba(139, 92, 246, 0.9)'; // Purple
+      return 'bg-violet-500';
     case 'Время':
-      return 'rgba(16, 185, 129, 0.9)'; // Green
+      return 'bg-emerald-500';
     case 'Спорт':
-      return 'rgba(239, 68, 68, 0.9)'; // Red
+      return 'bg-red-500';
     case 'Привычки':
-      return 'rgba(245, 158, 11, 0.9)'; // Amber
+      return 'bg-amber-500';
     default:
-      return 'rgba(var(--primary), 0.9)';
+      return 'bg-primary';
   }
 };
 
