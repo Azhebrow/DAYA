@@ -79,7 +79,7 @@ const initialGoals: Goal[] = [
     id: 3,
     title: "Набрать вес",
     target: 82,
-    current: 0,
+    current: 72,
     start: 72,
     unit: "кг",
     iconName: "Weight",

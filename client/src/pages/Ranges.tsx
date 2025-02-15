@@ -9,7 +9,7 @@ import {
 import { format, subMonths, startOfMonth, endOfMonth, getWeek, startOfWeek, endOfWeek, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale/ru';
 import { calculateDayScore } from '@/lib/utils';
-import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChart as BarChartIcon } from 'lucide-react';
+import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChartIcon, CheckIcon } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 // Обновляем цвета категорий
@@ -629,12 +629,19 @@ export default function Ranges() {
                               className="py-2 px-4 text-center min-w-[90px]"
                               style={{
                                 backgroundColor: task.type === TaskType.CHECKBOX
-                                  ? getSuccessColor(value, 100)
-                                  : '#6B728020'  // Серый цвет для всех не-checkbox значений
+                                  ? 'transparent'
+                                  : '#6B728020'
                               }}
                             >
-                              {task.type === TaskType.CHECKBOX ? `${value}%` :
-                                task.type === TaskType.CALORIE ? value : formatTimeTotal(value)}
+                              {task.type === TaskType.CHECKBOX ? (
+                                value === 100 ? (
+                                  <CheckIcon className="h-4 w-4 mx-auto text-green-500" />
+                                ) : (
+                                  <CheckIcon className="h-4 w-4 mx-auto text-gray-500" />
+                                )
+                              ) : task.type === TaskType.CALORIE ?
+                                value :
+                                formatTimeTotal(value)}
                             </td>
                           );
                         }),
@@ -644,7 +651,7 @@ export default function Ranges() {
                             <td
                               key={`${task.taskName}-${period}`}
                               className="py-2 px-4 text-center min-w-[90px]"
-                              style={{ backgroundColor: '#6B728020' }}  // Изменено на серый
+                              style={{ backgroundColor: '#6B728020' }}
                             >
                               {`${value}m`}
                             </td>
@@ -694,7 +701,7 @@ export default function Ranges() {
                           style={{
                             backgroundColor: task.type === TaskType.CHECKBOX
                               ? getSuccessColor(totalValue, 100)
-                              : '#6B728020'  // Серый цвет для всех не-checkbox значений
+                              : '#6B728020'
                           }}
                         >
                           {task.type === TaskType.CHECKBOX ? `${totalValue}%` :
@@ -709,7 +716,7 @@ export default function Ranges() {
                       <td
                         key={`total-${task.taskName}`}
                         className="py-2 px-4 text-center min-w-[90px]"
-                        style={{ backgroundColor: '#6B728020' }}  // Изменено на серый
+                        style={{ backgroundColor: '#6B728020' }}
                       >
                         {`${totalValue}m`}
                       </td>
@@ -824,7 +831,7 @@ export default function Ranges() {
                     return (
                       <td
                         key={`total-${category.categoryName}`}
-                        className="py-2 px-4 text-center min-w-[90px]"
+                        className="py-2 px-4 text-center min-w-[90px"
                         style={{
                           backgroundColor: getExpenseColor(categoryTotal, maxTotal)
                         }}
