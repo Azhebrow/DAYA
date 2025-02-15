@@ -158,7 +158,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                     <div className="text-[10px] text-gray-500 text-center">
                       {format(date, 'dd.MM')}
                     </div>
-                    <Card 
+                    <Card
                       className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50
                         ${isCurrentDay ? 'border-primary/40' : ''}
                         ${isSelected ? 'border-accent/40' : ''}`}
@@ -171,9 +171,9 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                               {hasData ? `${score}%` : '?'}
                             </span>
                           </div>
-                          <div className={`flex items-center justify-center ${getExpenseColor(expenses, maxExpenseInGroup)}`}>
+                          <div className="flex items-center justify-center">
                             <span className="text-sm font-bold text-white">
-                              {hasData ? expenses : '?'}
+                              {hasData ? `${expenses}zł` : '?'}
                             </span>
                           </div>
                         </div>
