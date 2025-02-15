@@ -51,8 +51,8 @@ export const TaskCard = React.memo(({
               {!isExpenseCard && (
                 <Progress 
                   value={progress} 
-                  className="h-2.5 bg-white"
-                  indicatorClassName={categoryColor}
+                  className="h-2.5"
+                  indicatorColor={categoryColor}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
