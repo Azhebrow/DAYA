@@ -45,29 +45,32 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
     progressParts.push(Math.min(100, timeProgress));
   }
 
-  // Вычисляем средний прогресс
-  return progressParts.length
-    ? Math.min(100, progressParts.reduce((a, b) => a + b) / progressParts.length)
-    : 0;
+  // Если нет задач определенного типа для категории, считаем как 0%
+  if (!progressParts.length) return 0;
+
+  // Вычисляем средний прогресс для категории
+  return progressParts.reduce((a, b) => a + b) / progressParts.length;
 }
 
 export function calculateDayScore(day: { categories: Category[] } | Category[]): number {
   // Обрабатываем оба варианта входных данных
   const categories = Array.isArray(day) ? day : day.categories;
-  if (!Array.isArray(categories) || categories.length === 0) return 0;
+  if (!Array.isArray(categories)) return 0;
 
-  // Учитываем только категории активности (первые 4)
-  const activityCategories = categories.slice(0, 4);
-  if (!activityCategories.length) return 0;
+  // Всегда учитываем все 4 категории активности
+  const TOTAL_CATEGORIES = 4;
 
-  // Считаем общий прогресс по всем категориям
+  // Считаем прогресс только для первых 4 категорий (категории активности)
+  const activityCategories = categories.slice(0, TOTAL_CATEGORIES);
+
+  // Считаем сумму прогресса всех категорий
   const totalProgress = activityCategories.reduce(
     (sum, category) => sum + calculateCategoryProgress(category.tasks, category.type),
     0
   );
 
-  // Возвращаем среднее значение прогресса, округленное до целых
-  return Math.min(100, Math.round(totalProgress / activityCategories.length));
+  // Делим на общее количество категорий (4), даже если некоторые отсутствуют
+  return Math.round(totalProgress / TOTAL_CATEGORIES);
 }
 
 export function getScoreColor(score: number): string {
