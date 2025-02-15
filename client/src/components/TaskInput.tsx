@@ -40,7 +40,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-80 border-gray-700`}>
+        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-80 border-gray-700 font-medium text-center`}>
           <SelectValue placeholder="Время" />
         </SelectTrigger>
         <SelectContent>
@@ -61,7 +61,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-80 border-gray-700`}>
+        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-80 border-gray-700 font-medium text-center`}>
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
@@ -81,7 +81,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         variant={task.completed ? "default" : "outline"}
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        className={`w-full h-9 text-base ${
+        className={`w-full h-9 text-base font-medium ${
           task.completed ? categoryColor : 'bg-zinc-800'
         } hover:bg-opacity-80 border-gray-700`}
       >
@@ -97,12 +97,12 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           type="number"
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          className={`w-full h-9 ${task.value ? 'bg-orange-500 text-white' : 'bg-zinc-800'} 
-            border-0 text-right pr-8 text-base font-medium transition-colors
+          className={`w-full h-9 ${task.value ? 'bg-orange-500 text-black' : 'bg-zinc-800 text-white'} 
+            border-0 text-center pr-8 text-base font-medium transition-colors
             focus:ring-1 focus:ring-orange-400 hover:bg-opacity-80`}
           placeholder="0"
         />
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-white">
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-black">
           zł
         </span>
       </div>
@@ -115,7 +115,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         type="text"
         value={task.textValue || ''}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full h-9 bg-zinc-800 border-gray-700 text-base"
+        className="w-full h-9 bg-zinc-800 border-gray-700 text-base text-center font-medium"
         placeholder="Описание..."
         maxLength={255}
       />
