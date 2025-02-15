@@ -4,6 +4,7 @@ import { DayEntry, CategoryType, TaskType } from '@shared/schema';
 import { format, isToday, isSameDay, getWeek, getMonth, getYear, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { calculateDayScore } from '@/lib/utils';
 import { ru } from 'date-fns/locale';
+import { LineChart, DollarSign } from 'lucide-react';
 
 interface HistoryGridProps {
   days: DayEntry[];
@@ -41,10 +42,10 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
     if (maxExpense === 0) return 'bg-orange-100/10';
     const ratio = expense / maxExpense;
     if (ratio === 0) return 'bg-orange-100/10';
-    if (ratio <= 0.3) return 'bg-orange-300/30';
-    if (ratio <= 0.6) return 'bg-orange-400/50';
-    if (ratio <= 0.8) return 'bg-orange-500/70';
-    return 'bg-orange-600/90';
+    if (ratio <= 0.3) return 'rgba(249, 115, 22, 0.3)';
+    if (ratio <= 0.6) return 'rgba(249, 115, 22, 0.5)';
+    if (ratio <= 0.8) return 'rgba(249, 115, 22, 0.7)';
+    return 'rgba(249, 115, 22, 0.9)';
   };
 
   const calculateGroupStats = (groupDays: DayEntry[]) => {
@@ -120,11 +121,17 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
         return (
           <div key={group.title} className="space-y-2">
             {group.title && (
-              <div className="flex items-center justify-between ml-2">
+              <div className="flex items-center gap-4 ml-2">
                 <h3 className="text-lg font-semibold text-primary">{group.title}</h3>
-                <div className="text-sm text-muted-foreground">
-                  <span className="mr-4">Средний успех: {averageSuccess}%</span>
-                  <span>Всего расходов: {totalExpenses}zł</span>
+                <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2 bg-zinc-900/50 px-3 py-1 rounded-md">
+                    <LineChart className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium text-white">{averageSuccess}%</span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-zinc-900/50 px-3 py-1 rounded-md">
+                    <DollarSign className="h-4 w-4 text-[rgb(249,115,22)]" />
+                    <span className="text-sm font-medium text-white">{totalExpenses}zł</span>
+                  </div>
                 </div>
               </div>
             )}
