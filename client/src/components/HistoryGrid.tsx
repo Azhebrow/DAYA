@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { DayEntry, CategoryType, TaskType } from '@shared/schema';
 import { format, isToday, isSameDay, getWeek, getMonth, getYear, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
-import { calculateDayScore, getScoreColor } from '@/lib/utils';
+import { calculateDayScore } from '@/lib/utils';
 
 interface HistoryGridProps {
   days: DayEntry[];
@@ -15,7 +15,7 @@ interface HistoryGridProps {
 
 export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMode }: HistoryGridProps) {
   const calculateDayExpenses = (day: DayEntry) => {
-    if (!day.categories) return null;
+    if (!day.categories) return 0;
 
     return day.categories
       .filter(category => category.type === CategoryType.EXPENSE)
@@ -24,6 +24,25 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
         return total + category.tasks.reduce((categoryTotal, task) =>
           categoryTotal + (typeof task.value === 'number' ? task.value : 0), 0);
       }, 0);
+  };
+
+  const getSuccessColor = (score: number) => {
+    if (score === 0) return 'bg-red-500/70';
+    if (score <= 30) return 'bg-red-400/70';
+    if (score <= 50) return 'bg-yellow-500/70';
+    if (score <= 70) return 'bg-yellow-400/70';
+    if (score <= 90) return 'bg-green-400/70';
+    return 'bg-green-500/70';
+  };
+
+  const getExpenseColor = (expense: number, maxExpense: number) => {
+    if (maxExpense === 0) return 'bg-orange-100/10';
+    const ratio = expense / maxExpense;
+    if (ratio === 0) return 'bg-orange-100/10';
+    if (ratio <= 0.3) return 'bg-orange-300/30';
+    if (ratio <= 0.6) return 'bg-orange-400/50';
+    if (ratio <= 0.8) return 'bg-orange-500/70';
+    return 'bg-orange-600/90';
   };
 
   const groupDaysByPeriod = () => {
@@ -65,7 +84,6 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
 
       currentGroup.push(day);
 
-      // Add the last group
       if (index === days.length - 1) {
         groups.push({ title: currentGroupTitle, days: currentGroup });
       }
@@ -78,44 +96,56 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
 
   return (
     <div className="space-y-6">
-      {groupedDays.map((group, groupIndex) => (
-        <div key={group.title} className="space-y-2">
-          {group.title && (
-            <h3 className="text-lg font-semibold text-primary ml-2">{group.title}</h3>
-          )}
-          <div className="grid grid-cols-7 gap-0.5">
-            {group.days.map((day) => {
-              const isCurrentDay = isToday(new Date(day.date));
-              const isSelected = selectedDate && isSameDay(new Date(day.date), selectedDate);
-              const hasData = day.categories && day.categories.length > 0;
-              const score = calculateDayScore(day);
-              const expenses = calculateDayExpenses(day);
+      {groupedDays.map((group, groupIndex) => {
+        const maxExpenseInGroup = Math.max(
+          ...group.days.map(day => calculateDayExpenses(day))
+        );
 
-              return (
-                <Card 
-                  key={day.date}
-                  className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50 border-gray-800
-                    ${isCurrentDay ? 'border-primary/40 bg-primary/5' : ''}
-                    ${isSelected ? 'border-accent/40 bg-accent/5' : ''}`}
-                  onClick={() => onDayClick(day.date)}
-                >
-                  <CardContent className="p-0.5 h-full flex flex-col items-center justify-center text-center">
-                    <div className="text-[10px] text-gray-500">
-                      {format(new Date(day.date), 'dd.MM')}
-                    </div>
-                    <div className={`text-sm font-bold ${hasData ? getScoreColor(score || 0) : 'text-gray-500'}`}>
-                      {hasData ? `${score}%` : '?'}
-                    </div>
-                    <div className="text-[10px] text-gray-400">
-                      {hasData ? `${expenses}` : '?'}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+        return (
+          <div key={group.title} className="space-y-2">
+            {group.title && (
+              <h3 className="text-lg font-semibold text-primary ml-2">{group.title}</h3>
+            )}
+            <div className="grid grid-cols-7 gap-0.5">
+              {group.days.map((day) => {
+                const isCurrentDay = isToday(new Date(day.date));
+                const isSelected = selectedDate && isSameDay(new Date(day.date), selectedDate);
+                const hasData = day.categories && day.categories.length > 0;
+                const score = hasData ? calculateDayScore(day) : 0;
+                const expenses = calculateDayExpenses(day);
+
+                return (
+                  <Card 
+                    key={day.date}
+                    className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50
+                      ${isCurrentDay ? 'border-primary/40' : ''}
+                      ${isSelected ? 'border-accent/40' : ''}`}
+                    onClick={() => onDayClick(day.date)}
+                  >
+                    <CardContent className="p-0.5">
+                      <div className="text-[10px] text-gray-500 text-center mb-0.5">
+                        {format(new Date(day.date), 'dd.MM')}
+                      </div>
+                      <div className="grid grid-rows-2 h-[40px] rounded-sm overflow-hidden">
+                        <div className={`flex items-center justify-center ${getSuccessColor(score)}`}>
+                          <span className="text-sm font-bold text-white">
+                            {hasData ? `${score}%` : '?'}
+                          </span>
+                        </div>
+                        <div className={`flex items-center justify-center ${getExpenseColor(expenses, maxExpenseInGroup)}`}>
+                          <span className="text-sm font-bold text-white">
+                            {hasData ? expenses : '?'}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
