@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DayEntry, CategoryType, TaskType } from '@shared/schema';
 import { format, isToday, isSameDay, getWeek, getMonth, getYear, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { calculateDayScore } from '@/lib/utils';
+import { ru } from 'date-fns/locale';
 
 interface HistoryGridProps {
   days: DayEntry[];
@@ -26,7 +27,8 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
       }, 0);
   };
 
-  const getSuccessColor = (score: number) => {
+  const getSuccessColor = (score: number, hasData: boolean) => {
+    if (!hasData) return 'bg-gray-500/50';
     if (score === 0) return 'bg-red-500/70';
     if (score <= 30) return 'bg-red-400/70';
     if (score <= 50) return 'bg-yellow-500/70';
@@ -71,7 +73,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
           currentGroupTitle = weekTitle;
         }
       } else { // monthly
-        const monthTitle = format(date, 'LLLL yyyy');
+        const monthTitle = format(date, 'LLLL yyyy', { locale: ru });
 
         if (currentGroupTitle !== monthTitle) {
           if (currentGroup.length > 0) {
@@ -106,40 +108,47 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
             {group.title && (
               <h3 className="text-lg font-semibold text-primary ml-2">{group.title}</h3>
             )}
-            <div className="grid grid-cols-7 gap-0.5">
+            <div className="grid grid-cols-7 gap-2">
               {group.days.map((day) => {
                 const isCurrentDay = isToday(new Date(day.date));
                 const isSelected = selectedDate && isSameDay(new Date(day.date), selectedDate);
                 const hasData = day.categories && day.categories.length > 0;
                 const score = hasData ? calculateDayScore(day) : 0;
                 const expenses = calculateDayExpenses(day);
+                const date = new Date(day.date);
 
                 return (
-                  <Card 
-                    key={day.date}
-                    className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50
-                      ${isCurrentDay ? 'border-primary/40' : ''}
-                      ${isSelected ? 'border-accent/40' : ''}`}
-                    onClick={() => onDayClick(day.date)}
-                  >
-                    <CardContent className="p-0.5">
-                      <div className="text-[10px] text-gray-500 text-center mb-0.5">
-                        {format(new Date(day.date), 'dd.MM')}
-                      </div>
-                      <div className="grid grid-rows-2 h-[40px] rounded-sm overflow-hidden">
-                        <div className={`flex items-center justify-center ${getSuccessColor(score)}`}>
-                          <span className="text-sm font-bold text-white">
-                            {hasData ? `${score}%` : '?'}
-                          </span>
+                  <div key={day.date} className="space-y-1">
+                    <div className="text-[10px] text-gray-500 text-center">
+                      {format(date, 'dd.MM')}
+                      {(groupingMode === 'weekly' || groupingMode === 'monthly') && (
+                        <div className="text-[9px] text-gray-600">
+                          {format(date, 'EEEEEE', { locale: ru })}
                         </div>
-                        <div className={`flex items-center justify-center ${getExpenseColor(expenses, maxExpenseInGroup)}`}>
-                          <span className="text-sm font-bold text-white">
-                            {hasData ? expenses : '?'}
-                          </span>
+                      )}
+                    </div>
+                    <Card 
+                      className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50
+                        ${isCurrentDay ? 'border-primary/40' : ''}
+                        ${isSelected ? 'border-accent/40' : ''}`}
+                      onClick={() => onDayClick(day.date)}
+                    >
+                      <CardContent className="p-0.5">
+                        <div className="grid grid-rows-2 h-[50px] rounded-sm overflow-hidden">
+                          <div className={`flex items-center justify-center ${getSuccessColor(score, hasData)}`}>
+                            <span className="text-sm font-bold text-white">
+                              {hasData ? `${score}%` : '?'}
+                            </span>
+                          </div>
+                          <div className={`flex items-center justify-center ${getExpenseColor(expenses, maxExpenseInGroup)}`}>
+                            <span className="text-sm font-bold text-white">
+                              {hasData ? expenses : '?'}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
                 );
               })}
             </div>
