@@ -629,19 +629,12 @@ export default function Ranges() {
                               className="py-2 px-4 text-center min-w-[90px]"
                               style={{
                                 backgroundColor: task.type === TaskType.CHECKBOX
-                                  ? 'transparent'
+                                  ? getSuccessColor(value, 100)
                                   : '#6B728020'
                               }}
                             >
-                              {task.type === TaskType.CHECKBOX ? (
-                                value === 100 ? (
-                                  <CheckIcon className="h-4 w-4 mx-auto text-green-500" />
-                                ) : (
-                                  <CheckIcon className="h-4 w-4 mx-auto text-gray-500" />
-                                )
-                              ) : task.type === TaskType.CALORIE ?
-                                value :
-                                formatTimeTotal(value)}
+                              {task.type === TaskType.CHECKBOX ? `${value}%` :
+                                task.type === TaskType.CALORIE ? value : formatTimeTotal(value)}
                             </td>
                           );
                         }),
@@ -831,7 +824,7 @@ export default function Ranges() {
                     return (
                       <td
                         key={`total-${category.categoryName}`}
-                        className="py-2 px-4 text-center min-w-[90px"
+                        className="py-2 px-4 text-center min-w-[90px]"
                         style={{
                           backgroundColor: getExpenseColor(categoryTotal, maxTotal)
                         }}
@@ -839,8 +832,7 @@ export default function Ranges() {
                         {categoryTotal} zł
                       </td>
                     );
-                  })}
-                </tr>
+                  })}                    </tr>
               </tbody>
             </table>
           </div>

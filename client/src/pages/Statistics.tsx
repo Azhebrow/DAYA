@@ -40,6 +40,7 @@ import {
   DollarSign,
   FileText,
   BarChartIcon,
+  CheckIcon,
 } from "lucide-react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
@@ -514,7 +515,8 @@ export default function Statistics() {
                           category.tasks
                             .filter((t) => t.type === TaskType.EXPENSE)
                             .reduce(
-                              (taskSum, task) => taskSum + (task.value || 0),
+                              (taskSum, task) =>
+                                taskSum + (task.value || 0),
                               0,
                             )
                         );
@@ -652,8 +654,18 @@ export default function Statistics() {
 
                             if (task.type === TaskType.CHECKBOX) {
                               const value = task.completed ? 100 : 0;
-                              bgColor = `rgba(16, 185, 129, ${0.1 + (value / 100) * 0.4})`;
-                              displayValue = task.completed ? "100%" : "0%";
+                              return (
+                                <td
+                                  key={`${category.name}-${task.name}`}
+                                  className="py-2 px-4 text-center min-w-[80px]"
+                                >
+                                  {task.completed ? (
+                                    <CheckIcon className="h-4 w-4 mx-auto text-green-500" />
+                                  ) : (
+                                    <CheckIcon className="h-4 w-4 mx-auto text-gray-500" />
+                                  )}
+                                </td>
+                              );
                             } else if (task.type === TaskType.TIME) {
                               displayValue = formatTimeTotal(task.value || 0);
                               bgColor = "#6B728020";
@@ -689,14 +701,8 @@ export default function Statistics() {
                     %
                   </td>
                   {data[0]?.categories
-                    .filter(
-                      (category) => category.type !== CategoryType.EXPENSE,
-                    )
-                    .sort(
-                      (a, b) =>
-                        CATEGORY_ORDER.indexOf(a.name) -
-                        CATEGORY_ORDER.indexOf(b.name),
-                    )
+                    .filter((category) => category.type !== CategoryType.EXPENSE)
+                    .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
                     .flatMap((category) =>
                       category.tasks.map((task) => {
                         let totalValue = "";
@@ -704,39 +710,25 @@ export default function Statistics() {
 
                         if (task.type === TaskType.CHECKBOX) {
                           const completedCount = data.reduce((sum, day) => {
-                            const cat = day.categories.find(
-                              (c) => c.name === category.name,
-                            );
-                            const t = cat?.tasks.find(
-                              (t) => t.name === task.name,
-                            );
+                            const cat = day.categories.find((c) => c.name === category.name);
+                            const t = cat?.tasks.find((t) => t.name === task.name);
                             return sum + (t?.completed ? 1 : 0);
                           }, 0);
-                          const percentage = Math.round(
-                            (completedCount / data.length) * 100,
-                          );
+                          const percentage = Math.round((completedCount / data.length) * 100);
                           bgColor = `rgba(16, 185, 129, ${0.1 + (percentage / 100) * 0.4})`;
                           totalValue = `${percentage}%`;
                         } else if (task.type === TaskType.TIME) {
                           const totalMinutes = data.reduce((sum, day) => {
-                            const cat = day.categories.find(
-                              (c) => c.name === category.name,
-                            );
-                            const t = cat?.tasks.find(
-                              (t) => t.name === task.name,
-                            );
+                            const cat = day.categories.find((c) => c.name === category.name);
+                            const t = cat?.tasks.find((t) => t.name === task.name);
                             return sum + (t?.value || 0);
                           }, 0);
                           totalValue = formatTimeTotal(totalMinutes);
                           bgColor = "#6B728020";
                         } else if (task.type === TaskType.CALORIE) {
                           const totalCalories = data.reduce((sum, day) => {
-                            const cat = day.categories.find(
-                              (c) => c.name === category.name,
-                            );
-                            const t = cat?.tasks.find(
-                              (t) => t.name === task.name,
-                            );
+                            const cat = day.categories.find((c) => c.name === category.name);
+                            const t = cat?.tasks.find((t) => t.name === task.name);
                             return sum + (t?.value || 0);
                           }, 0);
                           totalValue = `${totalCalories}`;
@@ -752,7 +744,7 @@ export default function Statistics() {
                             {totalValue}
                           </td>
                         );
-                      }),
+                      })
                     )}
                 </tr>
               </tbody>
@@ -806,9 +798,9 @@ export default function Statistics() {
                           (task.type === TaskType.EXPENSE
                             ? task.value || 0
                             : 0),
-                        0,
+                        0
                       ),
-                    0,
+                    0
                   );
 
                   const maxExpense = Math.max(
@@ -824,11 +816,11 @@ export default function Statistics() {
                                 (t.type === TaskType.EXPENSE
                                   ? t.value || 0
                                   : 0),
-                              0,
+                              0
                             ),
-                          0,
-                        ),
-                    ),
+                          0
+                        )
+                    )
                   );
 
                   return (
@@ -933,11 +925,11 @@ export default function Statistics() {
                                     (task.type === TaskType.EXPENSE
                                       ? task.value || 0
                                       : 0),
-                                  0,
+                                  0
                                 ) || 0)
                               );
-                            }, 0),
-                          ),
+                            }, 0)
+                          )
                       );
 
                       return (
@@ -945,7 +937,7 @@ export default function Statistics() {
                           key={`total-${category.name}`}
                           className="py-2 px-4 text-center min-w-[90px]"
                           style={{
-                            backgroundColor: `rgba(249, 115, 22, ${0.1 +(categoryTotal / maxTotal) * 0.4})`,
+                            backgroundColor: `rgba(249, 15, 22, ${0.1 +(categoryTotal / maxTotal) * 0.4})`,
                           }}
                         >
                           {categoryTotal} zł
