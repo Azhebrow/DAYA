@@ -47,6 +47,16 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
     return 'bg-orange-600/90';
   };
 
+  const calculateGroupStats = (groupDays: DayEntry[]) => {
+    const daysWithData = groupDays.filter(day => day.categories && day.categories.length > 0);
+    const totalExpenses = daysWithData.reduce((sum, day) => sum + calculateDayExpenses(day), 0);
+    const averageSuccess = daysWithData.length > 0
+      ? Math.round(daysWithData.reduce((sum, day) => sum + calculateDayScore(day), 0) / daysWithData.length)
+      : 0;
+
+    return { totalExpenses, averageSuccess };
+  };
+
   const groupDaysByPeriod = () => {
     if (groupingMode === 'normal') {
       return [{ title: '', days }];
@@ -60,9 +70,9 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
       const date = new Date(day.date);
 
       if (groupingMode === 'weekly') {
-        const weekNumber = getWeek(date);
-        const weekStart = format(startOfWeek(date), 'dd.MM');
-        const weekEnd = format(endOfWeek(date), 'dd.MM');
+        const weekNumber = getWeek(date, { weekStartsOn: 1 });
+        const weekStart = format(startOfWeek(date, { weekStartsOn: 1 }), 'dd.MM');
+        const weekEnd = format(endOfWeek(date, { weekStartsOn: 1 }), 'dd.MM');
         const weekTitle = `Неделя ${weekNumber} (${weekStart}-${weekEnd})`;
 
         if (currentGroupTitle !== weekTitle) {
@@ -73,7 +83,10 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
           currentGroupTitle = weekTitle;
         }
       } else { // monthly
-        const monthTitle = format(date, 'LLLL yyyy', { locale: ru });
+        const monthTitle = format(date, 'LLLL yyyy', { locale: ru })
+          .split('')
+          .map((char, i) => i === 0 ? char.toUpperCase() : char)
+          .join('');
 
         if (currentGroupTitle !== monthTitle) {
           if (currentGroup.length > 0) {
@@ -102,11 +115,27 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
         const maxExpenseInGroup = Math.max(
           ...group.days.map(day => calculateDayExpenses(day))
         );
+        const { totalExpenses, averageSuccess } = calculateGroupStats(group.days);
 
         return (
           <div key={group.title} className="space-y-2">
             {group.title && (
-              <h3 className="text-lg font-semibold text-primary ml-2">{group.title}</h3>
+              <div className="flex items-center justify-between ml-2">
+                <h3 className="text-lg font-semibold text-primary">{group.title}</h3>
+                <div className="text-sm text-muted-foreground">
+                  <span className="mr-4">Средний успех: {averageSuccess}%</span>
+                  <span>Всего расходов: {totalExpenses}zł</span>
+                </div>
+              </div>
+            )}
+            {(groupingMode === 'weekly' || groupingMode === 'monthly') && (
+              <div className="grid grid-cols-7 gap-2 mb-1">
+                {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) => (
+                  <div key={day} className="text-[10px] text-gray-500 text-center font-medium">
+                    {day}
+                  </div>
+                ))}
+              </div>
             )}
             <div className="grid grid-cols-7 gap-2">
               {group.days.map((day) => {
@@ -121,11 +150,6 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                   <div key={day.date} className="space-y-1">
                     <div className="text-[10px] text-gray-500 text-center">
                       {format(date, 'dd.MM')}
-                      {(groupingMode === 'weekly' || groupingMode === 'monthly') && (
-                        <div className="text-[9px] text-gray-600">
-                          {format(date, 'EEEEEE', { locale: ru })}
-                        </div>
-                      )}
                     </div>
                     <Card 
                       className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50
