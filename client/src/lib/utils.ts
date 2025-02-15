@@ -13,42 +13,61 @@ export function calculateTaskProgress(value: number, target: number): number {
 }
 
 export function calculateCategoryProgress(tasks: Category['tasks'], type: CategoryType): number {
-  if (!tasks.length) return 0;
+  if (!tasks || !tasks.length) return 0;
 
-  const checkboxTasks = tasks.filter((task) => task.type === TaskType.CHECKBOX);
-  const calorieTasks = tasks.filter((task) => task.type === TaskType.CALORIE);
-  const timeTasks = tasks.filter((task) => task.type === TaskType.TIME);
-  const settings = storage.getSettings();
+  switch (type) {
+    case CategoryType.MIND: {
+      // For mind category, each checkbox task contributes equally
+      const checkboxTasks = tasks.filter(task => task.type === TaskType.CHECKBOX);
+      if (!checkboxTasks.length) return 0;
+      const completed = checkboxTasks.filter(task => task.completed).length;
+      return (completed / checkboxTasks.length) * 100;
+    }
 
-  const progressParts = [];
+    case CategoryType.SPORT: {
+      const components = [];
 
-  // Calculate checkbox progress (already maxed at 100%)
-  if (checkboxTasks.length) {
-    const checkboxProgress =
-      (checkboxTasks.reduce((sum, task) => sum + (task.completed ? 1 : 0), 0) /
-        checkboxTasks.length) *
-      100;
-    progressParts.push(Math.min(100, checkboxProgress));
+      // Handle checkbox tasks (таблетки, тренировки)
+      const checkboxTasks = tasks.filter(task => task.type === TaskType.CHECKBOX);
+      if (checkboxTasks.length) {
+        const completed = checkboxTasks.filter(task => task.completed).length;
+        components.push((completed / checkboxTasks.length) * 100);
+      }
+
+      // Handle calorie tasks
+      const calorieTasks = tasks.filter(task => task.type === TaskType.CALORIE);
+      if (calorieTasks.length) {
+        const settings = storage.getSettings();
+        const totalCalories = calorieTasks.reduce((sum, task) => 
+          sum + (typeof task.value === 'number' ? task.value : 0), 0);
+        components.push(calculateTaskProgress(totalCalories, settings.calorieTarget));
+      }
+
+      return components.length ? components.reduce((a, b) => a + b) / components.length : 0;
+    }
+
+    case CategoryType.TIME: {
+      const settings = storage.getSettings();
+      const timeTasks = tasks.filter(task => task.type === TaskType.TIME);
+      if (!timeTasks.length) return 0;
+
+      const totalTime = timeTasks.reduce((sum, task) => 
+        sum + (typeof task.value === 'number' ? task.value : 0), 0);
+
+      return calculateTaskProgress(totalTime, settings.timeTarget);
+    }
+
+    case CategoryType.HABITS: {
+      // For habits, each checkbox task contributes equally
+      const checkboxTasks = tasks.filter(task => task.type === TaskType.CHECKBOX);
+      if (!checkboxTasks.length) return 0;
+      const completed = checkboxTasks.filter(task => task.completed).length;
+      return (completed / checkboxTasks.length) * 100;
+    }
+
+    default:
+      return 0;
   }
-
-  // Calculate calorie progress
-  if (calorieTasks.length) {
-    const totalCalories = calorieTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
-    const calorieProgress = calculateTaskProgress(totalCalories, settings.calorieTarget);
-    progressParts.push(Math.min(100, calorieProgress));
-  }
-
-  // Calculate time progress
-  if (timeTasks.length && type === CategoryType.TIME) {
-    const totalTime = timeTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
-    const timeProgress = calculateTaskProgress(totalTime, settings.timeTarget);
-    progressParts.push(Math.min(100, timeProgress));
-  }
-
-  // Calculate average progress, ensuring it doesn't exceed 100
-  return progressParts.length
-    ? Math.min(100, progressParts.reduce((a, b) => a + b) / progressParts.length)
-    : 0;
 }
 
 export function calculateDayScore(day: { categories: Category[] } | Category[]): number {
@@ -56,16 +75,20 @@ export function calculateDayScore(day: { categories: Category[] } | Category[]):
   const categories = Array.isArray(day) ? day : day.categories;
   if (!Array.isArray(categories) || categories.length === 0) return 0;
 
-  const activityCategories = categories.slice(0, 4); // Only consider activity tracker categories
+  // Filter out expense categories and only consider first 4 activity categories
+  const activityCategories = categories
+    .filter(category => category.type !== CategoryType.EXPENSE)
+    .slice(0, 4);
+
   if (!activityCategories.length) return 0;
 
-  const totalProgress = activityCategories.reduce(
-    (sum, category) => sum + calculateCategoryProgress(category.tasks, category.type),
-    0
-  );
+  // Calculate progress for each category
+  const categoryScores = activityCategories.map(category => 
+    calculateCategoryProgress(category.tasks, category.type));
 
-  // Ensure the final day score is also capped at 100
-  return Math.min(100, Math.round(totalProgress / activityCategories.length));
+  // Average all category scores for the final day score
+  const totalScore = categoryScores.reduce((sum, score) => sum + score, 0);
+  return Math.round(totalScore / categoryScores.length);
 }
 
 export function getScoreColor(score: number): string {

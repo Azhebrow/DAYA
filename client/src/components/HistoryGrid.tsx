@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { DayEntry, CategoryType, TaskType } from '@shared/schema';
 import { format, isToday, isSameDay, getWeek, getMonth, getYear, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
-import { getScoreColor } from '@/lib/utils';
+import { getScoreColor, calculateDayScore } from '@/lib/utils';
 
 interface HistoryGridProps {
   days: DayEntry[];
@@ -14,29 +14,6 @@ interface HistoryGridProps {
 }
 
 export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMode }: HistoryGridProps) {
-  const calculateDayScore = (day: DayEntry) => {
-    if (!day.categories) return null;
-
-    let score = 0;
-    let total = 0;
-
-    day.categories.slice(0, 4).forEach(category => {
-      if (!category.tasks) return;
-
-      category.tasks.forEach(task => {
-        if (task.type === TaskType.CHECKBOX) {
-          total += 1;
-          if (task.completed) score += 1;
-        } else if (task.type === TaskType.TIME || task.type === TaskType.CALORIE) {
-          total += 1;
-          if (typeof task.value === 'number' && task.value > 0) score += 1;
-        }
-      });
-    });
-
-    return total > 0 ? Math.round((score / total) * 100) : 0;
-  };
-
   const calculateDayExpenses = (day: DayEntry) => {
     if (!day.categories) return null;
 
@@ -126,7 +103,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                     <div className="text-[10px] text-gray-500">
                       {format(new Date(day.date), 'dd.MM')}
                     </div>
-                    <div className={`text-sm font-bold ${hasData ? getScoreColor(score || 0) : 'text-gray-500'}`}>
+                    <div className={`text-sm font-bold ${hasData ? getScoreColor(score) : 'text-gray-500'}`}>
                       {hasData ? `${score}%` : '?'}
                     </div>
                     <div className="text-[10px] text-gray-400">
