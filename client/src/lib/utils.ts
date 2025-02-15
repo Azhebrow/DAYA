@@ -16,7 +16,7 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
   if (!tasks || !tasks.length) return 0;
 
   switch (type) {
-    case CategoryType.MIND: {
+    case CategoryType.ACTIVITY: { // Mind category
       // For mind category, each checkbox task contributes equally
       const checkboxTasks = tasks.filter(task => task.type === TaskType.CHECKBOX);
       if (!checkboxTasks.length) return 0;
@@ -24,7 +24,7 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
       return (completed / checkboxTasks.length) * 100;
     }
 
-    case CategoryType.SPORT: {
+    case CategoryType.EXERCISE: { // Sport category
       const components = [];
 
       // Handle checkbox tasks (таблетки, тренировки)
@@ -57,7 +57,7 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
       return calculateTaskProgress(totalTime, settings.timeTarget);
     }
 
-    case CategoryType.HABITS: {
+    case CategoryType.HABIT: { // Habits category
       // For habits, each checkbox task contributes equally
       const checkboxTasks = tasks.filter(task => task.type === TaskType.CHECKBOX);
       if (!checkboxTasks.length) return 0;
