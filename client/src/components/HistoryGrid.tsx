@@ -60,10 +60,18 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
       const date = new Date(day.date);
 
       if (groupingMode === 'weekly') {
-        const weekNumber = getWeek(date);
-        const weekStart = format(startOfWeek(date), 'dd.MM');
-        const weekEnd = format(endOfWeek(date), 'dd.MM');
-        const weekTitle = `Неделя ${weekNumber} (${weekStart}-${weekEnd})`;
+        const weekNumber = getWeek(date, { weekStartsOn: 1, locale: ru });
+        const weekStart = format(startOfWeek(date, { weekStartsOn: 1 }), 'dd.MM');
+        const weekEnd = format(endOfWeek(date, { weekStartsOn: 1 }), 'dd.MM');
+
+        // Calculate group statistics
+        const daysWithData = currentGroup.filter(d => d.categories && d.categories.length > 0);
+        const totalExpenses = daysWithData.reduce((sum, d) => sum + calculateDayExpenses(d), 0);
+        const avgSuccess = daysWithData.length > 0 
+          ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d), 0) / daysWithData.length)
+          : 0;
+
+        const weekTitle = `Неделя ${weekNumber} (${weekStart}-${weekEnd}) • ${totalExpenses}zł • ${avgSuccess}%`;
 
         if (currentGroupTitle !== weekTitle) {
           if (currentGroup.length > 0) {
@@ -73,11 +81,20 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
           currentGroupTitle = weekTitle;
         }
       } else { // monthly
-        const monthTitle = format(date, 'LLLL yyyy', { locale: ru });
+        const monthTitle = format(date, "LLLL yyyy", { locale: ru })
+          .replace(/^./, str => str.toUpperCase());
 
         if (currentGroupTitle !== monthTitle) {
+          // Calculate group statistics for the previous month
+          const daysWithData = currentGroup.filter(d => d.categories && d.categories.length > 0);
+          const totalExpenses = daysWithData.reduce((sum, d) => sum + calculateDayExpenses(d), 0);
+          const avgSuccess = daysWithData.length > 0 
+            ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d), 0) / daysWithData.length)
+            : 0;
+
           if (currentGroup.length > 0) {
-            groups.push({ title: currentGroupTitle, days: currentGroup });
+            const titleWithStats = `${currentGroupTitle} • ${totalExpenses}zł • ${avgSuccess}%`;
+            groups.push({ title: titleWithStats, days: currentGroup });
           }
           currentGroup = [];
           currentGroupTitle = monthTitle;
@@ -87,7 +104,14 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
       currentGroup.push(day);
 
       if (index === days.length - 1) {
-        groups.push({ title: currentGroupTitle, days: currentGroup });
+        const daysWithData = currentGroup.filter(d => d.categories && d.categories.length > 0);
+        const totalExpenses = daysWithData.reduce((sum, d) => sum + calculateDayExpenses(d), 0);
+        const avgSuccess = daysWithData.length > 0 
+          ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d), 0) / daysWithData.length)
+          : 0;
+
+        const titleWithStats = `${currentGroupTitle} • ${totalExpenses}zł • ${avgSuccess}%`;
+        groups.push({ title: titleWithStats, days: currentGroup });
       }
     });
 
@@ -108,6 +132,15 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
             {group.title && (
               <h3 className="text-lg font-semibold text-primary ml-2">{group.title}</h3>
             )}
+            {(groupingMode === 'weekly' || groupingMode === 'monthly') && (
+              <div className="grid grid-cols-7 gap-2 mb-1">
+                {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day) => (
+                  <div key={day} className="text-center text-xs text-gray-500">
+                    {day}
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="grid grid-cols-7 gap-2">
               {group.days.map((day) => {
                 const isCurrentDay = isToday(new Date(day.date));
@@ -121,11 +154,6 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                   <div key={day.date} className="space-y-1">
                     <div className="text-[10px] text-gray-500 text-center">
                       {format(date, 'dd.MM')}
-                      {(groupingMode === 'weekly' || groupingMode === 'monthly') && (
-                        <div className="text-[9px] text-gray-600">
-                          {format(date, 'EEEEEE', { locale: ru })}
-                        </div>
-                      )}
                     </div>
                     <Card 
                       className={`cursor-pointer hover:shadow-lg transition-all duration-200 bg-zinc-900/50
