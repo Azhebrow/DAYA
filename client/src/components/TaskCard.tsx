@@ -61,12 +61,12 @@ export const TaskCard = React.memo(({
           {/* Task rows */}
           {category.tasks.map((task, index) => (
             <div key={task.id} className="flex items-center h-[3.5rem]">
-              <div className="w-1/2 px-4">
-                {(!isExpenseCard || index === 0) && (
+              {!isExpenseCard && (
+                <div className="w-1/2 px-4">
                   <span className="text-base text-gray-400">{task.name}</span>
-                )}
-              </div>
-              <div className="w-1/2 px-4">
+                </div>
+              )}
+              <div className={isExpenseCard ? "w-full px-4" : "w-1/2 px-4"}>
                 <TaskInput
                   task={task}
                   onChange={(value) => handleTaskUpdate(task.id, value)}
