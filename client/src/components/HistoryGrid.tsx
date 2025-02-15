@@ -68,7 +68,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
         const daysWithData = currentGroup.filter(d => d.categories && d.categories.length > 0);
         const totalExpenses = daysWithData.reduce((sum, d) => sum + calculateDayExpenses(d), 0);
         const avgSuccess = daysWithData.length > 0 
-          ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d), 0) / daysWithData.length)
+          ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d.categories), 0) / daysWithData.length)
           : 0;
 
         const weekTitle = `Неделя ${weekNumber} (${weekStart}-${weekEnd}) • ${totalExpenses}zł • ${avgSuccess}%`;
@@ -89,7 +89,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
           const daysWithData = currentGroup.filter(d => d.categories && d.categories.length > 0);
           const totalExpenses = daysWithData.reduce((sum, d) => sum + calculateDayExpenses(d), 0);
           const avgSuccess = daysWithData.length > 0 
-            ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d), 0) / daysWithData.length)
+            ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d.categories), 0) / daysWithData.length)
             : 0;
 
           if (currentGroup.length > 0) {
@@ -107,7 +107,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
         const daysWithData = currentGroup.filter(d => d.categories && d.categories.length > 0);
         const totalExpenses = daysWithData.reduce((sum, d) => sum + calculateDayExpenses(d), 0);
         const avgSuccess = daysWithData.length > 0 
-          ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d), 0) / daysWithData.length)
+          ? Math.round(daysWithData.reduce((sum, d) => sum + calculateDayScore(d.categories), 0) / daysWithData.length)
           : 0;
 
         const titleWithStats = `${currentGroupTitle} • ${totalExpenses}zł • ${avgSuccess}%`;
@@ -146,7 +146,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                 const isCurrentDay = isToday(new Date(day.date));
                 const isSelected = selectedDate && isSameDay(new Date(day.date), selectedDate);
                 const hasData = day.categories && day.categories.length > 0;
-                const score = hasData ? calculateDayScore(day) : 0;
+                const score = hasData ? calculateDayScore(day.categories) : 0;
                 const expenses = calculateDayExpenses(day);
                 const date = new Date(day.date);
 
