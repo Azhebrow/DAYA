@@ -426,15 +426,42 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-2 sm:px-4">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 sm:py-4 gap-2 sm:gap-0">
-          <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-primary" />
-            <h2 className="text-base sm:text-xl font-bold">Трекер активности</h2>
-            <DayScore score={dayScore} showAnimation={true} />
+      <div className="container mx-auto px-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-zinc-800/40 py-2 sm:py-4">
+          <div className="flex items-center w-full sm:w-auto justify-between">
+            <div className="flex items-center space-x-2">
+              <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
+              <h2 className="text-sm sm:text-xl font-semibold">Трекер</h2>
+              <DayScore score={dayScore} showAnimation={true} />
+            </div>
+            <div className="flex items-center sm:hidden space-x-2">
+              <span className="text-xs text-gray-400">
+                {format(selectedDate, 'dd.MM')}
+              </span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-7 w-7 p-0"
+                  >
+                    <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 mt-1 sm:mt-0">
-            <span className="text-xs text-gray-400">
+
+          <div className="hidden sm:flex items-center space-x-4">
+            <span className="text-sm text-gray-400">
               {format(selectedDate, 'dd.MM.yyyy')}
             </span>
             <Popover>
@@ -459,7 +486,7 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-4">
           {dayEntry.categories.slice(0, 4).map((category) => (
             <TaskCard
               key={category.id}
