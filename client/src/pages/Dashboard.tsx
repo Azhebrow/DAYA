@@ -426,20 +426,24 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center py-3 sm:py-4">
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            <h2 className="text-lg sm:text-xl font-bold">Трекер активности</h2>
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 sm:py-4 gap-2 sm:gap-0">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-primary" />
+            <h2 className="text-base sm:text-xl font-bold">Трекер активности</h2>
             <DayScore score={dayScore} showAnimation={true} />
           </div>
-          <div className="flex items-center gap-2 sm:gap-4">
-            <span className="text-xs sm:text-sm text-gray-400">
-              {format(selectedDate, 'MMMM dd, yyyy')}
+          <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-4 mt-1 sm:mt-0">
+            <span className="text-xs text-gray-400">
+              {format(selectedDate, 'dd.MM.yyyy')}
             </span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-300 p-1 sm:p-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-gray-400 hover:text-gray-300 p-1"
+                >
                   <CalendarIcon className="h-4 w-4" />
                 </Button>
               </PopoverTrigger>
