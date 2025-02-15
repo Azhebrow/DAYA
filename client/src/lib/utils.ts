@@ -20,36 +20,35 @@ export function calculateCategoryProgress(tasks: Category['tasks'], type: Catego
   const timeTasks = tasks.filter((task) => task.type === TaskType.TIME);
   const settings = storage.getSettings();
 
-  let totalTasks = 0;
-  let completedValue = 0;
-  let targetValue = 0;
+  const progressParts = [];
 
-  // Calculate checkbox tasks progress
+  // Calculate checkbox progress (already maxed at 100%)
   if (checkboxTasks.length) {
-    totalTasks += checkboxTasks.length;
-    completedValue += checkboxTasks.reduce((sum, task) => sum + (task.completed ? 1 : 0), 0);
-    targetValue += checkboxTasks.length;
+    const checkboxProgress =
+      (checkboxTasks.reduce((sum, task) => sum + (task.completed ? 1 : 0), 0) /
+        checkboxTasks.length) *
+      100;
+    progressParts.push(Math.min(100, checkboxProgress));
   }
 
-  // Calculate calorie tasks progress
+  // Calculate calorie progress
   if (calorieTasks.length) {
-    totalTasks += calorieTasks.length;
-    completedValue += calorieTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
-    targetValue += settings.calorieTarget;
+    const totalCalories = calorieTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
+    const calorieProgress = calculateTaskProgress(totalCalories, settings.calorieTarget);
+    progressParts.push(Math.min(100, calorieProgress));
   }
 
-  // Calculate time tasks progress
+  // Calculate time progress
   if (timeTasks.length && type === CategoryType.TIME) {
-    totalTasks += timeTasks.length;
-    completedValue += timeTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
-    targetValue += settings.timeTarget;
+    const totalTime = timeTasks.reduce((sum, task) => sum + (typeof task.value === 'number' ? task.value : 0), 0);
+    const timeProgress = calculateTaskProgress(totalTime, settings.timeTarget);
+    progressParts.push(Math.min(100, timeProgress));
   }
 
-  // If no tasks with progress to calculate, return 0
-  if (totalTasks === 0) return 0;
-
-  // Calculate final progress percentage
-  return Math.min(100, (completedValue / targetValue) * 100);
+  // Calculate average progress, ensuring it doesn't exceed 100
+  return progressParts.length
+    ? Math.min(100, progressParts.reduce((a, b) => a + b) / progressParts.length)
+    : 0;
 }
 
 export function calculateDayScore(day: { categories: Category[] } | Category[]): number {
@@ -57,17 +56,15 @@ export function calculateDayScore(day: { categories: Category[] } | Category[]):
   const categories = Array.isArray(day) ? day : day.categories;
   if (!Array.isArray(categories) || categories.length === 0) return 0;
 
-  // Only consider activity tracker categories (first 4 categories)
-  const activityCategories = categories.slice(0, 4);
+  const activityCategories = categories.slice(0, 4); // Only consider activity tracker categories
   if (!activityCategories.length) return 0;
 
-  // Calculate progress for each category using the same method as calculateCategoryProgress
   const totalProgress = activityCategories.reduce(
     (sum, category) => sum + calculateCategoryProgress(category.tasks, category.type),
     0
   );
 
-  // Calculate average progress across all categories
+  // Ensure the final day score is also capped at 100
   return Math.min(100, Math.round(totalProgress / activityCategories.length));
 }
 
