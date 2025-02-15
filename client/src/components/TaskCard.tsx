@@ -51,8 +51,10 @@ export const TaskCard = React.memo(({
               {!isExpenseCard && (
                 <Progress 
                   value={progress} 
-                  className={`h-2.5 bg-white/20`}
-                  indicatorClassName={categoryColor}
+                  className="h-2.5 bg-white/20"
+                  style={{
+                    '--progress-background': categoryColor
+                  } as React.CSSProperties}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
@@ -60,7 +62,7 @@ export const TaskCard = React.memo(({
           </div>
 
           {/* Task rows */}
-          {category.tasks.map((task, index) => (
+          {category.tasks.map((task) => (
             <div key={task.id} className="flex items-center h-[3.5rem]">
               {!isExpenseCard && (
                 <div className="w-1/2 px-4">
@@ -85,20 +87,20 @@ export const TaskCard = React.memo(({
 
 const getCategoryColor = (name: string, type: CategoryType): string => {
   if (type === CategoryType.EXPENSE) {
-    return 'bg-orange-500/90';
+    return 'rgba(249, 115, 22, 0.9)'; // Orange color for expenses
   }
 
   switch (name) {
     case 'Разум':
-      return 'bg-blue-500/90';
+      return 'rgba(139, 92, 246, 0.9)'; // Purple
     case 'Время':
-      return 'bg-green-500/90';
+      return 'rgba(16, 185, 129, 0.9)'; // Green
     case 'Спорт':
-      return 'bg-red-500/90';
+      return 'rgba(239, 68, 68, 0.9)'; // Red
     case 'Привычки':
-      return 'bg-purple-500/90';
+      return 'rgba(245, 158, 11, 0.9)'; // Amber
     default:
-      return 'bg-primary';
+      return 'rgba(var(--primary), 0.9)';
   }
 };
 
