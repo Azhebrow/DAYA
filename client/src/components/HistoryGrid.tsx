@@ -171,7 +171,7 @@ export default function HistoryGrid({ days, onDayClick, selectedDate, groupingMo
                               {hasData ? `${score}%` : '?'}
                             </span>
                           </div>
-                          <div className="flex items-center justify-center">
+                          <div className={`flex items-center justify-center ${getExpenseColor(expenses, maxExpenseInGroup)}`}>
                             <span className="text-sm font-bold text-white">
                               {hasData ? `${expenses}zł` : '?'}
                             </span>
