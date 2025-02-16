@@ -139,6 +139,65 @@ export const settingsSchema = z.object({
     expenses: '--orange',
     daySuccess: '--green',
   }),
+  subcategories: z.object({
+    mind: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      emoji: z.string()
+    })).default([
+      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+    ]),
+    time: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      emoji: z.string()
+    })).default([
+      { id: 'work', name: '💼 Работа', emoji: '💼' },
+      { id: 'study', name: '📚 Учёба', emoji: '📚' },
+      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+    ]),
+    sport: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      emoji: z.string()
+    })).default([
+      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+    ]),
+    habits: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      emoji: z.string()
+    })).default([
+      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+    ])
+  }).default({
+    mind: [
+      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+    ],
+    time: [
+      { id: 'work', name: '💼 Работа', emoji: '💼' },
+      { id: 'study', name: '📚 Учёба', emoji: '📚' },
+      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+    ],
+    sport: [
+      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+    ],
+    habits: [
+      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+    ]
+  }),
   pomodoroSettings: pomodoroSettingsSchema.optional()
 });
 

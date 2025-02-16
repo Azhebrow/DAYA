@@ -28,6 +28,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import EmojiPicker from 'emoji-picker-react';
 
 // Updated colorPalette - organized by color groups
 const colorPalette = [
@@ -132,6 +133,70 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
 
+const SubcategoryEditor = ({
+  category,
+  subcategories,
+  onUpdate,
+  title,
+  icon: Icon
+}: {
+  category: 'mind' | 'time' | 'sport' | 'habits';
+  subcategories: { id: string; name: string; emoji: string; }[];
+  onUpdate: (category: string, subcategories: { id: string; name: string; emoji: string; }[]) => void;
+  title: string;
+  icon: React.ElementType;
+}) => {
+  return (
+    <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+      <CardHeader>
+        <CardTitle className="text-xl text-primary flex items-center gap-2">
+          <Icon className="h-5 w-5" />
+          <span>{title}</span>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {subcategories.map((sub, index) => (
+            <div key={sub.id} className="flex items-center gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-12">
+                    {sub.emoji}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <EmojiPicker
+                    onEmojiClick={(emojiData) => {
+                      const newSubcategories = [...subcategories];
+                      newSubcategories[index] = {
+                        ...sub,
+                        emoji: emojiData.emoji
+                      };
+                      onUpdate(category, newSubcategories);
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+              <Input
+                value={sub.name}
+                onChange={(e) => {
+                  const newSubcategories = [...subcategories];
+                  newSubcategories[index] = {
+                    ...sub,
+                    name: e.target.value
+                  };
+                  onUpdate(category, newSubcategories);
+                }}
+                className="flex-1"
+              />
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
 export default function SettingsPage() {
   const [settings, setSettings] = React.useState<Settings>(() => {
     try {
@@ -147,6 +212,12 @@ export default function SettingsPage() {
           habits: '--orange',
           expenses: '--orange',
           daySuccess: '--green'
+        },
+        subcategories: {
+          mind: [{ id: '1', name: 'Focus', emoji: '🧘' }, { id: '2', name: 'Mindfulness', emoji: '😌' }],
+          time: [{ id: '3', name: 'Work', emoji: '💼' }, { id: '4', name: 'Study', emoji: '📚' }],
+          sport: [{ id: '5', name: 'Gym', emoji: '🏋️' }, { id: '6', name: 'Running', emoji: '🏃' }],
+          habits: [{ id: '7', name: 'Reading', emoji: '📖' }, { id: '8', name: 'Meditation', emoji: '🙏' }]
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
@@ -173,6 +244,12 @@ export default function SettingsPage() {
           habits: '--orange',
           expenses: '--orange',
           daySuccess: '--green'
+        },
+        subcategories: {
+          mind: [{ id: '1', name: 'Focus', emoji: '🧘' }, { id: '2', name: 'Mindfulness', emoji: '😌' }],
+          time: [{ id: '3', name: 'Work', emoji: '💼' }, { id: '4', name: 'Study', emoji: '📚' }],
+          sport: [{ id: '5', name: 'Gym', emoji: '🏋️' }, { id: '6', name: 'Running', emoji: '🏃' }],
+          habits: [{ id: '7', name: 'Reading', emoji: '📖' }, { id: '8', name: 'Meditation', emoji: '🙏' }]
         }
       });
     }
@@ -182,12 +259,14 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   const handleSettingChange = (key: keyof Settings, value: any) => {
-    let newSettings = {...settings};
+    let newSettings = { ...settings };
 
     if (key === 'colors') {
-      newSettings = { ...settings, colors: {...settings.colors, ...value} };
+      newSettings = { ...settings, colors: { ...settings.colors, ...value } };
     } else if (key === 'timeTarget') {
       newSettings = { ...settings, timeTarget: value * 60 };
+    } else if (key === 'subcategories') {
+        newSettings = {...settings, subcategories: {...settings.subcategories, ...value}}
     } else {
       newSettings = { ...settings, [key]: value };
     }
@@ -434,6 +513,66 @@ export default function SettingsPage() {
                     icon={DollarSign}
                   />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
+            <CardHeader>
+              <CardTitle className="text-xl text-primary">
+                Настройка подкатегорий
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SubcategoryEditor
+                  category="mind"
+                  subcategories={settings.subcategories.mind}
+                  onUpdate={(category, newSubcategories) => {
+                    handleSettingChange('subcategories', {
+                      ...settings.subcategories,
+                      [category]: newSubcategories
+                    });
+                  }}
+                  title="Разум"
+                  icon={Brain}
+                />
+                <SubcategoryEditor
+                  category="time"
+                  subcategories={settings.subcategories.time}
+                  onUpdate={(category, newSubcategories) => {
+                    handleSettingChange('subcategories', {
+                      ...settings.subcategories,
+                      [category]: newSubcategories
+                    });
+                  }}
+                  title="Время"
+                  icon={Clock}
+                />
+                <SubcategoryEditor
+                  category="sport"
+                  subcategories={settings.subcategories.sport}
+                  onUpdate={(category, newSubcategories) => {
+                    handleSettingChange('subcategories', {
+                      ...settings.subcategories,
+                      [category]: newSubcategories
+                    });
+                  }}
+                  title="Спорт"
+                  icon={Dumbbell}
+                />
+                <SubcategoryEditor
+                  category="habits"
+                  subcategories={settings.subcategories.habits}
+                  onUpdate={(category, newSubcategories) => {
+                    handleSettingChange('subcategories', {
+                      ...settings.subcategories,
+                      [category]: newSubcategories
+                    });
+                  }}
+                  title="Пороки"
+                  icon={Ban}
+                />
               </div>
             </CardContent>
           </Card>
