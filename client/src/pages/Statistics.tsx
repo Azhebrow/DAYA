@@ -749,10 +749,10 @@ export default function Statistics() {
             <div className="w-full inline-block align-middle">
               <div className="overflow-x-auto border rounded-lg shadow-sm">
                 <table className="min-w-full divide-y divide-border relative">
-                  <thead className="sticky top-0 bg-background z-10">
+                  <thead className="bg-background z-10">
                     <tr className="border-b border-border/20">
-                      <th className="sticky left-0 z-20 bg-background py-2 px-4 text-left text-sm font-semibold w-[100px]" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Дата</th>
-                      <th className="sticky left-[100px] z-20 bg-background py-2 px-4 text-center text-sm font-semibold w-[80px]" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Успех</th>
+                      <th className="fixed left-0 z-20 bg-background py-2 px-4 text-left text-sm font-semibold w-[100px]" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Дата</th>
+                      <th className="fixed left-[100px] z-20 bg-background py-2 px-4 text-center text-sm font-semibold w-[80px]" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Успех</th>
                       {data[0]?.categories
                         .filter((category) => category.type !== CategoryType.EXPENSE)
                         .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
@@ -772,8 +772,8 @@ export default function Statistics() {
                         ))}
                     </tr>
                     <tr className="border-b border-border/20">
-                      <th className="sticky left-0 bg-background"></th>
-                      <th className="sticky left-[100px] bg-background"></th>
+                      <th className="fixed left-0 bg-background"></th>
+                      <th className="fixed left-[100px] bg-background"></th>
                       {data[0]?.categories
                         .filter((category) => category.type !== CategoryType.EXPENSE)
                         .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
@@ -798,11 +798,11 @@ export default function Statistics() {
                   <tbody className="divide-y divide-border bg-background">
                     {data.map((day) => (
                       <tr key={day.date} className="border-b border-border/10">
-                        <td className="sticky left-0 z-10 bg-background px-4 py-2 font-medium" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>
+                        <td className="fixed left-0 z-10 bg-background px-4 py-2 font-medium" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>
                           {format(new Date(day.date), "dd.MM")}
                         </td>
                         <td
-                          className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-medium"
+                          className="fixed left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-medium"
                           style={{
                             backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6)),
                             boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)'
@@ -827,18 +827,35 @@ export default function Statistics() {
                               if (task.type === TaskType.CHECKBOX) {
                                 displayValue = task.completed ? "✓" : "✗";
                                 bgColor = task.completed
-                                  ? hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), 0.5)
+                                  ? hexToRGBA(getCssVar(CATEGORY_COLORS[category.name]), 0.3)
                                   : "transparent";
                               } else if (task.type === TaskType.TIME) {
-                                displayValue = formatTimeTotal(task.value || 0);
+                                if (typeof task.value === "number" && task.value > 0) {
+                                  const hours = Math.floor(task.value / 60);
+                                  displayValue = `${hours}`;
+                                  bgColor = hexToRGBA(
+                                    getCssVar(CATEGORY_COLORS[category.name]),
+                                    0.3
+                                  );
+                                } else {
+                                  displayValue = "✗";
+                                }
                               } else if (task.type === TaskType.CALORIE) {
-                                displayValue = `${task.value || 0}`;
+                                if (typeof task.value === "number" && task.value > 0) {
+                                  displayValue = task.value.toString();
+                                  bgColor = hexToRGBA(
+                                    getCssVar(CATEGORY_COLORS[category.name]),
+                                    0.3
+                                  );
+                                } else {
+                                  displayValue = "✗";
+                                }
                               }
 
                               return (
                                 <td
                                   key={`${category.name}-${task.name}`}
-                                  className="py-2 px-4 text-center text-sm font-semibold"
+                                  className="px-4 py-2 text-center whitespace-nowrap"
                                   style={{ backgroundColor: bgColor }}
                                 >
                                   {displayValue}
@@ -851,9 +868,9 @@ export default function Statistics() {
                       </tr>
                     ))}
                     <tr className="border-t-2 border-border font-bold">
-                      <td className="sticky left-0 z-10 bg-background px-4 py-2 text-sm font-semibold" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Итого</td>
+                      <td className="fixed left-0 z-10 bg-background px-4 py-2 text-sm font-semibold" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Итого</td>
                       <td
-                        className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-semibold"
+                        className="fixed left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
                             getCssVar(settings.colors.daySuccess),
