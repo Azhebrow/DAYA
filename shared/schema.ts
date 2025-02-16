@@ -124,7 +124,19 @@ export const settingsSchema = z.object({
   viewMode: z.enum(['normal', 'weekly', 'monthly']).default('normal'),
   timeRange: z.enum(['7', '14', '30']).default('7'),
   oathText: z.string().optional(),
-  colorScheme: z.enum(['default', 'ocean', 'sunset', 'forest', 'monochrome']).default('default'),
+  colors: z.object({
+    mind: z.string().default('from-purple-500 to-violet-700'),
+    time: z.string().default('from-green-500 to-emerald-700'),
+    sport: z.string().default('from-red-500 to-rose-700'),
+    habits: z.string().default('from-orange-500 to-amber-700'),
+    expenses: z.string().default('from-orange-500 to-amber-700'),
+  }).default({
+    mind: 'from-purple-500 to-violet-700',
+    time: 'from-green-500 to-emerald-700',
+    sport: 'from-red-500 to-rose-700',
+    habits: 'from-orange-500 to-amber-700',
+    expenses: 'from-orange-500 to-amber-700',
+  }),
   pomodoroSettings: pomodoroSettingsSchema.optional()
 });
 

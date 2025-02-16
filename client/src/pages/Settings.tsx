@@ -43,6 +43,41 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
 
+const availableColors = {
+  purple: {
+    name: 'Фиолетовый',
+    value: 'from-purple-500 to-violet-700'
+  },
+  blue: {
+    name: 'Синий',
+    value: 'from-blue-500 to-cyan-700'
+  },
+  green: {
+    name: 'Зеленый',
+    value: 'from-green-500 to-emerald-700'
+  },
+  red: {
+    name: 'Красный',
+    value: 'from-red-500 to-rose-700'
+  },
+  orange: {
+    name: 'Оранжевый',
+    value: 'from-orange-500 to-amber-700'
+  },
+  yellow: {
+    name: 'Желтый',
+    value: 'from-yellow-500 to-amber-700'
+  },
+  pink: {
+    name: 'Розовый',
+    value: 'from-pink-500 to-rose-700'
+  },
+  teal: {
+    name: 'Бирюзовый',
+    value: 'from-teal-500 to-cyan-700'
+  }
+};
+
 const colorSchemes = {
   default: {
     name: 'По умолчанию',
@@ -90,20 +125,41 @@ export default function SettingsPage() {
   const [settings, setSettings] = React.useState<Settings>(() => {
     try {
       const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({ 
-        startDate: '2025-02-07', 
+      if (!stored) return settingsSchema.parse({
+        startDate: '2025-02-07',
         endDate: '2025-09-09',
         oathText: DEFAULT_OATH_TEXT,
-        colorScheme: 'default'
+        colorScheme: 'default',
+        colors: {
+          mind: 'from-purple-500 to-violet-700',
+          time: 'from-green-500 to-emerald-700',
+          sport: 'from-red-500 to-rose-700',
+          habits: 'from-orange-500 to-amber-700',
+          expenses: 'from-orange-500 to-amber-700',
+        }
       });
-      return settingsSchema.parse(JSON.parse(stored));
+      const parsedSettings = settingsSchema.parse(JSON.parse(stored));
+      return { ...parsedSettings, colors: parsedSettings.colors || {
+          mind: 'from-purple-500 to-violet-700',
+          time: 'from-green-500 to-emerald-700',
+          sport: 'from-red-500 to-rose-700',
+          habits: 'from-orange-500 to-amber-700',
+          expenses: 'from-orange-500 to-amber-700',
+        } };
     } catch (error) {
       console.error('Error parsing settings:', error);
-      return settingsSchema.parse({ 
-        startDate: '2025-02-07', 
+      return settingsSchema.parse({
+        startDate: '2025-02-07',
         endDate: '2025-09-09',
         oathText: DEFAULT_OATH_TEXT,
-        colorScheme: 'default'
+        colorScheme: 'default',
+        colors: {
+          mind: 'from-purple-500 to-violet-700',
+          time: 'from-green-500 to-emerald-700',
+          sport: 'from-red-500 to-rose-700',
+          habits: 'from-orange-500 to-amber-700',
+          expenses: 'from-orange-500 to-amber-700',
+        }
       });
     }
   });
@@ -112,12 +168,16 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   const handleSettingChange = (key: keyof Settings, value: any) => {
-    let processedValue = value;
-    if (key === 'timeTarget') {
+    let newSettings = {...settings};
+
+    if (key === 'colors') {
+      newSettings = { ...settings, colors: {...settings.colors, ...value} };
+    } else if (key === 'timeTarget') {
       // Convert hours to minutes when saving
-      processedValue = value * 60;
+      newSettings = { ...settings, timeTarget: value * 60 };
+    } else {
+      newSettings = { ...settings, [key]: value };
     }
-    const newSettings = { ...settings, [key]: processedValue };
     setSettings(newSettings);
     storage.saveSettings(newSettings);
     toast({
@@ -147,7 +207,6 @@ export default function SettingsPage() {
   // Convert minutes to hours for display
   const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
 
-  const currentScheme = colorSchemes[settings.colorScheme as keyof typeof colorSchemes] || colorSchemes.default;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
@@ -276,45 +335,128 @@ export default function SettingsPage() {
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
               <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Цветовая схема
+                Цвета категорий
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Выберите цветовую схему</Label>
-                  <Select
-                    value={settings.colorScheme}
-                    onValueChange={(value) => handleSettingChange('colorScheme', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Выберите схему" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(colorSchemes).map(([key, scheme]) => (
-                        <SelectItem key={key} value={key}>
-                          {scheme.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-5 gap-2">
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.mind} flex items-center justify-center`}>
+              <div className="grid gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.mind} flex items-center justify-center`}>
                     <Brain className="h-6 w-6 text-white" />
                   </div>
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.time} flex items-center justify-center`}>
+                  <div className="flex-grow">
+                    <Label>Разум</Label>
+                    <Select
+                      value={settings.colors.mind}
+                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, mind: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите цвет" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(availableColors).map(([key, color]) => (
+                          <SelectItem key={key} value={color.value}>
+                            {color.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.time} flex items-center justify-center`}>
                     <Clock className="h-6 w-6 text-white" />
                   </div>
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.sport} flex items-center justify-center`}>
+                  <div className="flex-grow">
+                    <Label>Время</Label>
+                    <Select
+                      value={settings.colors.time}
+                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, time: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите цвет" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(availableColors).map(([key, color]) => (
+                          <SelectItem key={key} value={color.value}>
+                            {color.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.sport} flex items-center justify-center`}>
                     <ActivitySquare className="h-6 w-6 text-white" />
                   </div>
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.habits} flex items-center justify-center`}>
+                  <div className="flex-grow">
+                    <Label>Спорт</Label>
+                    <Select
+                      value={settings.colors.sport}
+                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, sport: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите цвет" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(availableColors).map(([key, color]) => (
+                          <SelectItem key={key} value={color.value}>
+                            {color.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.habits} flex items-center justify-center`}>
                     <Zap className="h-6 w-6 text-white" />
                   </div>
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.expenses} flex items-center justify-center`}>
+                  <div className="flex-grow">
+                    <Label>Привычки</Label>
+                    <Select
+                      value={settings.colors.habits}
+                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, habits: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите цвет" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(availableColors).map(([key, color]) => (
+                          <SelectItem key={key} value={color.value}>
+                            {color.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.expenses} flex items-center justify-center`}>
                     <DollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="flex-grow">
+                    <Label>Траты</Label>
+                    <Select
+                      value={settings.colors.expenses}
+                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, expenses: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Выберите цвет" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(availableColors).map(([key, color]) => (
+                          <SelectItem key={key} value={color.value}>
+                            {color.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
