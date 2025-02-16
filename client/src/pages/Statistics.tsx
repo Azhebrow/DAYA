@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { storage } from "@/lib/storage";
+import { useQuery } from '@tanstack/react-query';
 import {
   DayEntry,
   CategoryType,
   TaskType,
-  settingsSchema,
-  Settings as SettingsType,
-} from "@shared/schema";
+  Settings,
+} from '@shared/schema';
 import {
   BarChart,
   Bar,
@@ -28,9 +24,22 @@ import {
   Cell,
   AreaChart,
   Area,
-} from "recharts";
-import { format, subDays, startOfDay, eachDayOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, isSameWeek, isSameMonth, differenceInDays, startOfYear } from "date-fns";
-import { ru } from "date-fns/locale/ru";
+} from 'recharts';
+import {
+  format,
+  subDays,
+  startOfDay,
+  eachDayOfInterval,
+  startOfWeek,
+  startOfMonth,
+  endOfWeek,
+  endOfMonth,
+  isSameWeek,
+  isSameMonth,
+  differenceInDays,
+  startOfYear
+} from 'date-fns';
+import { ru } from 'date-fns/locale/ru';
 import { calculateDayScore } from "@/lib/utils";
 import {
   ActivitySquare,
@@ -45,111 +54,80 @@ import {
   Brain,
   Dumbbell,
   Ban,
-} from "lucide-react";
+} from 'lucide-react';
 
 const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
-const getCssVar = (varName: string): string => {
-  if (typeof document === 'undefined') return '#000000';
-  if (!varName) return '#000000';
-
-  try {
-    const cssVar = varName.startsWith('--') ? varName : `--${varName}`;
-    return getComputedStyle(document.documentElement)
-      .getPropertyValue(cssVar)
-      .trim() || '#000000';
-  } catch (error) {
-    console.error('Error getting CSS variable:', error);
-    return '#000000';
-  }
-};
-
-function hexToRGBA(hex: string, alpha: number): string {
-  try {
-    if (!hex) return `rgba(0, 0, 0, ${alpha})`;
-
-    if (hex.startsWith('var(')) {
-      const varName = hex.slice(4, -1);
-      hex = getCssVar(varName);
-    }
-
-    if (hex.startsWith('rgb')) {
-      return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
-    }
-
-    const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
-    if (cleanHex.length !== 6) return `rgba(0, 0, 0, ${alpha})`;
-
-    const r = parseInt(cleanHex.slice(0, 2), 16);
-    const g = parseInt(cleanHex.slice(2, 4), 16);
-    const b = parseInt(cleanHex.slice(4, 6), 16);
-
-    if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 0, 0, ${alpha})`;
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  } catch (error) {
-    console.error('Error converting color to RGBA:', error);
-    return `rgba(0, 0, 0, ${alpha})`;
-  }
-}
-
 function Statistics() {
-  const [settings, setSettings] = useState<SettingsType>(() => {
-    try {
-      const stored = localStorage.getItem("day_success_tracker_settings");
-      if (!stored) return settingsSchema.parse({});
-      const parsedSettings = settingsSchema.parse(JSON.parse(stored));
-      return parsedSettings;
-    } catch (error) {
-      console.error("Error parsing settings:", error);
-      return settingsSchema.parse({});
-    }
-  });
-
-  const getVarColor = (varName: string): string => {
-    if (!varName) return '#000000';
-    try {
-      return `var(${varName})`;
-    } catch (error) {
-      console.error('Error getting var color:', error);
-      return '#000000';
-    }
-  };
-
-  const CATEGORY_COLORS: { [key: string]: string } = {
-    'Разум': getVarColor(settings.colors.mind),
-    'Время': getVarColor(settings.colors.time),
-    'Спорт': getVarColor(settings.colors.sport),
-    'Привычки': getVarColor(settings.colors.habits),
-    'Траты': getVarColor(settings.colors.expenses),
-    'Успех': getVarColor(settings.colors.daySuccess)
-  };
-
-  const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
-    'Разум': {
-      bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2),
-      text: "#ffffff"
-    },
-    'Время': {
-      bg: hexToRGBA(getCssVar(settings.colors.time), 0.2),
-      text: "#ffffff"
-    },
-    'Спорт': {
-      bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2),
-      text: "#ffffff"
-    },
-    'Привычки': {
-      bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2),
-      text: "#ffffff"
-    }
-  };
-
-  const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(settings.timeRange || "7");
+  const [timeRange, setTimeRange] = useState<"7" | "14" | "30">("7");
   const [displayType, setDisplayType] = useState<"days" | "weeks" | "months">(() => {
     const savedDisplayType = localStorage.getItem("statistics_display_type");
     return (savedDisplayType as "days" | "weeks" | "months") || "days";
   });
+
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState("");
+
+  const { data: settings, isLoading: isSettingsLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => storage.getSettings()
+  });
+
+  const getCssVar = (varName: string): string => {
+    if (typeof document === 'undefined') return '#000000';
+    if (!varName) return '#000000';
+
+    try {
+      const cssVar = varName.startsWith('--') ? varName : `--${varName}`;
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue(cssVar)
+        .trim() || '#000000';
+    } catch (error) {
+      console.error('Error getting CSS variable:', error);
+      return '#000000';
+    }
+  };
+
+  const getVarColor = (categoryType: string): string => {
+    if (!settings?.colors) return '#000000';
+
+    switch (categoryType) {
+      case 'Разум': return `var(${settings.colors.mind})`;
+      case 'Время': return `var(${settings.colors.time})`;
+      case 'Спорт': return `var(${settings.colors.sport})`;
+      case 'Привычки': return `var(${settings.colors.habits})`;
+      case 'Траты': return `var(${settings.colors.expenses})`;
+      default: return '#000000';
+    }
+  };
+
+  const hexToRGBA = (hex: string, alpha: number): string => {
+    try {
+      if (!hex) return `rgba(0, 0, 0, ${alpha})`;
+
+      if (hex.startsWith('var(')) {
+        const varName = hex.slice(4, -1);
+        hex = getCssVar(varName);
+      }
+
+      if (hex.startsWith('rgb')) {
+        return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+      }
+
+      const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
+      if (cleanHex.length !== 6) return `rgba(0, 0, 0, ${alpha})`;
+
+      const r = parseInt(cleanHex.slice(0, 2), 16);
+      const g = parseInt(cleanHex.slice(2, 4), 16);
+      const b = parseInt(cleanHex.slice(4, 6), 16);
+
+      if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 0, 0, ${alpha})`;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    } catch (error) {
+      console.error('Error converting color to RGBA:', error);
+      return `rgba(0, 0, 0, ${alpha})`;
+    }
+  };
 
   useEffect(() => {
     if (displayType === "days") {
@@ -174,7 +152,7 @@ function Statistics() {
       setData(days);
     } else if (displayType === "weeks") {
       const endDate = startOfDay(new Date());
-      const startDate = subDays(endDate, 30); // Always show last 30 days for weeks view
+      const startDate = subDays(endDate, 30);
 
       setDateRangeText(
         `${format(startDate, "MMMM", { locale: ru })} - ${format(endDate, "MMMM", { locale: ru })}`,
@@ -193,7 +171,7 @@ function Statistics() {
       setData(days);
     } else if (displayType === "months") {
       const endDate = startOfDay(new Date());
-      const startDate = subDays(endDate, 90); // Show last 3 months for months view
+      const startDate = subDays(endDate, 90);
 
       setDateRangeText(
         `${format(startDate, "MMMM yyyy", { locale: ru })} - ${format(endDate, "MMMM yyyy", { locale: ru })}`,
@@ -211,7 +189,7 @@ function Statistics() {
 
       setData(days);
     }
-  }, [timeRange, displayType]);
+  }, [timeRange, displayType, settings]);
 
   const aggregateTaskData = (days: DayEntry[], periodKey: string) => {
     const taskData: {
@@ -260,7 +238,7 @@ function Statistics() {
       const weekNum = Math.ceil(differenceInDays(date, startOfYear(date)) / 7);
       return `${weekNum} нед`;
     } else {
-      return format(date, "LLL", { locale: ru }); // Возвращает сокращенное название месяца
+      return format(date, "LLL", { locale: ru }); 
     }
   };
 
@@ -292,6 +270,7 @@ function Statistics() {
 
     return periodData;
   };
+
 
 
   const calculateTotalTime = (day: DayEntry): number => {
@@ -389,17 +368,21 @@ function Statistics() {
 
   const handleTimeRangeChange = (value: "7" | "14" | "30") => {
     setTimeRange(value);
-    const updatedSettings = { ...settings, timeRange: value };
-    setSettings(updatedSettings);
-    localStorage.setItem(
-      "day_success_tracker_settings",
-      JSON.stringify(updatedSettings),
-    );
   };
 
   const handleDisplayTypeChange = (value: "days" | "weeks" | "months") => {
     setDisplayType(value);
     localStorage.setItem("statistics_display_type", value);
+  };
+
+  const getSubcategoryName = (categoryType: string, taskId: string): string => {
+    if (!settings?.subcategories) return taskId;
+
+    const subcategories = settings.subcategories[categoryType.toLowerCase()];
+    if (!subcategories) return taskId;
+
+    const subcategory = subcategories.find(sub => sub.id === taskId);
+    return subcategory ? subcategory.name : taskId;
   };
 
   const CATEGORY_ICONS: { [key: string]: React.ReactNode } = {
@@ -566,7 +549,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
+              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Успех') }} />
               Показатель успеха
             </CardTitle>
           </CardHeader>
@@ -587,11 +570,11 @@ function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke={CATEGORY_COLORS.Успех}
-                  fill={CATEGORY_COLORS.Успех}
+                  stroke={getVarColor('Успех')}
+                  fill={getVarColor('Успех')}
                   name="Успех"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: CATEGORY_COLORS.Успех }}
+                  label={{ position: "top", fill: getVarColor('Успех') }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -601,7 +584,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Время }} />
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Время') }} />
               Общее время
             </CardTitle>
           </CardHeader>
@@ -623,13 +606,13 @@ function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="totalTime"
-                  stroke={CATEGORY_COLORS.Время}
-                  fill={CATEGORY_COLORS.Время}
+                  stroke={getVarColor('Время')}
+                  fill={getVarColor('Время')}
                   name="Время"
                   dot={{ r: 4 }}
                   label={{
                     position: "top",
-                    fill: CATEGORY_COLORS.Время,
+                    fill: getVarColor('Время'),
                     formatter: (value: any) => formatTimeTotal(value as number)
                   }}
                 />
@@ -641,7 +624,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Flame className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Спорт }} />
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Спорт') }} />
               Калории
             </CardTitle>
           </CardHeader>
@@ -662,11 +645,11 @@ function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="calories"
-                  stroke={CATEGORY_COLORS.Спорт}
-                  fill={CATEGORY_COLORS.Спорт}
+                  stroke={getVarColor('Спорт')}
+                  fill={getVarColor('Спорт')}
                   name="Калории"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: CATEGORY_COLORS.Спорт }}
+                  label={{ position: "top", fill: getVarColor('Спорт') }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -676,7 +659,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Траты') }} />
               Расходы
             </CardTitle>
           </CardHeader>
@@ -697,11 +680,11 @@ function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke={CATEGORY_COLORS.Траты}
-                  fill={CATEGORY_COLORS.Траты}
+                  stroke={getVarColor('Траты')}
+                  fill={getVarColor('Траты')}
                   name="Расходы"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: CATEGORY_COLORS.Траты }}
+                  label={{ position: "top", fill: getVarColor('Траты') }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -712,7 +695,7 @@ function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Траты') }} />
             Расходы по категориям
           </CardTitle>
         </CardHeader>
@@ -729,7 +712,7 @@ function Statistics() {
                         <th
                           key={category}
                           className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                          style={{ backgroundColor: hexToRGBA(getCssVar(settings.colors.expenses), 0.2) }}
+                          style={{ backgroundColor: hexToRGBA(getCssVar(settings?.colors?.expenses || 'gray'), 0.2) }}
                         >
                           {category}
                         </th>
@@ -749,7 +732,7 @@ function Statistics() {
                             className="px-4 py-2 text-center text-sm font-medium"
                             style={{
                               backgroundColor: hexToRGBA(
-                                getCssVar(settings.colors.expenses),
+                                getCssVar(settings?.colors?.expenses || 'gray'),
                                 Math.min((periodTotal / maxExpense) * 0.4 + 0.1, 0.5)
                               ),
                             }}
@@ -762,7 +745,7 @@ function Statistics() {
                               className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
                               style={{
                                 backgroundColor: hexToRGBA(
-                                  getCssVar(settings.colors.expenses),
+                                  getCssVar(settings?.colors?.expenses || 'gray'),
                                   Math.min(((categoryTotals[categoryName] || 0) / maxExpense) * 0.4 + 0.1, 0.5)
                                 ),
                               }}
@@ -779,7 +762,7 @@ function Statistics() {
                         className="px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
-                            getCssVar(settings.colors.expenses),
+                            getCssVar(settings?.colors?.expenses || 'gray'),
                             Math.min((Object.values(expensesByPeriod).reduce((sum, categoryTotals) =>
                               sum + Object.values(categoryTotals).reduce((a, b) => a + b, 0), 0) / maxExpense) * 0.4 + 0.1, 0.5)
                           ),
@@ -797,7 +780,7 @@ function Statistics() {
                             className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
                             style={{
                               backgroundColor: hexToRGBA(
-                                getCssVar(settings.colors.expenses),
+                                getCssVar(settings?.colors?.expenses || 'gray'),
                                 Math.min((categoryTotal / maxExpense) * 0.4 + 0.1, 0.5)
                               ),
                             }}
@@ -818,7 +801,7 @@ function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w5" style={{ color: CATEGORY_COLORS.Успех }} />
+            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w5" style={{ color: getVarColor('Успех') }} />
             Успешность задач по {displayType === "days" ? "дням" : displayType === "weeks" ? "неделям" : "месяцам"}
           </CardTitle>
         </CardHeader>
@@ -840,7 +823,8 @@ function Statistics() {
                             colSpan={category.tasks.length}
                             className="py-2 px-4 text-center text-sm font-semibold"
                             style={{
-                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',                              color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
+                              backgroundColor: hexToRGBA(getVarColor(category.name), 0.2),
+                              color: "#ffffff"
                             }}
                           >
                             {CATEGORY_ICONS[category.name]}
@@ -860,8 +844,8 @@ function Statistics() {
                               key={`${category.name}-${task.name}`}
                               className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
                               style={{
-                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
-                                color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
+                                backgroundColor: hexToRGBA(getVarColor(category.name), 0.2),
+                                color: "#ffffff",
                                 opacity: 0.8,
                                 minWidth: "80px",
                               }}
@@ -887,7 +871,7 @@ function Statistics() {
                             className="px-4 py-2 text-center text-sm font-medium"
                             style={{
                               backgroundColor: hexToRGBA(
-                                getCssVar(settings.colors.daySuccess),
+                                getVarColor('Успех'),
                                 Math.min((displayType === "days"
                                   ? calculateDayScore(entry as DayEntry)
                                   : (taskData as any).avgScore) / 100 * 0.4 + 0.1, 0.5)
@@ -916,7 +900,7 @@ function Statistics() {
                                     const isCompleted = taskInDay?.completed || false;
                                     displayValue = isCompleted ? "✓" : "×";
                                     if (isCompleted) {
-                                      textColor = getCssVar(settings.colors.daySuccess);
+                                      textColor = getVarColor('Успех');
                                     }
                                   } else if (task.type === TaskType.TIME) {
                                     const hours = Math.floor((taskInDay?.value || 0) / 60);
@@ -939,7 +923,7 @@ function Statistics() {
                                       : 0;
                                     displayValue = `${completionRate}%`;
                                     bgColor = hexToRGBA(
-                                      getCssVar(settings.colors.daySuccess),
+                                      getVarColor('Успех'),
                                       Math.min((completionRate / 100) * 0.4 + 0.1, 0.5)
                                     );
                                   } else if (task.type === TaskType.TIME) {
@@ -973,7 +957,7 @@ function Statistics() {
                         className="px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
-                            getCssVar(settings.colors.daySuccess),
+                            getVarColor('Успех'),
                             Math.min((avgDayScore / 100) * 0.4 + 0.1, 0.5)
                           ),
                         }}
@@ -1008,7 +992,7 @@ function Statistics() {
                               const percentage = Math.round((taskStats.completed / taskStats.total) * 100);
                               totalValue = `${percentage}%`;
                               bgColor = hexToRGBA(
-                                getCssVar(settings.colors.daySuccess),
+                                getVarColor('Успех'),
                                 Math.min((percentage / 100) * 0.4 + 0.1, 0.5)
                               );
                             } else if (task.type === TaskType.TIME) {
@@ -1042,7 +1026,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Время }} />
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Время') }} />
               Распределение времени: {formatTimeTotal(timeDistribution.totalMinutes)}
             </CardTitle>
           </CardHeader>
@@ -1068,7 +1052,7 @@ function Statistics() {
                     return (
                       <Cell
                         key={entry.name}
-                        fill={hexToRGBA(getCssVar(settings.colors.time), opacity)}
+                        fill={hexToRGBA(getVarColor('Время'), opacity)}
                       />
                     );
                   })}
@@ -1090,7 +1074,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Траты') }} />
               Распределение расходов: {expenseDistribution.totalExpenses}zł
             </CardTitle>
           </CardHeader>
@@ -1111,7 +1095,7 @@ function Statistics() {
                     return (
                       <Cell
                         key={entry.name}
-                        fill={hexToRGBA(getCssVar(settings.colors.expenses), opacity)}
+                        fill={hexToRGBA(getVarColor('Траты'), opacity)}
                       />
                     );
                   })}
