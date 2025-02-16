@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Category } from '@shared/schema';
@@ -13,7 +13,7 @@ interface TaskCardProps {
   isExpenseCard?: boolean;
 }
 
-export const TaskCard = React.memo(({ 
+export const TaskCard = ({ 
   category, 
   onTaskUpdate, 
   isExpenseCard = false 
@@ -33,7 +33,7 @@ export const TaskCard = React.memo(({
     [category.tasks, category.type]
   );
 
-  const handleTaskUpdate = useCallback((taskId: string, value: number | boolean | string) => {
+  const handleTaskUpdate = React.useCallback((taskId: string, value: number | boolean | string) => {
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
@@ -94,6 +94,7 @@ export const TaskCard = React.memo(({
         <div>
           {category.tasks.map((task) => {
             const storedTask = storedCategory?.tasks.find(t => t.id === task.id);
+            const currentTask = storedTask || task;
 
             return (
               <div 
@@ -102,12 +103,12 @@ export const TaskCard = React.memo(({
               >
                 {!isExpenseCard && (
                   <span className="w-1/2 text-gray-400">
-                    {storedTask ? `${storedTask.emoji} ${storedTask.name}` : task.name}
+                    {currentTask.emoji} {currentTask.name}
                   </span>
                 )}
                 <div className={isExpenseCard ? "w-full" : "w-1/2"}>
                   <TaskInput
-                    task={task}
+                    task={currentTask}
                     onChange={(value) => handleTaskUpdate(task.id, value)}
                     isExpenseCard={isExpenseCard}
                     categoryColor={iconColor}
@@ -120,8 +121,6 @@ export const TaskCard = React.memo(({
       </Card>
     </motion.div>
   );
-});
-
-TaskCard.displayName = 'TaskCard';
+};
 
 export default TaskCard;

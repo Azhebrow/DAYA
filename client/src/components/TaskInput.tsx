@@ -29,6 +29,12 @@ interface TaskInputProps {
 }
 
 const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: TaskInputProps) => {
+  // Обработчики изменений
+  const handleNumberChange = (value: string) => {
+    const num = parseInt(value, 10);
+    onChange(isNaN(num) ? 0 : num);
+  };
+
   // Checkbox component
   if (task.type === TaskType.CHECKBOX) {
     return (
@@ -52,11 +58,13 @@ const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: Tas
 
   // Time select component
   if (task.type === TaskType.TIME) {
+    const timeValue = String(task.value || 0);
+
     return (
       <Select
         defaultValue="0"
-        value={String(task.value || 0)}
-        onValueChange={(newValue) => onChange(Number(newValue))}
+        value={timeValue}
+        onValueChange={handleNumberChange}
       >
         <SelectTrigger 
           className={`w-full h-9 font-bold border-0 transition-all ${
@@ -88,11 +96,13 @@ const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: Tas
 
   // Calorie select component
   if (task.type === TaskType.CALORIE) {
+    const calorieValue = String(task.value || 0);
+
     return (
       <Select
         defaultValue="0"
-        value={String(task.value || 0)}
-        onValueChange={(newValue) => onChange(Number(newValue))}
+        value={calorieValue}
+        onValueChange={handleNumberChange}
       >
         <SelectTrigger 
           className={`w-full h-9 font-bold border-0 transition-all ${
