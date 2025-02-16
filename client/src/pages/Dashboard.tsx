@@ -440,9 +440,9 @@ export default function Dashboard() {
               </span>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-7 w-7 p-0"
                   >
                     <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
@@ -466,9 +466,9 @@ export default function Dashboard() {
             </span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-gray-400 hover:text-gray-300 p-1"
                 >
                   <CalendarIcon className="h-4 w-4" />
@@ -490,7 +490,7 @@ export default function Dashboard() {
           {dayEntry.categories.slice(0, 4).map((category) => (
             <TaskCard
               key={category.id}
-              category={category}
+              categoryName={category.name}
               onTaskUpdate={(taskId, value) => handleTaskUpdate(category.id, taskId, value)}
             />
           ))}
@@ -507,7 +507,7 @@ export default function Dashboard() {
           {dayEntry.categories.slice(4).map((category) => (
             <TaskCard
               key={category.id}
-              category={category}
+              categoryName={category.name}
               onTaskUpdate={(taskId, value) => handleTaskUpdate(category.id, taskId, value)}
               isExpenseCard={true}
             />
