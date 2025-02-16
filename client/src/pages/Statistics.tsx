@@ -757,7 +757,7 @@ export default function Statistics() {
                     <tr className="border-t-2 border-border font-bold">
                       <td className="py-2 px-4 text-sm font-semibold">Итого</td>
                       <td
-                        className="py-2 px-4 text-center text-sm font-semibold w-[100px]"
+                        className="py-2 px-4 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
                             getCssVar(settings.colors.daySuccess),
@@ -780,6 +780,7 @@ export default function Statistics() {
                           category.tasks.map((task) => {
                             let totalValue = "";
                             let bgColor = "transparent";
+                            let totalPercentage = 0;
 
                             if (task.type === TaskType.CHECKBOX) {
                               const completedCount = data.reduce((sum, day) => {
@@ -787,10 +788,10 @@ export default function Statistics() {
                                 const t = cat?.tasks.find((t) => t.name === task.name);
                                 return sum + (t?.completed ? 1 : 0);
                               }, 0);
-                              const percentage = Math.round((completedCount / data.length) * 100);
-                              const opacity = Math.min((percentage / 100) * 0.4 + 0.1, 0.5);
+                              totalPercentage = Math.round((completedCount / data.length) * 100);
+                              const opacity = Math.min((totalPercentage / 100) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
-                              totalValue = `${percentage}%`;
+                              totalValue = `${totalPercentage}%`;
                             } else if (task.type === TaskType.TIME) {
                               const totalMinutes = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
@@ -820,7 +821,7 @@ export default function Statistics() {
                                 {totalValue}
                               </td>
                             );
-                          })
+                          }),
                         )}
                     </tr>
                   </tbody>
