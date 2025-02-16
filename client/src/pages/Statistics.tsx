@@ -827,7 +827,7 @@ function Statistics() {
                           category.tasks.map((task) => (
                             <th
                               key={`${category.name}-${task.name}`}
-                                                            className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
+                              className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
                               style={{
                                 backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
                                 color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
@@ -866,15 +866,15 @@ function Statistics() {
                           )
                           .flatMap((category) =>
                             category.tasks.map((task) => {
-                              
                               let displayValue = "";
                               let bgColor = "transparent";
+                              let textColor = "inherit";
 
                               if (task.type === TaskType.CHECKBOX) {
                                 const isCompleted = task.completed;
                                 displayValue = isCompleted ? "✓" : "×";
                                 if (isCompleted) {
-                                  bgColor = hexToRGBA(getCssVar(settings.colors.daySuccess), 0.3);
+                                  textColor = getCssVar(settings.colors.daySuccess);
                                 }
                               } else if (task.type === TaskType.TIME) {
                                 const hours = Math.floor((task.value || 0) / 60);
@@ -885,13 +885,14 @@ function Statistics() {
 
                               return (
                                 <td
-                                  key={`${category.name}-${task.name}`}
+                                  key={`${day.date}-${category.name}-${task.name}`}
                                   className="px-4 py-2 text-center whitespace-nowrap"
-                                  style={{ backgroundColor: bgColor }}
+                                  style={{
+                                    backgroundColor: bgColor,
+                                    color: textColor
+                                  }}
                                 >
                                   {displayValue}
-                                  {task.type === TaskType.TIME && 'ч'}
-                                  {task.type === TaskType.CALORIE && 'ккал'}
                                 </td>
                               );
                             })
