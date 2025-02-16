@@ -45,6 +45,7 @@ import {
 } from "lucide-react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
 // Utility function to get CSS variable value
 const getCssVar = (varName: string) => {
@@ -826,7 +827,7 @@ export default function Statistics() {
                             {format(new Date(day.date), "dd.MM.yyyy")}
                           </td>
                           <td
-                            className="py                        py-2 px-4 text-center text-sm font-semibold font-bold min-w-[90px]"
+                            className="py-2 px-4 text-center text-smfont-semibold font-bold min-w-[90px]"
                             style={{
                               backgroundColor: `rgba(249, 115, 22, ${0.1 + (dayTotal / maxExpense) * 0.4})`,
                             }}
