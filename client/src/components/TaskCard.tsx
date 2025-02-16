@@ -75,7 +75,7 @@ export const TaskCard = React.memo(({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="bg-zinc-900/50">
+      <Card className="bg-zinc-900/50 task-card">
         <div className="flex items-center h-14 px-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
             <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
