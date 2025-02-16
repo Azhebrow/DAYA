@@ -197,6 +197,7 @@ export default function Dashboard() {
               name: 'Еда',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -204,14 +205,15 @@ export default function Dashboard() {
         {
           id: 'exp2',
           name: 'Дерьмо',
-          emoji: '💩',
+          emoji: '🍕',
           type: CategoryType.EXPENSE,
           tasks: [
             {
-              id: 'shit_expense',
+              id: 'junk_expense',
               name: 'Дерьмо',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -227,6 +229,7 @@ export default function Dashboard() {
               name: 'Город',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -234,7 +237,7 @@ export default function Dashboard() {
         {
           id: 'exp4',
           name: 'Спорт',
-          emoji: '🏃',
+          emoji: '⚽',
           type: CategoryType.EXPENSE,
           tasks: [
             {
@@ -242,6 +245,7 @@ export default function Dashboard() {
               name: 'Спорт',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -257,6 +261,7 @@ export default function Dashboard() {
               name: 'Отдых',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -264,14 +269,15 @@ export default function Dashboard() {
         {
           id: 'exp6',
           name: 'Сервис',
-          emoji: '📱',
+          emoji: '🔧',
           type: CategoryType.EXPENSE,
           tasks: [
             {
-              id: 'apps_expense',
+              id: 'service_expense',
               name: 'Сервис',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -279,7 +285,7 @@ export default function Dashboard() {
         {
           id: 'exp7',
           name: 'Разное',
-          emoji: '📝',
+          emoji: '📦',
           type: CategoryType.EXPENSE,
           tasks: [
             {
@@ -287,6 +293,7 @@ export default function Dashboard() {
               name: 'Разное',
               type: TaskType.EXPENSE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -303,6 +310,7 @@ export default function Dashboard() {
               type: TaskType.EXPENSE_NOTE,
               textValue: '',
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -440,9 +448,9 @@ export default function Dashboard() {
               </span>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-7 w-7 p-0"
                   >
                     <CalendarIcon className="h-3.5 w-3.5 text-gray-400" />
@@ -466,9 +474,9 @@ export default function Dashboard() {
             </span>
             <Popover>
               <PopoverTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="text-gray-400 hover:text-gray-300 p-1"
                 >
                   <CalendarIcon className="h-4 w-4" />
@@ -504,12 +512,13 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 xl:grid-cols-8 gap-4">
-          {dayEntry.categories.slice(4).map((category) => (
+          {dayEntry.categories.slice(4).map((category, index) => (
             <TaskCard
               key={category.id}
               category={category}
               onTaskUpdate={(taskId, value) => handleTaskUpdate(category.id, taskId, value)}
               isExpenseCard={true}
+              expenseIndex={index}
             />
           ))}
         </div>

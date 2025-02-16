@@ -5,26 +5,46 @@ import { Progress } from '@/components/ui/progress';
 import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
+import { useQuery } from '@tanstack/react-query';
+import { storage } from '@/lib/storage';
 
 interface TaskCardProps {
   category: Category;
   onTaskUpdate: (taskId: string, value: number | boolean | string) => void;
   isExpenseCard?: boolean;
+  expenseIndex?: number;
 }
 
 export const TaskCard = React.memo(({ 
   category, 
   onTaskUpdate, 
-  isExpenseCard = false 
+  isExpenseCard = false,
+  expenseIndex 
 }: TaskCardProps) => {
   const progress = React.useMemo(() => 
     calculateCategoryProgress(category.tasks, category.type),
     [category.tasks, category.type]
   );
 
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => storage.getSettings()
+  });
+
   const handleTaskUpdate = useCallback((taskId: string, value: number | boolean | string) => {
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
+
+  // If this is an expense card, update the name and emoji from settings
+  React.useEffect(() => {
+    if (isExpenseCard && settings?.subcategories?.expenses && typeof expenseIndex === 'number') {
+      const expenseCategory = settings.subcategories.expenses[expenseIndex];
+      if (expenseCategory) {
+        category.name = expenseCategory.name.split(' ')[1]; // Remove emoji prefix
+        category.emoji = expenseCategory.emoji;
+      }
+    }
+  }, [settings, category, isExpenseCard, expenseIndex]);
 
   return (
     <motion.div
