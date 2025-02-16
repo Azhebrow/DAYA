@@ -9,7 +9,7 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronDown, ChevronUp, Brain, Clock, ActivitySquare, Zap, DollarSign } from 'lucide-react';
+import { CalendarIcon, ChevronDown, ChevronUp, Brain, Clock, Dumbbell, Sparkles, DollarSign } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -36,7 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Текст клятвы по умолчанию
+// Основной текст клятвы остается без изменений
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
 Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
 Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
@@ -46,78 +46,78 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 const availableColors = {
   purple: {
     name: 'Фиолетовый',
-    value: 'from-purple-500 to-violet-700'
+    value: 'purple-500'
   },
   blue: {
     name: 'Синий',
-    value: 'from-blue-500 to-cyan-700'
+    value: 'blue-500'
   },
   green: {
     name: 'Зеленый',
-    value: 'from-green-500 to-emerald-700'
+    value: 'green-500'
   },
   red: {
     name: 'Красный',
-    value: 'from-red-500 to-rose-700'
+    value: 'red-500'
   },
   orange: {
     name: 'Оранжевый',
-    value: 'from-orange-500 to-amber-700'
+    value: 'orange-500'
   },
   yellow: {
     name: 'Желтый',
-    value: 'from-yellow-500 to-amber-700'
+    value: 'yellow-500'
   },
   pink: {
     name: 'Розовый',
-    value: 'from-pink-500 to-rose-700'
+    value: 'pink-500'
   },
   teal: {
     name: 'Бирюзовый',
-    value: 'from-teal-500 to-cyan-700'
+    value: 'teal-500'
   }
 };
 
 const colorSchemes = {
   default: {
     name: 'По умолчанию',
-    mind: 'from-purple-500 to-violet-700',
-    time: 'from-green-500 to-emerald-700',
-    sport: 'from-red-500 to-rose-700',
-    habits: 'from-orange-500 to-amber-700',
-    expenses: 'from-orange-500 to-amber-700',
+    mind: 'purple-500',
+    time: 'green-500',
+    sport: 'red-500',
+    habits: 'orange-500',
+    expenses: 'orange-500',
   },
   ocean: {
     name: 'Океан',
-    mind: 'from-blue-500 to-cyan-700',
-    time: 'from-teal-500 to-cyan-700',
-    sport: 'from-indigo-500 to-blue-700',
-    habits: 'from-sky-500 to-blue-700',
-    expenses: 'from-cyan-500 to-teal-700',
+    mind: 'blue-500',
+    time: 'teal-500',
+    sport: 'indigo-500',
+    habits: 'sky-500',
+    expenses: 'cyan-500',
   },
   sunset: {
     name: 'Закат',
-    mind: 'from-pink-500 to-rose-700',
-    time: 'from-orange-500 to-red-700',
-    sport: 'from-red-500 to-rose-700',
-    habits: 'from-yellow-500 to-orange-700',
-    expenses: 'from-amber-500 to-orange-700',
+    mind: 'pink-500',
+    time: 'orange-500',
+    sport: 'red-500',
+    habits: 'yellow-500',
+    expenses: 'amber-500',
   },
   forest: {
     name: 'Лес',
-    mind: 'from-emerald-500 to-green-700',
-    time: 'from-lime-500 to-green-700',
-    sport: 'from-green-500 to-emerald-700',
-    habits: 'from-teal-500 to-green-700',
-    expenses: 'from-green-500 to-teal-700',
+    mind: 'emerald-500',
+    time: 'lime-500',
+    sport: 'green-500',
+    habits: 'teal-500',
+    expenses: 'green-500',
   },
   monochrome: {
     name: 'Монохром',
-    mind: 'from-gray-500 to-slate-700',
-    time: 'from-zinc-500 to-gray-700',
-    habits: 'from-slate-500 to-zinc-700',
-    sport: 'from-neutral-500 to-gray-700',
-    expenses: 'from-stone-500 to-slate-700',
+    mind: 'gray-500',
+    time: 'zinc-500',
+    habits: 'slate-500',
+    sport: 'neutral-500',
+    expenses: 'stone-500',
   }
 };
 
@@ -131,20 +131,20 @@ export default function SettingsPage() {
         oathText: DEFAULT_OATH_TEXT,
         colorScheme: 'default',
         colors: {
-          mind: 'from-purple-500 to-violet-700',
-          time: 'from-green-500 to-emerald-700',
-          sport: 'from-red-500 to-rose-700',
-          habits: 'from-orange-500 to-amber-700',
-          expenses: 'from-orange-500 to-amber-700',
+          mind: 'purple-500',
+          time: 'green-500',
+          sport: 'red-500',
+          habits: 'orange-500',
+          expenses: 'orange-500',
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
       return { ...parsedSettings, colors: parsedSettings.colors || {
-          mind: 'from-purple-500 to-violet-700',
-          time: 'from-green-500 to-emerald-700',
-          sport: 'from-red-500 to-rose-700',
-          habits: 'from-orange-500 to-amber-700',
-          expenses: 'from-orange-500 to-amber-700',
+          mind: 'purple-500',
+          time: 'green-500',
+          sport: 'red-500',
+          habits: 'orange-500',
+          expenses: 'orange-500',
         } };
     } catch (error) {
       console.error('Error parsing settings:', error);
@@ -154,11 +154,11 @@ export default function SettingsPage() {
         oathText: DEFAULT_OATH_TEXT,
         colorScheme: 'default',
         colors: {
-          mind: 'from-purple-500 to-violet-700',
-          time: 'from-green-500 to-emerald-700',
-          sport: 'from-red-500 to-rose-700',
-          habits: 'from-orange-500 to-amber-700',
-          expenses: 'from-orange-500 to-amber-700',
+          mind: 'purple-500',
+          time: 'green-500',
+          sport: 'red-500',
+          habits: 'orange-500',
+          expenses: 'orange-500',
         }
       });
     }
@@ -340,9 +340,10 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4">
+                {/* Разум */}
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.mind} flex items-center justify-center`}>
-                    <Brain className="h-6 w-6 text-white" />
+                  <div className={`p-4 rounded-lg bg-${settings.colors.mind} flex items-center justify-center`}>
+                    <Brain className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-grow">
                     <Label>Разум</Label>
@@ -364,9 +365,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
+                {/* Время */}
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.time} flex items-center justify-center`}>
-                    <Clock className="h-6 w-6 text-white" />
+                  <div className={`p-4 rounded-lg bg-${settings.colors.time} flex items-center justify-center`}>
+                    <Clock className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-grow">
                     <Label>Время</Label>
@@ -388,9 +390,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
+                {/* Спорт */}
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.sport} flex items-center justify-center`}>
-                    <ActivitySquare className="h-6 w-6 text-white" />
+                  <div className={`p-4 rounded-lg bg-${settings.colors.sport} flex items-center justify-center`}>
+                    <Dumbbell className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-grow">
                     <Label>Спорт</Label>
@@ -412,9 +415,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
+                {/* Привычки */}
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.habits} flex items-center justify-center`}>
-                    <Zap className="h-6 w-6 text-white" />
+                  <div className={`p-4 rounded-lg bg-${settings.colors.habits} flex items-center justify-center`}>
+                    <Sparkles className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-grow">
                     <Label>Привычки</Label>
@@ -436,9 +440,10 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
+                {/* Траты */}
                 <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-gradient-to-br ${settings.colors.expenses} flex items-center justify-center`}>
-                    <DollarSign className="h-6 w-6 text-white" />
+                  <div className={`p-4 rounded-lg bg-${settings.colors.expenses} flex items-center justify-center`}>
+                    <DollarSign className="h-5 w-5 text-white" />
                   </div>
                   <div className="flex-grow">
                     <Label>Траты</Label>

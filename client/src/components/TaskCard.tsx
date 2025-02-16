@@ -38,33 +38,36 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  // Get category icon
-  const getCategoryIcon = () => {
+  // Получение цвета из настроек
+  const getCategoryColor = () => {
     switch (category.name) {
       case 'Разум':
-        return <Brain className="w-6 h-6" />;
+        return settings.colors?.mind || 'purple-500';
       case 'Время':
-        return <Clock className="w-6 h-6" />;
+        return settings.colors?.time || 'green-500';
       case 'Спорт':
-        return <Dumbbell className="w-6 h-6" />;
+        return settings.colors?.sport || 'red-500';
       case 'Привычки':
-        return <Sparkles className="w-6 h-6" />;
+        return settings.colors?.habits || 'orange-500';
       default:
-        return null;
+        return settings.colors?.expenses || 'orange-500';
     }
   };
 
-  const getCategoryColor = () => {
-    const colorMap = {
-      'Разум': 'purple',
-      'Время': 'green',
-      'Спорт': 'red',
-      'Привычки': 'orange',
-      'default': 'zinc'
-    };
-
-    const baseName = colorMap[category.name] || colorMap.default;
-    return `${baseName}-500`;
+  // Получение иконки для категории
+  const getCategoryIcon = () => {
+    switch (category.name) {
+      case 'Разум':
+        return <Brain className="h-5 w-5" />;
+      case 'Время':
+        return <Clock className="h-5 w-5" />;
+      case 'Спорт':
+        return <Dumbbell className="h-5 w-5" />;
+      case 'Привычки':
+        return <Sparkles className="h-5 w-5" />;
+      default:
+        return null;
+    }
   };
 
   const categoryColor = getCategoryColor();
@@ -92,11 +95,7 @@ export const TaskCard = React.memo(({
               {!isExpenseCard && (
                 <Progress 
                   value={progress} 
-                  className="h-2.5"
-                  style={{
-                    backgroundColor: 'rgb(39, 39, 42)'
-                  }}
-                  className={`bg-zinc-800 [&>div]:bg-${categoryColor}`}
+                  className={`h-2.5 bg-zinc-800 [&>div]:bg-${categoryColor}`}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
@@ -104,23 +103,25 @@ export const TaskCard = React.memo(({
           </div>
 
           {/* Task rows */}
-          {category.tasks.map((task) => (
-            <div key={task.id} className="flex items-center h-[3.5rem]">
-              {!isExpenseCard && (
-                <div className="w-1/2 px-4">
-                  <span className="text-base text-gray-400">{task.name}</span>
+          <div className="divide-y divide-zinc-800">
+            {category.tasks.map((task) => (
+              <div key={task.id} className="flex items-center h-[3.5rem]">
+                {!isExpenseCard && (
+                  <div className="w-1/2 px-4">
+                    <span className="text-base text-gray-400">{task.name}</span>
+                  </div>
+                )}
+                <div className={isExpenseCard ? "w-full px-4" : "w-1/2 px-4"}>
+                  <TaskInput
+                    task={task}
+                    onChange={(value) => handleTaskUpdate(task.id, value)}
+                    isExpenseCard={isExpenseCard}
+                    categoryColor={categoryColor}
+                  />
                 </div>
-              )}
-              <div className={isExpenseCard ? "w-full px-4" : "w-1/2 px-4"}>
-                <TaskInput
-                  task={task}
-                  onChange={(value) => handleTaskUpdate(task.id, value)}
-                  isExpenseCard={isExpenseCard}
-                  categoryColor={categoryColor}
-                />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Card>
     </motion.div>
