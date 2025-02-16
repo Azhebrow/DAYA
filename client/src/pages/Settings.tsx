@@ -175,38 +175,57 @@ export default function SettingsPage() {
 
   const handleTaskNameChange = React.useCallback((categoryName: string, taskName: string, newName: string, newEmoji: string) => {
     try {
+      console.log('Attempting to update task:', { categoryName, taskName, newName, newEmoji });
+
       const tasks = localStorage.getItem('tasks');
       if (!tasks) {
+        console.error('No tasks found in storage');
         throw new Error('No tasks found in storage');
       }
 
-      const parsedTasks = JSON.parse(tasks);
-      const category = parsedTasks.find((c: any) => c.name === categoryName);
+      let parsedTasks;
+      try {
+        parsedTasks = JSON.parse(tasks);
+        console.log('Current tasks:', parsedTasks);
+      } catch (e) {
+        console.error('Failed to parse tasks:', e);
+        throw new Error('Failed to parse tasks');
+      }
 
+      if (!Array.isArray(parsedTasks)) {
+        console.error('Tasks is not an array:', parsedTasks);
+        throw new Error('Invalid tasks format');
+      }
+
+      const category = parsedTasks.find((c: any) => c.name === categoryName);
       if (!category) {
+        console.error('Category not found:', categoryName);
         throw new Error(`Category ${categoryName} not found`);
       }
 
       const task = category.tasks.find((t: any) => t.name === taskName);
       if (!task) {
+        console.error('Task not found:', taskName);
         throw new Error(`Task ${taskName} not found in ${categoryName}`);
       }
 
-      const updatedTasks = parsedTasks.map((category: any) => {
-        if (category.name === categoryName) {
+      const updatedTasks = parsedTasks.map((c: any) => {
+        if (c.name === categoryName) {
           return {
-            ...category,
-            tasks: category.tasks.map((task: any) =>
-              task.name === taskName
-                ? { ...task, name: newName, emoji: newEmoji }
-                : task
+            ...c,
+            tasks: c.tasks.map((t: any) =>
+              t.name === taskName
+                ? { ...t, name: newName, emoji: newEmoji }
+                : t
             )
           };
         }
-        return category;
+        return c;
       });
 
+      console.log('Updated tasks:', updatedTasks);
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+
       toast({
         title: "Задача обновлена",
         description: `${newEmoji} ${newName} успешно сохранено`,
@@ -215,7 +234,7 @@ export default function SettingsPage() {
       console.error('Error updating task:', error);
       toast({
         title: "Ошибка",
-        description: "Не удалось обновить задачу",
+        description: "Не удалось обновить задачу: " + (error instanceof Error ? error.message : 'Неизвестная ошибка'),
         variant: "destructive"
       });
     }
