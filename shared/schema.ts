@@ -124,6 +124,7 @@ export const settingsSchema = z.object({
   viewMode: z.enum(['normal', 'weekly', 'monthly']).default('normal'),
   timeRange: z.enum(['7', '14', '30']).default('7'),
   oathText: z.string().optional(),
+  colorScheme: z.enum(['default', 'ocean', 'sunset', 'forest', 'monochrome']).default('default'),
   pomodoroSettings: pomodoroSettingsSchema.optional()
 });
 

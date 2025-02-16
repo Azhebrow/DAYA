@@ -9,7 +9,7 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { CalendarIcon, ChevronDown, ChevronUp, Brain, Clock, ActivitySquare, Zap, DollarSign } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -28,6 +28,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Текст клятвы по умолчанию
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
@@ -36,6 +43,49 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
 
+const colorSchemes = {
+  default: {
+    name: 'По умолчанию',
+    mind: 'from-purple-500 to-violet-700',
+    time: 'from-green-500 to-emerald-700',
+    sport: 'from-red-500 to-rose-700',
+    habits: 'from-orange-500 to-amber-700',
+    expenses: 'from-orange-500 to-amber-700',
+  },
+  ocean: {
+    name: 'Океан',
+    mind: 'from-blue-500 to-cyan-700',
+    time: 'from-teal-500 to-cyan-700',
+    sport: 'from-indigo-500 to-blue-700',
+    habits: 'from-sky-500 to-blue-700',
+    expenses: 'from-cyan-500 to-teal-700',
+  },
+  sunset: {
+    name: 'Закат',
+    mind: 'from-pink-500 to-rose-700',
+    time: 'from-orange-500 to-red-700',
+    sport: 'from-red-500 to-rose-700',
+    habits: 'from-yellow-500 to-orange-700',
+    expenses: 'from-amber-500 to-orange-700',
+  },
+  forest: {
+    name: 'Лес',
+    mind: 'from-emerald-500 to-green-700',
+    time: 'from-lime-500 to-green-700',
+    sport: 'from-green-500 to-emerald-700',
+    habits: 'from-teal-500 to-green-700',
+    expenses: 'from-green-500 to-teal-700',
+  },
+  monochrome: {
+    name: 'Монохром',
+    mind: 'from-gray-500 to-slate-700',
+    time: 'from-zinc-500 to-gray-700',
+    habits: 'from-slate-500 to-zinc-700',
+    sport: 'from-neutral-500 to-gray-700',
+    expenses: 'from-stone-500 to-slate-700',
+  }
+};
+
 export default function SettingsPage() {
   const [settings, setSettings] = React.useState<Settings>(() => {
     try {
@@ -43,7 +93,8 @@ export default function SettingsPage() {
       if (!stored) return settingsSchema.parse({ 
         startDate: '2025-02-07', 
         endDate: '2025-09-09',
-        oathText: DEFAULT_OATH_TEXT 
+        oathText: DEFAULT_OATH_TEXT,
+        colorScheme: 'default'
       });
       return settingsSchema.parse(JSON.parse(stored));
     } catch (error) {
@@ -51,7 +102,8 @@ export default function SettingsPage() {
       return settingsSchema.parse({ 
         startDate: '2025-02-07', 
         endDate: '2025-09-09',
-        oathText: DEFAULT_OATH_TEXT 
+        oathText: DEFAULT_OATH_TEXT,
+        colorScheme: 'default'
       });
     }
   });
@@ -94,6 +146,8 @@ export default function SettingsPage() {
 
   // Convert minutes to hours for display
   const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
+
+  const currentScheme = colorSchemes[settings.colorScheme as keyof typeof colorSchemes] || colorSchemes.default;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
@@ -213,6 +267,55 @@ export default function SettingsPage() {
                     className="transition-shadow hover:shadow-md focus:shadow-lg"
                     step="0.5"
                   />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Карточка цветовой схемы */}
+          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+            <CardHeader>
+              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Цветовая схема
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Выберите цветовую схему</Label>
+                  <Select
+                    value={settings.colorScheme}
+                    onValueChange={(value) => handleSettingChange('colorScheme', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Выберите схему" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(colorSchemes).map(([key, scheme]) => (
+                        <SelectItem key={key} value={key}>
+                          {scheme.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-5 gap-2">
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.mind} flex items-center justify-center`}>
+                    <Brain className="h-6 w-6 text-white" />
+                  </div>
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.time} flex items-center justify-center`}>
+                    <Clock className="h-6 w-6 text-white" />
+                  </div>
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.sport} flex items-center justify-center`}>
+                    <ActivitySquare className="h-6 w-6 text-white" />
+                  </div>
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.habits} flex items-center justify-center`}>
+                    <Zap className="h-6 w-6 text-white" />
+                  </div>
+                  <div className={`p-4 rounded-lg bg-gradient-to-br ${currentScheme.expenses} flex items-center justify-center`}>
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
                 </div>
               </div>
             </CardContent>
