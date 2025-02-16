@@ -678,7 +678,7 @@ export default function Statistics() {
                             className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
                             style={{
                               backgroundColor: hexToRGBA(
-                                getCssVar(settings.colors.daySuccess),
+                                getCssVar(settings.colors.expenses),
                                 Math.min((grandTotal / (maxTotal * data.length)) * 0.4 + 0.1, 0.5)
                               ),
                             }}
@@ -748,102 +748,6 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Графики распределения */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-        <Card className="w-full">
-          <CardHeader className="space-y-1 pb-2">
-            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Время }} />
-              Распределение времени: {formatTimeTotal(timeDistribution.totalMinutes)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[250px] sm:h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={timeDistribution.distribution.map((entry) => ({
-                    ...entry,
-                    minutes: Math.round(entry.minutes / 60),
-                  }))}
-                  dataKey="minutes"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={(entry) =>
-                    `${entry.name}: ${Math.round(entry.minutes)}ч`
-                  }
-                >
-                  {timeDistribution.distribution.map((entry, index) => {
-                    // Calculate opacity based on the proportion of total time
-                    const opacity = Math.min((entry.minutes / timeDistribution.totalMinutes) * 0.8 + 0.2, 1);
-                    return (
-                      <Cell
-                        key={entry.name}
-                        fill={hexToRGBA(getCssVar(settings.colors.time), opacity)}
-                      />
-                    );
-                  })}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(0, 0, 0, 0.8)",
-                    border: "none",
-                  }}
-                  itemStyle={{ color: "#ffffff" }}
-                  labelStyle={{ color: "#ffffff" }}
-                  formatter={(value) => `${Math.round(Number(value))}ч`}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="w-full">
-          <CardHeader className="space-y-1 pb-2">
-            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
-              Распределение расходов: {expenseDistribution.totalExpenses}zł
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[250px] sm:h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={expenseDistribution.distribution}
-                  dataKey="amount"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={80}
-                  label={(entry) => `${entry.name}: ${entry.amount}zł`}
-                >
-                  {expenseDistribution.distribution.map((entry, index) => {
-                    // Calculate opacity based on the proportion of total expenses
-                    const opacity = Math.min((entry.amount / expenseDistribution.totalExpenses) * 0.8 + 0.2, 1);
-                    return (
-                      <Cell
-                        key={entry.name}
-                        fill={hexToRGBA(getCssVar(settings.colors.expenses), opacity)}
-                      />
-                    );
-                  })}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "rgba(0, 0, 0, 0.8)",
-                    border: "none",
-                  }}
-                  itemStyle={{ color: "#ffffff" }}
-                  labelStyle={{ color: "#ffffff" }}
-                  formatter={(value) => `${value}zł`}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Таблица успешности задач по дням */}
       <Card>
@@ -951,7 +855,7 @@ export default function Statistics() {
                                   displayValue = formatTimeTotal(task.value || 0);
                                   const maxValue = 8 * 60;
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                  bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
+                                  bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.settings.colors]), opacity);
                                 } else if (task.type === TaskType.CALORIE) {
                                   displayValue = `${task.value || 0}`;
                                   const maxValue = 3000;
@@ -1144,6 +1048,101 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
+      {/* Графики распределения */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="w-full">
+          <CardHeader className="space-y-1 pb-2">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Время }} />
+              Распределение времени: {formatTimeTotal(timeDistribution.totalMinutes)}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[250px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={timeDistribution.distribution.map((entry) => ({
+                    ...entry,
+                    minutes: Math.round(entry.minutes / 60),
+                  }))}
+                  dataKey="minutes"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={(entry) =>
+                    `${entry.name}: ${Math.round(entry.minutes)}ч`
+                  }
+                >
+                  {timeDistribution.distribution.map((entry, index) => {
+                    // Calculate opacity based on the proportion of total time
+                    const opacity = Math.min((entry.minutes / timeDistribution.totalMinutes) * 0.8 + 0.2, 1);
+                    return (
+                      <Cell
+                        key={entry.name}
+                        fill={hexToRGBA(getCssVar(settings.colors.time), opacity)}
+                      />
+                    );
+                  })}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    border: "none",
+                  }}
+                  itemStyle={{ color: "#ffffff" }}
+                  labelStyle={{ color: "#ffffff" }}
+                  formatter={(value) => `${Math.round(Number(value))}ч`}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full">
+          <CardHeader className="space-y-1 pb-2">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
+              Распределение расходов: {expenseDistribution.totalExpenses}zł
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[250px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={expenseDistribution.distribution}
+                  dataKey="amount"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  label={(entry) => `${entry.name}: ${entry.amount}zł`}
+                >
+                  {expenseDistribution.distribution.map((entry, index) => {
+                    // Calculate opacity based on the proportion of total expenses
+                    const opacity = Math.min((entry.amount / expenseDistribution.totalExpenses) * 0.8 + 0.2, 1);
+                    return (
+                      <Cell
+                        key={entry.name}
+                        fill={hexToRGBA(getCssVar(settings.colors.expenses), opacity)}
+                      />
+                    );
+                  })}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    border: "none",
+                  }}
+                  itemStyle={{ color: "#ffffff" }}
+                  labelStyle={{ color: "#ffffff" }}
+                  formatter={(value) => `${value}zł`}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
