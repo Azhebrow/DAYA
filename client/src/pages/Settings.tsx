@@ -25,6 +25,7 @@ const EMOJIS = {
 interface TaskNameEditorProps {
   taskName: string;
   emoji: string;
+  taskId: string; // Added taskId prop
   onChange: (newName: string, newEmoji: string) => void;
   icon: React.ElementType;
   color: string;
@@ -34,6 +35,7 @@ interface TaskNameEditorProps {
 const TaskNameEditor = ({
   taskName,
   emoji,
+  taskId, // Use taskId prop
   onChange,
   icon: Icon,
   color,
@@ -223,7 +225,7 @@ export default function SettingsPage() {
     });
   }, []);
 
-  const handleTaskNameChange = React.useCallback((categoryName: string, taskName: string, newName: string, newEmoji: string) => {
+  const handleTaskNameChange = React.useCallback((categoryName: string, taskId: string, newName: string, newEmoji: string) => {
     try {
       const tasks = storage.getTasks();
       const category = tasks.find(c => c.name === categoryName);
@@ -232,9 +234,9 @@ export default function SettingsPage() {
         throw new Error(`Category ${categoryName} not found`);
       }
 
-      const task = category.tasks.find(t => t.name === taskName);
+      const task = category.tasks.find(t => t.id === taskId);
       if (!task) {
-        throw new Error(`Task ${taskName} not found in ${categoryName}`);
+        throw new Error(`Task ${taskId} not found in ${categoryName}`);
       }
 
       const updatedTasks = tasks.map(c => {
@@ -242,9 +244,7 @@ export default function SettingsPage() {
           return {
             ...c,
             tasks: c.tasks.map(t =>
-              t.name === taskName
-                ? { ...t, name: newName, emoji: newEmoji }
-                : t
+              t.id === taskId ? { ...t, name: newName, emoji: newEmoji } : t
             )
           };
         }
@@ -318,16 +318,18 @@ export default function SettingsPage() {
               <Label className="text-sm text-muted-foreground">Разум</Label>
               <TaskNameEditor
                 taskName="Дыхание"
+                taskId="1" // Added taskId
                 emoji="🫁"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Дыхание', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', '1', newName, newEmoji)}
                 icon={Brain}
                 color={settings.colors.mind}
                 toast={toast}
               />
               <TaskNameEditor
                 taskName="Чай"
+                taskId="2" // Added taskId
                 emoji="🍵"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Чай', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', '2', newName, newEmoji)}
                 icon={Brain}
                 color={settings.colors.mind}
                 toast={toast}
@@ -339,32 +341,36 @@ export default function SettingsPage() {
               <Label className="text-sm text-muted-foreground">Время</Label>
               <TaskNameEditor
                 taskName="Уборка"
+                taskId="3" // Added taskId
                 emoji="🧹"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Уборка', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '3', newName, newEmoji)}
                 icon={Clock}
                 color={settings.colors.time}
                 toast={toast}
               />
               <TaskNameEditor
                 taskName="Работа"
+                taskId="4" // Added taskId
                 emoji="💼"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Работа', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '4', newName, newEmoji)}
                 icon={Clock}
                 color={settings.colors.time}
                 toast={toast}
               />
               <TaskNameEditor
                 taskName="Учёба"
+                taskId="5" // Added taskId
                 emoji="📚"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Учёба', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '5', newName, newEmoji)}
                 icon={Clock}
                 color={settings.colors.time}
                 toast={toast}
               />
               <TaskNameEditor
                 taskName="Проект"
+                taskId="6" // Added taskId
                 emoji="🎯"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Проект', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '6', newName, newEmoji)}
                 icon={Clock}
                 color={settings.colors.time}
                 toast={toast}
@@ -376,8 +382,9 @@ export default function SettingsPage() {
               <Label className="text-sm text-muted-foreground">Здоровье</Label>
               <TaskNameEditor
                 taskName="Таблетки"
+                taskId="7" // Added taskId
                 emoji="💊"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', 'Таблетки', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', '7', newName, newEmoji)}
                 icon={Dumbbell}
                 color={settings.colors.sport}
                 toast={toast}
@@ -389,16 +396,18 @@ export default function SettingsPage() {
               <Label className="text-sm text-muted-foreground">Пороки</Label>
               <TaskNameEditor
                 taskName="Дерьмо"
+                taskId="8" // Added taskId
                 emoji="🍔"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Дерьмо', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', '8', newName, newEmoji)}
                 icon={Ban}
                 color={settings.colors.habits}
                 toast={toast}
               />
               <TaskNameEditor
                 taskName="Порно"
+                taskId="9" // Added taskId
                 emoji="🔞"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Порно', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', '9', newName, newEmoji)}
                 icon={Ban}
                 color={settings.colors.habits}
                 toast={toast}
@@ -410,8 +419,9 @@ export default function SettingsPage() {
               <Label className="text-sm text-muted-foreground">Траты</Label>
               <TaskNameEditor
                 taskName="Траты"
+                taskId="10" // Added taskId
                 emoji="💸"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Траты', 'Траты', newName, newEmoji)}
+                onChange={(newName, newEmoji) => handleTaskNameChange('Траты', '10', newName, newEmoji)}
                 icon={DollarSign}
                 color={settings.colors.expenses}
                 toast={toast}

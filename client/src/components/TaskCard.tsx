@@ -18,11 +18,12 @@ export const TaskCard = React.memo(({
   onTaskUpdate, 
   isExpenseCard = false 
 }: TaskCardProps) => {
-  const [tasks, setTasks] = React.useState(() => storage.getTasks());
+  const [storedTasks, setStoredTasks] = React.useState(() => storage.getTasks());
+  const settings = storage.getSettings();
 
   React.useEffect(() => {
     return storage.subscribe(() => {
-      setTasks(storage.getTasks());
+      setStoredTasks(storage.getTasks());
     });
   }, []);
 
@@ -36,15 +37,12 @@ export const TaskCard = React.memo(({
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
-    const settings = storage.getSettings();
     const colors = settings.colors;
-
     switch (category.name) {
       case 'Разум': return `var(${colors.mind})`;
       case 'Время': return `var(${colors.time})`;
       case 'Спорт': return `var(${colors.sport})`;
-      case 'Привычки': return `var(${colors.habits})`; 
-      case 'Пороки': return `var(${colors.habits})`; 
+      case 'Пороки': return `var(${colors.habits})`;
       default: return `var(${colors.expenses})`;
     }
   };
@@ -54,13 +52,13 @@ export const TaskCard = React.memo(({
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
-      case 'Привычки': 
       case 'Пороки': return <Ban className="h-5 w-5" />;
       default: return <DollarSign className="h-5 w-5" />;
     }
   };
 
   const iconColor = getIconColor();
+  const storedCategory = storedTasks.find(c => c.name === category.name);
 
   return (
     <motion.div
@@ -73,7 +71,7 @@ export const TaskCard = React.memo(({
           <div className="flex items-center gap-2">
             <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
             <span className="text-base font-medium text-gray-200">
-              {category.name === 'Привычки' ? 'Пороки' : category.name}
+              {category.name}
             </span>
           </div>
 
@@ -94,9 +92,7 @@ export const TaskCard = React.memo(({
 
         <div>
           {category.tasks.map((task) => {
-            // Find the task definition from storage
-            const categoryData = tasks.find(c => c.name === category.name);
-            const taskData = categoryData?.tasks.find(t => t.id === task.id);
+            const storedTask = storedCategory?.tasks.find(t => t.id === task.id);
 
             return (
               <div 
@@ -105,7 +101,7 @@ export const TaskCard = React.memo(({
               >
                 {!isExpenseCard && (
                   <span className="w-1/2 text-gray-400">
-                    {taskData ? `${taskData.emoji} ${taskData.name}` : task.name}
+                    {storedTask ? `${storedTask.emoji} ${storedTask.name}` : task.name}
                   </span>
                 )}
                 <div className={isExpenseCard ? "w-full" : "w-1/2"}>
