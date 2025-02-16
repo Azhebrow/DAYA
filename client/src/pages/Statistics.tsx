@@ -78,20 +78,20 @@ export default function Statistics() {
 
   const getVarColor = (varName: string) => `var(${varName})`;
 
-  const CATEGORY_COLORS = {
-    Разум: getVarColor(settings.colors.mind),
-    Время: getVarColor(settings.colors.time),
-    Спорт: getVarColor(settings.colors.sport),
-    Привычки: getVarColor(settings.colors.habits),
-    Траты: getVarColor(settings.colors.expenses),
-    Успех: getVarColor(settings.colors.daySuccess) // Use daySuccess color for success indicators
+  const CATEGORY_COLORS: { [key: string]: string } = {
+    'Разум': getVarColor(settings.colors.mind),
+    'Время': getVarColor(settings.colors.time),
+    'Спорт': getVarColor(settings.colors.sport),
+    'Привычки': getVarColor(settings.colors.habits),
+    'Траты': getVarColor(settings.colors.expenses),
+    'Успех': getVarColor('--success') // Use a CSS variable for success color
   };
 
-  const CATEGORY_HEADER_COLORS = {
-    Разум: { bg: `${CATEGORY_COLORS.Разум}20`, text: "#ffffff" },
-    Время: { bg: `${CATEGORY_COLORS.Время}20`, text: "#ffffff" },
-    Спорт: { bg: `${CATEGORY_COLORS.Спорт}20`, text: "#ffffff" },
-    Привычки: { bg: `${CATEGORY_COLORS.Привычки}20`, text: "#ffffff" }
+  const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
+    'Разум': { bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2), text: "#ffffff" },
+    'Время': { bg: hexToRGBA(getCssVar(settings.colors.time), 0.2), text: "#ffffff" },
+    'Спорт': { bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2), text: "#ffffff" },
+    'Привычки': { bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2), text: "#ffffff" }
   };
 
   const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(() => {
@@ -593,8 +593,8 @@ export default function Statistics() {
                             colSpan={category.tasks.length}
                             className="py-2 px-4 text-center text-sm font-semibold"
                             style={{
-                              backgroundColor: `${CATEGORY_COLORS[category.name]}20`,
-                              color: "#ffffff",
+                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
+                              color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
                             }}
                           >
                             {category.name}
@@ -613,8 +613,8 @@ export default function Statistics() {
                               key={`${category.name}-${task.name}`}
                               className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
                               style={{
-                                backgroundColor: `${CATEGORY_COLORS[category.name]}20`,
-                                color: "#ffffff",
+                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
+                                color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
                                 opacity: 0.8,
                                 minWidth: "80px",
                               }}
@@ -672,12 +672,12 @@ export default function Statistics() {
                                   displayValue = formatTimeTotal(task.value || 0);
                                   const maxValue = 8 * 60; // 8 hours in minutes
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                  bgColor = `${CATEGORY_COLORS[category.name]}${Math.round(opacity * 255).toString(16)}`;
+                                  bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                                 } else if (task.type === TaskType.CALORIE) {
                                   displayValue = `${task.value || 0}`;
                                   const maxValue = 3000; // 3000 calories
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                  bgColor = `${CATEGORY_COLORS[category.name]}${Math.round(opacity * 255).toString(16)}`;
+                                  bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                                 }
 
                                 return (
@@ -727,7 +727,8 @@ export default function Statistics() {
                                 return sum + (t?.completed ? 1 : 0);
                               }, 0);
                               const percentage = Math.round((completedCount / data.length) * 100);
-                              bgColor = `${CATEGORY_COLORS[category.name]}${Math.round(10 + (percentage / 100) * 40).toString(16)}`;
+                              const opacity = Math.min((percentage / 100) * 0.4 + 0.1, 0.5);
+                              bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                               totalValue = `${percentage}%`;
                             } else if (task.type === TaskType.TIME) {
                               const totalMinutes = data.reduce((sum, day) => {
@@ -736,7 +737,8 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = formatTimeTotal(totalMinutes);
-                              bgColor = `${CATEGORY_COLORS[category.name]}20`;
+                              const opacity = 0.2;
+                              bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
@@ -744,7 +746,8 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
-                              bgColor = `${CATEGORY_COLORS[category.name]}20`;
+                              const opacity = 0.2;
+                              bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             }
 
                             return (
@@ -787,7 +790,7 @@ export default function Statistics() {
                         .filter(
                           (category) => category.type === CategoryType.EXPENSE,
                         )
-                        .map((category) => (
+                        .map((category) =>                        (
                           <th
                             key={category.name}
                             className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
