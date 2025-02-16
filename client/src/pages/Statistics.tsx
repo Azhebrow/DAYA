@@ -42,55 +42,54 @@ import {
   BarChartIcon,
   CheckIcon,
   X,
+  Brain,
+  Dumbbell,
+  Ban,
 } from "lucide-react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
-// Updated color utility functions with proper error handling and type safety
 const getCssVar = (varName: string): string => {
-  if (typeof document === 'undefined') return '#000000'; // Fallback for SSR
-  if (!varName) return '#000000'; // Fallback for undefined values
+  if (typeof document === 'undefined') return '#000000';
+  if (!varName) return '#000000';
 
   try {
     const cssVar = varName.startsWith('--') ? varName : `--${varName}`;
     return getComputedStyle(document.documentElement)
       .getPropertyValue(cssVar)
-      .trim() || '#000000'; // Fallback if the CSS variable is not found
+      .trim() || '#000000';
   } catch (error) {
     console.error('Error getting CSS variable:', error);
-    return '#000000'; // Fallback for any errors
+    return '#000000';
   }
 };
 
 function hexToRGBA(hex: string, alpha: number): string {
   try {
-    if (!hex) return `rgba(0, 0, 0, ${alpha})`; // Fallback for undefined colors
+    if (!hex) return `rgba(0, 0, 0, ${alpha})`;
 
-    // Handle CSS variable values
     if (hex.startsWith('var(')) {
       const varName = hex.slice(4, -1);
       hex = getCssVar(varName);
     }
 
-    // Handle RGB/RGBA values
     if (hex.startsWith('rgb')) {
       return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
     }
 
-    // Handle hex values
     const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
-    if (cleanHex.length !== 6) return `rgba(0, 0, 0, ${alpha})`; // Invalid hex
+    if (cleanHex.length !== 6) return `rgba(0, 0, 0, ${alpha})`;
 
     const r = parseInt(cleanHex.slice(0, 2), 16);
     const g = parseInt(cleanHex.slice(2, 4), 16);
     const b = parseInt(cleanHex.slice(4, 6), 16);
 
-    if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 0, 0, ${alpha})`; // Invalid hex values
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 0, 0, ${alpha})`;
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   } catch (error) {
     console.error('Error converting color to RGBA:', error);
-    return `rgba(0, 0, 0, ${alpha})`; // Fallback for any errors
+    return `rgba(0, 0, 0, ${alpha})`;
   }
 }
 
@@ -108,12 +107,12 @@ export default function Statistics() {
   });
 
   const getVarColor = (varName: string): string => {
-    if (!varName) return '#000000'; // Fallback for undefined variables
+    if (!varName) return '#000000';
     try {
-      return `var(${varName})`; // Return CSS variable syntax
+      return `var(${varName})`;
     } catch (error) {
       console.error('Error getting var color:', error);
-      return '#000000'; // Fallback for any errors
+      return '#000000';
     }
   };
 
@@ -123,7 +122,7 @@ export default function Statistics() {
     'Спорт': getVarColor(settings.colors.sport),
     'Привычки': getVarColor(settings.colors.habits),
     'Траты': getVarColor(settings.colors.expenses),
-    'Успех': getVarColor(settings.colors.daySuccess) // Use daySuccess from settings
+    'Успех': getVarColor(settings.colors.daySuccess)
   };
 
   const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
@@ -192,7 +191,7 @@ export default function Statistics() {
       day.categories.forEach((category) => {
         category.tasks.forEach((task) => {
           if (task.type === TaskType.TIME && typeof task.value === "number") {
-            totalTime += Math.round(task.value / 60); // Convert minutes to hours
+            totalTime += Math.round(task.value / 60);
           }
           if (
             task.type === TaskType.CALORIE &&
@@ -290,7 +289,6 @@ export default function Statistics() {
   const timeDistribution = calculateTimeDistribution();
   const expenseDistribution = calculateExpenseDistribution();
 
-  // Format time total function
   const formatTimeTotal = (minutes: number): string => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -332,6 +330,16 @@ export default function Statistics() {
       JSON.stringify(updatedSettings),
     );
   };
+
+  // Add a mapping for category icons
+  const CATEGORY_ICONS: { [key: string]: React.ReactNode } = {
+    'Разум': <Brain className="h-4 w-4 inline-block mr-2" />,
+    'Время': <Clock className="h-4 w-4 inline-block mr-2" />,
+    'Спорт': <Dumbbell className="h-4 w-4 inline-block mr-2" />,
+    'Привычки': <Ban className="h-4 w-4 inline-block mr-2" />,
+    'Траты': <DollarSign className="h-4 w-4 inline-block mr-2" />,
+  };
+
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -648,6 +656,7 @@ export default function Statistics() {
                               color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
                             }}
                           >
+                            {CATEGORY_ICONS[category.name]}
                             {category.name}
                           </th>
                         ))}
@@ -721,12 +730,12 @@ export default function Statistics() {
                                   );
                                 } else if (task.type === TaskType.TIME) {
                                   displayValue = formatTimeTotal(task.value || 0);
-                                  const maxValue = 8 * 60; // 8 hours in minutes
+                                  const maxValue = 8 * 60;
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
                                   bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                                 } else if (task.type === TaskType.CALORIE) {
                                   displayValue = `${task.value || 0}`;
-                                  const maxValue = 3000; // 3000 calories
+                                  const maxValue = 3000;
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
                                   bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                                 }
@@ -745,7 +754,6 @@ export default function Statistics() {
                         </tr>
                       );
                     })}
-                    {/* Totals row */}
                     <tr className="border-t-2 border-border font-bold">
                       <td className="py-2 px-4 text-sm font-semibold">Итого</td>
                       <td
@@ -796,7 +804,7 @@ export default function Statistics() {
                               const totalCalories = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
                                 const t = cat?.tasks.find((t) => t.name === task.name);
-                                returnsum + (t?.value || 0);
+                                return sum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
                               const opacity = Math.min((totalCalories / (3000 * data.length)) * 0.4 + 0.1, 0.5);
@@ -932,7 +940,6 @@ export default function Statistics() {
                         </tr>
                       );
                     })}
-                    {/* Add totals row */}
                     <tr className="border-t-2 border-border font-bold">
                       <td className="py-2 px-4 text-sm font-semibold min-w-[90px]">Итого</td>
                       <td className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]">
