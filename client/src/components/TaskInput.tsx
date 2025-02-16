@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Task, TaskType } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,13 +54,9 @@ const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: Tas
   if (task.type === TaskType.TIME) {
     return (
       <Select
+        defaultValue="0"
         value={String(task.value || 0)}
-        onValueChange={(newValue) => {
-          const numValue = parseInt(newValue);
-          if (!isNaN(numValue)) {
-            onChange(numValue);
-          }
-        }}
+        onValueChange={(newValue) => onChange(Number(newValue))}
       >
         <SelectTrigger 
           className={`w-full h-9 font-bold border-0 transition-all ${
@@ -75,6 +71,7 @@ const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: Tas
           <SelectValue placeholder="Время" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="0">Не выбрано</SelectItem>
           {TIME_OPTIONS.map((option) => (
             <SelectItem 
               key={option.value} 
@@ -93,13 +90,9 @@ const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: Tas
   if (task.type === TaskType.CALORIE) {
     return (
       <Select
+        defaultValue="0"
         value={String(task.value || 0)}
-        onValueChange={(newValue) => {
-          const numValue = parseInt(newValue);
-          if (!isNaN(numValue)) {
-            onChange(numValue);
-          }
-        }}
+        onValueChange={(newValue) => onChange(Number(newValue))}
       >
         <SelectTrigger 
           className={`w-full h-9 font-bold border-0 transition-all ${
@@ -114,6 +107,7 @@ const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: Tas
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="0">Не выбрано</SelectItem>
           {CALORIE_OPTIONS.map((option) => (
             <SelectItem 
               key={option.value} 
