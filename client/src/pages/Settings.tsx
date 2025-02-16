@@ -9,7 +9,7 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronDown, ChevronUp, Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -98,7 +98,7 @@ const ColorPicker = ({
               {categoryName === 'Разум' && <Brain className="h-6 w-6" />}
               {categoryName === 'Время' && <Clock className="h-6 w-6" />}
               {categoryName === 'Спорт' && <Dumbbell className="h-6 w-6" />}
-              {categoryName === 'Привычки' && <Ban className="h-6 w-6" />}
+              {categoryName === 'Пороки' && <Ban className="h-6 w-6" />}
               {categoryName === 'Траты' && <DollarSign className="h-6 w-6" />}
             </span>
           </div>
