@@ -149,26 +149,66 @@ function Statistics() {
   const [dateRangeText, setDateRangeText] = useState("");
 
   useEffect(() => {
-    const endDate = startOfDay(new Date());
-    const daysToSubtract = parseInt(timeRange);
-    const startDate = subDays(endDate, daysToSubtract - 1);
+    if (displayType === "days") {
+      const endDate = startOfDay(new Date());
+      const daysToSubtract = parseInt(timeRange);
+      const startDate = subDays(endDate, daysToSubtract - 1);
 
-    setDateRangeText(
-      `${format(startDate, "dd.MM.yyyy")} - ${format(endDate, "dd.MM.yyyy")}`,
-    );
+      setDateRangeText(
+        `${format(startDate, "dd.MM")} - ${format(endDate, "dd.MM")}`,
+      );
 
-    const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
-    const days: DayEntry[] = [];
+      const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
+      const days: DayEntry[] = [];
 
-    dateRange.forEach((date) => {
-      const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
-      if (entry) {
-        days.push(entry);
-      }
-    });
+      dateRange.forEach((date) => {
+        const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
+        if (entry) {
+          days.push(entry);
+        }
+      });
 
-    setData(days);
-  }, [timeRange]);
+      setData(days);
+    } else if (displayType === "weeks") {
+      const endDate = startOfDay(new Date());
+      const startDate = subDays(endDate, 30); // Always show last 30 days for weeks view
+
+      setDateRangeText(
+        `${format(startDate, "MMMM", { locale: ru })} - ${format(endDate, "MMMM", { locale: ru })}`,
+      );
+
+      const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
+      const days: DayEntry[] = [];
+
+      dateRange.forEach((date) => {
+        const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
+        if (entry) {
+          days.push(entry);
+        }
+      });
+
+      setData(days);
+    } else if (displayType === "months") {
+      const endDate = startOfDay(new Date());
+      const startDate = subDays(endDate, 90); // Show last 3 months for months view
+
+      setDateRangeText(
+        `${format(startDate, "MMMM yyyy", { locale: ru })} - ${format(endDate, "MMMM yyyy", { locale: ru })}`,
+      );
+
+      const dateRange = eachDayOfInterval({ start: startDate, end: endDate });
+      const days: DayEntry[] = [];
+
+      dateRange.forEach((date) => {
+        const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
+        if (entry) {
+          days.push(entry);
+        }
+      });
+
+      setData(days);
+    }
+  }, [timeRange, displayType]);
 
   const aggregateDataByPeriod = () => {
     if (!data.length) return [];
@@ -265,9 +305,9 @@ function Statistics() {
         category.tasks.forEach((task) => {
           if (task.type !== TaskType.TIME || typeof task.value !== 'number') return;
 
-          if (displayType === 'days' || 
-             (displayType === 'weeks' && isSameWeek(date, new Date(), { locale: ru })) ||
-             (displayType === 'months' && isSameMonth(date, new Date()))) {
+          if (displayType === 'days' ||
+            (displayType === 'weeks' && isSameWeek(date, new Date(), { locale: ru })) ||
+            (displayType === 'months' && isSameMonth(date, new Date()))) {
             const key = task.name;
             if (!timeByActivity[key]) {
               timeByActivity[key] = { minutes: 0, name: task.name };
@@ -297,9 +337,9 @@ function Statistics() {
         category.tasks.forEach((task) => {
           if (task.type !== TaskType.EXPENSE || typeof task.value !== 'number') return;
 
-          if (displayType === 'days' || 
-             (displayType === 'weeks' && isSameWeek(date, new Date(), { locale: ru })) ||
-             (displayType === 'months' && isSameMonth(date, new Date()))) {
+          if (displayType === 'days' ||
+            (displayType === 'weeks' && isSameWeek(date, new Date(), { locale: ru })) ||
+            (displayType === 'months' && isSameMonth(date, new Date()))) {
             const key = category.name;
             if (!expensesByCategory[key]) {
               expensesByCategory[key] = { amount: 0, name: `${category.emoji} ${category.name}` };
@@ -363,16 +403,18 @@ function Statistics() {
               <SelectItem value="months">По месяцам</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={timeRange} onValueChange={handleTimeRangeChange}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Выберите период" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">7 дней</SelectItem>
-              <SelectItem value="14">14 дней</SelectItem>
-              <SelectItem value="30">30 дней</SelectItem>
-            </SelectContent>
-          </Select>
+          {displayType === "days" && (
+            <Select value={timeRange} onValueChange={handleTimeRangeChange}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Выберите период" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">7 дней</SelectItem>
+                <SelectItem value="14">14 дней</SelectItem>
+                <SelectItem value="30">30 дней</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
@@ -593,7 +635,7 @@ function Statistics() {
                       return (
                         <tr key={day.date} className="border-b border-border/10">
                           <td className="px-4 py-2 text-sm font-medium whitespace-nowrap">
-                            {format(new Date(day.date), "dd.MM.yyyy")}
+                            {format(new Date(day.date), "dd.MM")}
                           </td>
                           <td
                             className="px-4 py-2 text-center text-sm font-medium"
@@ -783,12 +825,12 @@ function Statistics() {
                             <th
                               key={`${category.name}-${task.name}`}
                               className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
-                              style={{
-                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
-                                color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
-                                opacity: 0.8,
-                                minWidth: "80px",
-                              }}
+                                style={{
+                                  backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
+                                  color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
+                                  opacity: 0.8,
+                                  minWidth: "80px",
+                                }}
                             >
                               {task.name}
                             </th>
