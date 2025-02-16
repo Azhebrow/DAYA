@@ -128,21 +128,25 @@ const ColorPicker = ({
 
 const TaskNameEditor = ({
   taskName,
+  emoji,
   onChange,
   icon: Icon,
   color
 }: {
   taskName: string;
-  onChange: (value: string) => void;
+  emoji: string;
+  onChange: (newName: string, newEmoji: string) => void;
   icon: React.ElementType;
   color: string;
 }) => {
   const [isEditing, setIsEditing] = React.useState(false);
-  const [value, setValue] = React.useState(taskName);
+  const [name, setName] = React.useState(taskName);
+  const [emojiValue, setEmojiValue] = React.useState(emoji);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const emojiInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleSave = () => {
-    onChange(value);
+    onChange(name, emojiValue);
     setIsEditing(false);
   };
 
@@ -150,7 +154,8 @@ const TaskNameEditor = ({
     if (e.key === 'Enter') {
       handleSave();
     } else if (e.key === 'Escape') {
-      setValue(taskName);
+      setName(taskName);
+      setEmojiValue(emoji);
       setIsEditing(false);
     }
   };
@@ -166,19 +171,31 @@ const TaskNameEditor = ({
       className="w-full p-3 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-between gap-3"
       style={{ backgroundColor: `var(${color})` }}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-1">
         <Icon className="h-4 w-4 text-white" />
         {isEditing ? (
-          <Input
-            ref={inputRef}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            onBlur={handleSave}
-            onKeyDown={handleKeyDown}
-            className="h-7 w-40 bg-white/10 border-none text-white"
-          />
+          <div className="flex gap-2 flex-1">
+            <Input
+              ref={emojiInputRef}
+              value={emojiValue}
+              onChange={(e) => setEmojiValue(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="h-7 w-12 bg-white/10 border-none text-white text-center"
+            />
+            <Input
+              ref={inputRef}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={handleSave}
+              onKeyDown={handleKeyDown}
+              className="h-7 flex-1 bg-white/10 border-none text-white"
+            />
+          </div>
         ) : (
-          <span className="text-sm text-white font-medium">{taskName}</span>
+          <span className="text-sm text-white font-medium">
+            {emojiValue} {taskName}
+          </span>
         )}
       </div>
       <Button
@@ -198,6 +215,29 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
 Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
+
+const handleTaskNameChange = (categoryName: string, taskName: string, newName: string, newEmoji: string) => {
+  const tasks = localStorage.getItem('tasks');
+  if (tasks) {
+    const parsedTasks = JSON.parse(tasks);
+    const updatedTasks = parsedTasks.map((category: any) => {
+      if (category.name === categoryName) {
+        return {
+          ...category,
+          tasks: category.tasks.map((task: any) =>
+            task.name === taskName ? { ...task, name: newName, emoji: newEmoji } : task
+          )
+        };
+      }
+      return category;
+    });
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    toast({
+      title: "Задача обновлена",
+      description: "Название и эмодзи успешно сохранены",
+    });
+  }
+};
 
 export default function SettingsPage() {
   const [settings, setSettings] = React.useState<Settings>(() => {
@@ -284,30 +324,6 @@ export default function SettingsPage() {
     }
   };
 
-
-  const handleTaskNameChange = (categoryName: string, taskName: string, newName: string) => {
-    // Get current tasks from storage
-    const tasks = localStorage.getItem('tasks');
-    if (tasks) {
-      const parsedTasks = JSON.parse(tasks);
-      const updatedTasks = parsedTasks.map((category: any) => {
-        if (category.name === categoryName) {
-          return {
-            ...category,
-            tasks: category.tasks.map((task: any) =>
-              task.name === taskName ? { ...task, name: newName } : task
-            )
-          };
-        }
-        return category;
-      });
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-      toast({
-        title: "Название задачи обновлено",
-        description: "Изменения успешно сохранены",
-      });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
@@ -536,19 +552,21 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
                 {/* Mind tasks */}
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Разум</Label>
                   <TaskNameEditor
                     taskName="Дыхание"
-                    onChange={(newName) => handleTaskNameChange('Разум', 'Дыхание', newName)}
+                    emoji="🫁"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Дыхание', newName, newEmoji)}
                     icon={Brain}
                     color={settings.colors.mind}
                   />
                   <TaskNameEditor
                     taskName="Чай"
-                    onChange={(newName) => handleTaskNameChange('Разум', 'Чай', newName)}
+                    emoji="🍵"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Чай', newName, newEmoji)}
                     icon={Brain}
                     color={settings.colors.mind}
                   />
@@ -559,15 +577,74 @@ export default function SettingsPage() {
                   <Label className="text-sm text-muted-foreground">Время</Label>
                   <TaskNameEditor
                     taskName="Уборка"
-                    onChange={(newName) => handleTaskNameChange('Время', 'Уборка', newName)}
+                    emoji="🧹"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Уборка', newName, newEmoji)}
                     icon={Clock}
                     color={settings.colors.time}
                   />
                   <TaskNameEditor
                     taskName="Работа"
-                    onChange={(newName) => handleTaskNameChange('Время', 'Работа', newName)}
+                    emoji="💼"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Работа', newName, newEmoji)}
                     icon={Clock}
                     color={settings.colors.time}
+                  />
+                  <TaskNameEditor
+                    taskName="Учёба"
+                    emoji="📚"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Учёба', newName, newEmoji)}
+                    icon={Clock}
+                    color={settings.colors.time}
+                  />
+                  <TaskNameEditor
+                    taskName="Проект"
+                    emoji="🎯"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Проект', newName, newEmoji)}
+                    icon={Clock}
+                    color={settings.colors.time}
+                  />
+                </div>
+
+                {/* Health tasks */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Здоровье</Label>
+                  <TaskNameEditor
+                    taskName="Таблетки"
+                    emoji="💊"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', 'Таблетки', newName, newEmoji)}
+                    icon={Dumbbell}
+                    color={settings.colors.sport}
+                  />
+                </div>
+
+                {/* Habits tasks */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Пороки</Label>
+                  <TaskNameEditor
+                    taskName="Дерьмо"
+                    emoji="🍔"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Дерьмо', newName, newEmoji)}
+                    icon={Ban}
+                    color={settings.colors.habits}
+                  />
+                  <TaskNameEditor
+                    taskName="Порно"
+                    emoji="🔞"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Порно', newName, newEmoji)}
+                    icon={Ban}
+                    color={settings.colors.habits}
+                  />
+                </div>
+
+                {/* Expenses tasks */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Траты</Label>
+                  <TaskNameEditor
+                    taskName="Траты"
+                    emoji="💸"
+                    onChange={(newName, newEmoji) => handleTaskNameChange('Траты', 'Траты', newName, newEmoji)}
+                    icon={DollarSign}
+                    color={settings.colors.expenses}
                   />
                 </div>
               </div>
