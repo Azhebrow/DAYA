@@ -84,156 +84,107 @@ const DEFAULT_TASKS: CategoryData[] = [
 ];
 
 // Event system for synchronization
-const subscribers: Set<() => void> = new Set();
+const subscribers = new Set<() => void>();
 
 export const storage = {
-  // Subscribe to storage changes
-  subscribe: (callback: () => void) => {
+  subscribe(callback: () => void) {
     subscribers.add(callback);
-    return () => subscribers.delete(callback);
+    return () => {
+      subscribers.delete(callback);
+    };
   },
 
-  // Notify all subscribers
-  notifySubscribers: () => {
+  notifySubscribers() {
     subscribers.forEach(callback => callback());
   },
 
-  getSettings: (): Settings => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-      return stored ? settingsSchema.parse(JSON.parse(stored)) : defaultSettings;
-    } catch (error) {
-      console.error('Error getting settings:', error);
-      return defaultSettings;
-    }
-  },
-
-  saveSettings: (settings: Settings): void => {
-    try {
-      const validatedSettings = settingsSchema.parse(settings);
-      localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(validatedSettings));
-      if (validatedSettings.darkMode) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      storage.updateVersion();
-      storage.notifySubscribers();
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      throw error;
-    }
-  },
-
-  getTasks: (): CategoryData[] => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.TASKS);
-      if (!stored) {
-        storage.saveTasks(DEFAULT_TASKS);
-        return DEFAULT_TASKS;
-      }
-      return JSON.parse(stored);
-    } catch (error) {
-      console.error('Error getting tasks:', error);
+  getTasks(): CategoryData[] {
+    const stored = localStorage.getItem(STORAGE_KEYS.TASKS);
+    if (!stored) {
+      this.saveTasks(DEFAULT_TASKS);
       return DEFAULT_TASKS;
     }
+    return JSON.parse(stored);
   },
 
-  saveTasks: (tasks: CategoryData[]): void => {
-    try {
-      localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
-      storage.updateVersion();
-      storage.notifySubscribers();
-    } catch (error) {
-      console.error('Error saving tasks:', error);
-      throw error;
-    }
+  saveTasks(tasks: CategoryData[]) {
+    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
+    this.updateVersion();
+    this.notifySubscribers();
   },
 
-  updateTask: (categoryName: string, taskId: string, updates: Partial<TaskData>): void => {
-    try {
-      const tasks = storage.getTasks();
-      const updatedTasks = tasks.map(category => {
-        if (category.name === categoryName) {
-          return {
-            ...category,
-            tasks: category.tasks.map(task =>
-              task.id === taskId ? { ...task, ...updates } : task
-            )
-          };
-        }
-        return category;
-      });
-      storage.saveTasks(updatedTasks);
-    } catch (error) {
-      console.error('Error updating task:', error);
-      throw error;
-    }
-  },
-
-  getDayEntry: (date: string): DayEntry | null => {
-    try {
-      const days = storage.getAllDays();
-      return days.find(day => day.date === date) || null;
-    } catch (error) {
-      console.error('Error getting day entry:', error);
-      return null;
-    }
-  },
-
-  getAllDays: (): DayEntry[] => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.DAYS);
-      if (!stored) return [];
-      const days = JSON.parse(stored);
-      return Array.isArray(days) ? days.map(day => dayEntrySchema.parse(day)) : [];
-    } catch (error) {
-      console.error('Error getting all days:', error);
-      localStorage.removeItem(STORAGE_KEYS.DAYS);
-      return [];
-    }
-  },
-
-  saveDayEntry: (entry: DayEntry): void => {
-    try {
-      const validatedEntry = dayEntrySchema.parse(entry);
-      const days = storage.getAllDays();
-      const existingIndex = days.findIndex(day => day.date === entry.date);
-
-      if (existingIndex >= 0) {
-        days[existingIndex] = validatedEntry;
-      } else {
-        days.push(validatedEntry);
+  updateTask(categoryName: string, taskId: string, updates: Partial<TaskData>) {
+    const tasks = this.getTasks();
+    const updatedTasks = tasks.map(category => {
+      if (category.name === categoryName) {
+        return {
+          ...category,
+          tasks: category.tasks.map(task =>
+            task.id === taskId ? { ...task, ...updates } : task
+          )
+        };
       }
-
-      localStorage.setItem(STORAGE_KEYS.DAYS, JSON.stringify(days));
-      storage.updateVersion();
-      storage.notifySubscribers();
-    } catch (error) {
-      console.error('Error saving day entry:', error);
-      throw error;
-    }
+      return category;
+    });
+    this.saveTasks(updatedTasks);
   },
 
-  updateVersion: (): void => {
+  getSettings(): Settings {
+    const stored = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+    return stored ? settingsSchema.parse(JSON.parse(stored)) : defaultSettings;
+  },
+
+  saveSettings(settings: Settings) {
+    const validatedSettings = settingsSchema.parse(settings);
+    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(validatedSettings));
+    if (validatedSettings.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    this.updateVersion();
+    this.notifySubscribers();
+  },
+
+  updateVersion() {
     localStorage.setItem(STORAGE_KEYS.VERSION, Date.now().toString());
     window.dispatchEvent(new Event('storage'));
   },
 
-  removeDayEntry: (date: string): void => {
-    try {
-      const days = storage.getAllDays();
-      const filteredDays = days.filter(day => day.date !== date);
-      localStorage.setItem(STORAGE_KEYS.DAYS, JSON.stringify(filteredDays));
-      storage.updateVersion();
-      storage.notifySubscribers();
-    } catch (error) {
-      console.error('Error removing day entry:', error);
-      throw error;
-    }
+  getAllDays(): DayEntry[] {
+    const stored = localStorage.getItem(STORAGE_KEYS.DAYS);
+    if (!stored) return [];
+    const days = JSON.parse(stored);
+    return Array.isArray(days) ? days.map(day => dayEntrySchema.parse(day)) : [];
   },
 
-  // New functions for export/import
+  getDayEntry(date: string): DayEntry | null {
+    const days = this.getAllDays();
+    return days.find(day => day.date === date) || null;
+  },
+
+  saveDayEntry(entry: DayEntry) {
+    const days = this.getAllDays();
+    const existingIndex = days.findIndex(day => day.date === entry.date);
+
+    if (existingIndex >= 0) {
+      days[existingIndex] = entry;
+    } else {
+      days.push(entry);
+    }
+
+    localStorage.setItem(STORAGE_KEYS.DAYS, JSON.stringify(days));
+    this.updateVersion();
+    this.notifySubscribers();
+  },
+
+  removeDayEntry(date: string) {
+    const days = this.getAllDays();
+    const filteredDays = days.filter(day => day.date !== date);
+    localStorage.setItem(STORAGE_KEYS.DAYS, JSON.stringify(filteredDays));
+    this.updateVersion();
+    this.notifySubscribers();
+  },
   exportData: (): string => {
     try {
       const data = {

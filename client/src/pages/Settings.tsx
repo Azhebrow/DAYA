@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
-import { Settings, settingsSchema } from '@shared/schema';
+import { Settings } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
@@ -25,7 +25,7 @@ const EMOJIS = {
 interface TaskNameEditorProps {
   taskName: string;
   emoji: string;
-  taskId: string; // Added taskId prop
+  taskId: string;
   onChange: (newName: string, newEmoji: string) => void;
   icon: React.ElementType;
   color: string;
@@ -35,7 +35,7 @@ interface TaskNameEditorProps {
 const TaskNameEditor = ({
   taskName,
   emoji,
-  taskId, // Use taskId prop
+  taskId,
   onChange,
   icon: Icon,
   color,
@@ -48,7 +48,6 @@ const TaskNameEditor = ({
   const [error, setError] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Reset to original values when editing is cancelled
   const resetValues = () => {
     setName(taskName);
     setEmojiValue(emoji);
@@ -170,88 +169,39 @@ const TaskNameEditor = ({
 
 const DEFAULT_OATH_TEXT = `[Your oath text here]`;
 
-const DEFAULT_TASKS = [
-  {
-    name: 'Разум',
-    type: 'mind',
-    tasks: [
-      { id: '1', name: 'Дыхание', emoji: '🫁', type: 'checkbox', completed: false },
-      { id: '2', name: 'Чай', emoji: '🍵', type: 'checkbox', completed: false },
-    ]
-  },
-  {
-    name: 'Время',
-    type: 'time',
-    tasks: [
-      { id: '3', name: 'Уборка', emoji: '🧹', type: 'time', value: 0 },
-      { id: '4', name: 'Работа', emoji: '💼', type: 'time', value: 0 },
-      { id: '5', name: 'Учёба', emoji: '📚', type: 'time', value: 0 },
-      { id: '6', name: 'Проект', emoji: '🎯', type: 'time', value: 0 },
-    ]
-  },
-  {
-    name: 'Здоровье',
-    type: 'health',
-    tasks: [
-      { id: '7', name: 'Таблетки', emoji: '💊', type: 'checkbox', completed: false },
-    ]
-  },
-  {
-    name: 'Пороки',
-    type: 'habits',
-    tasks: [
-      { id: '8', name: 'Дерьмо', emoji: '🍔', type: 'checkbox', completed: false },
-      { id: '9', name: 'Порно', emoji: '🔞', type: 'checkbox', completed: false },
-    ]
-  },
-  {
-    name: 'Траты',
-    type: 'expenses',
-    tasks: [
-      { id: '10', name: 'Траты', emoji: '💸', type: 'expense', value: 0 },
-    ]
-  }
-];
-
 export default function SettingsPage() {
   const { toast } = useToast();
   const [settings, setSettings] = React.useState<Settings>(() => storage.getSettings());
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
+  const [tasks, setTasks] = React.useState(() => storage.getTasks());
 
-  // Subscribe to storage changes
   React.useEffect(() => {
-    return storage.subscribe(() => {
+    const unsubscribe = storage.subscribe(() => {
       setSettings(storage.getSettings());
+      setTasks(storage.getTasks());
     });
+    return unsubscribe;
   }, []);
 
   const handleTaskNameChange = React.useCallback((categoryName: string, taskId: string, newName: string, newEmoji: string) => {
     try {
-      const tasks = storage.getTasks();
-      const category = tasks.find(c => c.name === categoryName);
-
-      if (!category) {
-        throw new Error(`Category ${categoryName} not found`);
-      }
-
-      const task = category.tasks.find(t => t.id === taskId);
-      if (!task) {
-        throw new Error(`Task ${taskId} not found in ${categoryName}`);
-      }
-
-      const updatedTasks = tasks.map(c => {
-        if (c.name === categoryName) {
+      const updatedTasks = tasks.map(category => {
+        if (category.name === categoryName) {
           return {
-            ...c,
-            tasks: c.tasks.map(t =>
-              t.id === taskId ? { ...t, name: newName, emoji: newEmoji } : t
+            ...category,
+            tasks: category.tasks.map(task =>
+              task.id === taskId
+                ? { ...task, name: newName, emoji: newEmoji }
+                : task
             )
           };
         }
-        return c;
+        return category;
       });
 
       storage.saveTasks(updatedTasks);
+      setTasks(updatedTasks);
+
       toast({
         title: "Задача обновлена",
         description: `${newEmoji} ${newName} успешно сохранено`,
@@ -260,24 +210,26 @@ export default function SettingsPage() {
       console.error('Error updating task:', error);
       toast({
         title: "Ошибка",
-        description: "Не удалось обновить задачу: " + (error instanceof Error ? error.message : 'Неизвестная ошибка'),
+        description: "Не удалось обновить задачу",
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [tasks, toast]);
 
   const handleSettingChange = (key: keyof Settings, value: any) => {
-    let newSettings = {...settings};
+    const newSettings = { ...settings };
 
     if (key === 'colors') {
-      newSettings = { ...settings, colors: {...settings.colors, ...value} };
+      newSettings.colors = { ...settings.colors, ...value };
     } else if (key === 'timeTarget') {
-      newSettings = { ...settings, timeTarget: value * 60 };
+      newSettings.timeTarget = value * 60;
     } else {
-      newSettings = { ...settings, [key]: value };
+      (newSettings as any)[key] = value;
     }
-    setSettings(newSettings);
+
     storage.saveSettings(newSettings);
+    setSettings(newSettings);
+
     toast({
       title: "Настройки сохранены",
       description: "Ваши изменения успешно применены",
@@ -302,9 +254,15 @@ export default function SettingsPage() {
     }
   };
 
+  // Найдем задачи для каждой категории
+  const mindTasks = tasks.find(c => c.name === 'Разум')?.tasks || [];
+  const timeTasks = tasks.find(c => c.name === 'Время')?.tasks || [];
+  const healthTasks = tasks.find(c => c.name === 'Здоровье')?.tasks || [];
+  const habitsTasks = tasks.find(c => c.name === 'Пороки')?.tasks || [];
+  const expensesTasks = tasks.find(c => c.name === 'Траты')?.tasks || [];
+
   return (
     <div className="container max-w-7xl mx-auto p-4 space-y-6">
-      {/* Task Names Section */}
       <Card className="backdrop-blur-sm bg-card/80 border-accent/20 col-span-full">
         <CardHeader>
           <CardTitle className="text-xl text-primary">
@@ -316,116 +274,86 @@ export default function SettingsPage() {
             {/* Mind tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Разум</Label>
-              <TaskNameEditor
-                taskName="Дыхание"
-                taskId="1" // Added taskId
-                emoji="🫁"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', '1', newName, newEmoji)}
-                icon={Brain}
-                color={settings.colors.mind}
-                toast={toast}
-              />
-              <TaskNameEditor
-                taskName="Чай"
-                taskId="2" // Added taskId
-                emoji="🍵"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', '2', newName, newEmoji)}
-                icon={Brain}
-                color={settings.colors.mind}
-                toast={toast}
-              />
+              {mindTasks.map(task => (
+                <TaskNameEditor
+                  key={task.id}
+                  taskName={task.name}
+                  taskId={task.id}
+                  emoji={task.emoji}
+                  onChange={(newName, newEmoji) => handleTaskNameChange('Разум', task.id, newName, newEmoji)}
+                  icon={Brain}
+                  color={settings.colors.mind}
+                  toast={toast}
+                />
+              ))}
             </div>
 
             {/* Time tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Время</Label>
-              <TaskNameEditor
-                taskName="Уборка"
-                taskId="3" // Added taskId
-                emoji="🧹"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '3', newName, newEmoji)}
-                icon={Clock}
-                color={settings.colors.time}
-                toast={toast}
-              />
-              <TaskNameEditor
-                taskName="Работа"
-                taskId="4" // Added taskId
-                emoji="💼"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '4', newName, newEmoji)}
-                icon={Clock}
-                color={settings.colors.time}
-                toast={toast}
-              />
-              <TaskNameEditor
-                taskName="Учёба"
-                taskId="5" // Added taskId
-                emoji="📚"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '5', newName, newEmoji)}
-                icon={Clock}
-                color={settings.colors.time}
-                toast={toast}
-              />
-              <TaskNameEditor
-                taskName="Проект"
-                taskId="6" // Added taskId
-                emoji="🎯"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Время', '6', newName, newEmoji)}
-                icon={Clock}
-                color={settings.colors.time}
-                toast={toast}
-              />
+              {timeTasks.map(task => (
+                <TaskNameEditor
+                  key={task.id}
+                  taskName={task.name}
+                  taskId={task.id}
+                  emoji={task.emoji}
+                  onChange={(newName, newEmoji) => handleTaskNameChange('Время', task.id, newName, newEmoji)}
+                  icon={Clock}
+                  color={settings.colors.time}
+                  toast={toast}
+                />
+              ))}
             </div>
 
             {/* Health tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Здоровье</Label>
-              <TaskNameEditor
-                taskName="Таблетки"
-                taskId="7" // Added taskId
-                emoji="💊"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', '7', newName, newEmoji)}
-                icon={Dumbbell}
-                color={settings.colors.sport}
-                toast={toast}
-              />
+              {healthTasks.map(task => (
+                <TaskNameEditor
+                  key={task.id}
+                  taskName={task.name}
+                  taskId={task.id}
+                  emoji={task.emoji}
+                  onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', task.id, newName, newEmoji)}
+                  icon={Dumbbell}
+                  color={settings.colors.sport}
+                  toast={toast}
+                />
+              ))}
             </div>
 
             {/* Habits tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Пороки</Label>
-              <TaskNameEditor
-                taskName="Дерьмо"
-                taskId="8" // Added taskId
-                emoji="🍔"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', '8', newName, newEmoji)}
-                icon={Ban}
-                color={settings.colors.habits}
-                toast={toast}
-              />
-              <TaskNameEditor
-                taskName="Порно"
-                taskId="9" // Added taskId
-                emoji="🔞"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', '9', newName, newEmoji)}
-                icon={Ban}
-                color={settings.colors.habits}
-                toast={toast}
-              />
+              {habitsTasks.map(task => (
+                <TaskNameEditor
+                  key={task.id}
+                  taskName={task.name}
+                  taskId={task.id}
+                  emoji={task.emoji}
+                  onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', task.id, newName, newEmoji)}
+                  icon={Ban}
+                  color={settings.colors.habits}
+                  toast={toast}
+                />
+              ))}
             </div>
 
             {/* Expenses tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Траты</Label>
-              <TaskNameEditor
-                taskName="Траты"
-                taskId="10" // Added taskId
-                emoji="💸"
-                onChange={(newName, newEmoji) => handleTaskNameChange('Траты', '10', newName, newEmoji)}
-                icon={DollarSign}
-                color={settings.colors.expenses}
-                toast={toast}
-              />
+              {expensesTasks.map(task => (
+                <TaskNameEditor
+                  key={task.id}
+                  taskName={task.name}
+                  taskId={task.id}
+                  emoji={task.emoji}
+                  onChange={(newName, newEmoji) => handleTaskNameChange('Траты', task.id, newName, newEmoji)}
+                  icon={DollarSign}
+                  color={settings.colors.expenses}
+                  toast={toast}
+                />
+              ))}
             </div>
           </div>
         </CardContent>

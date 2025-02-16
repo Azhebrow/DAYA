@@ -22,9 +22,10 @@ export const TaskCard = React.memo(({
   const settings = storage.getSettings();
 
   React.useEffect(() => {
-    return storage.subscribe(() => {
+    const unsubscribe = storage.subscribe(() => {
       setStoredTasks(storage.getTasks());
     });
+    return unsubscribe;
   }, []);
 
   const progress = React.useMemo(() => 
