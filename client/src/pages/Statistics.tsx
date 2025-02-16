@@ -458,7 +458,7 @@ function Statistics() {
           avgScore: 0,
         };
       }
-      Object.assign(periodData[periodKey].tasks, taskData); 
+      Object.assign(periodData[periodKey].tasks, taskData);
       periodData[periodKey].avgScore += calculateDayScore(day);
     });
 
@@ -827,7 +827,7 @@ function Statistics() {
                           .filter((category) => category.type !== CategoryType.EXPENSE)
                           .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
                           .flatMap((category) =>
-                            category.tasks.map((task) => {
+                    category.tasks.map((task) => {
                               const key = `${category.name}-${task.name}`;
                               const taskStats = taskData.tasks[key] || {
                                 completedCount: 0,
@@ -838,21 +838,32 @@ function Statistics() {
 
                               let displayValue = "";
                               let bgColor = "transparent";
+                              let textColor = "inherit";
 
                               if (task.type === TaskType.CHECKBOX) {
-                                const completionRate = taskStats.totalCount > 0 
-                                  ? Math.round((taskStats.completedCount / taskStats.totalCount) * 100)
-                                  : 0;
-                                displayValue = `${completionRate}%`;
-                                bgColor = hexToRGBA(
-                                  getCssVar(settings.colors.daySuccess),
-                                  Math.min((completionRate / 100) * 0.4 + 0.1, 0.5)
-                                );
+                                if (displayType === "days") {
+                                  // В режиме "по дням" показываем галочки и крестики
+                                  const isCompleted = task.completed;
+                                  displayValue = isCompleted ? "✓" : "×";
+                                  if (isCompleted) {
+                                    textColor = getCssVar(settings.colors.daySuccess);
+                                  }
+                                } else {
+                                  // В режимах "по неделям" и "по месяцам" показываем проценты
+                                  const completionRate = taskStats.totalCount > 0 
+                                    ? Math.round((taskStats.completedCount / taskStats.totalCount) * 100)
+                                    : 0;
+                                  displayValue = `${completionRate}%`;
+                                  bgColor = hexToRGBA(
+                                    getCssVar(settings.colors.daySuccess),
+                                    Math.min((completionRate / 100) * 0.4 + 0.1, 0.5)
+                                  );
+                                }
                               } else if (task.type === TaskType.TIME) {
-                                const totalHours = Math.floor(taskStats.totalTime / 60);
-                                displayValue = `${totalHours}ч`;
+                                const hours = Math.floor((task.value || 0) / 60);
+                                displayValue = `${hours}ч`;
                               } else if (task.type === TaskType.CALORIE) {
-                                displayValue = `${taskStats.totalCalories}ккал`;
+                                displayValue = `${task.value || 0}ккал`;
                               }
 
                               return (
@@ -860,7 +871,8 @@ function Statistics() {
                                   key={`${periodKey}-${category.name}-${task.name}`}
                                   className="px-4 py-2 text-center whitespace-nowrap"
                                   style={{
-                                    backgroundColor: bgColor
+                                    backgroundColor: bgColor,
+                                    color: textColor
                                   }}
                                 >
                                   {displayValue}
