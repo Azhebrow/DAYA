@@ -670,10 +670,14 @@ export default function Statistics() {
                                   );
                                 } else if (task.type === TaskType.TIME) {
                                   displayValue = formatTimeTotal(task.value || 0);
-                                  bgColor = `${CATEGORY_COLORS[category.name]}20`;
+                                  const maxValue = 8 * 60; // 8 hours in minutes
+                                  const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
+                                  bgColor = `${CATEGORY_COLORS[category.name]}${Math.round(opacity * 255).toString(16)}`;
                                 } else if (task.type === TaskType.CALORIE) {
                                   displayValue = `${task.value || 0}`;
-                                  bgColor = `${CATEGORY_COLORS[category.name]}20`;
+                                  const maxValue = 3000; // 3000 calories
+                                  const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
+                                  bgColor = `${CATEGORY_COLORS[category.name]}${Math.round(opacity * 255).toString(16)}`;
                                 }
 
                                 return (
@@ -811,8 +815,7 @@ export default function Statistics() {
                                 : 0),
                             0
                           ),
-                        0
-                      );
+                        0                      );
 
                       const maxExpense = Math.max(
                         ...data.map((d) =>
@@ -823,7 +826,8 @@ export default function Statistics() {
                                 sum +
                                 c.tasks.reduce(
                                   (tSum, t) =>
-                                    tSum +                                    (t.type === TaskType.EXPENSE
+                                    tSum +
+                                    (t.type === TaskType.EXPENSE
                                       ? t.value || 0
                                       : 0),
                                   0
