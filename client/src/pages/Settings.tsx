@@ -12,7 +12,22 @@ import { format } from 'date-fns';
 import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2 } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // Updated colorPalette - organized by color groups
 const colorPalette = [
