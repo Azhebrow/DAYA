@@ -60,8 +60,8 @@ const DEFAULT_TASKS: CategoryData[] = [
     ]
   },
   {
-    name: 'Здоровье',
-    type: 'health',
+    name: 'Спорт',
+    type: 'sport',
     tasks: [
       { id: '7', name: 'Таблетки', emoji: '💊', type: 'checkbox', completed: false },
     ]

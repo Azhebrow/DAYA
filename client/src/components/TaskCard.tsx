@@ -47,7 +47,7 @@ export const TaskCard = React.memo(({
     switch (categoryName) {
       case 'Разум': return `var(${colors.mind})`;
       case 'Время': return `var(${colors.time})`;
-      case 'Здоровье': return `var(${colors.sport})`;
+      case 'Спорт': return `var(${colors.sport})`;
       case 'Пороки': return `var(${colors.habits})`;
       default: return `var(${colors.expenses})`;
     }
@@ -57,7 +57,7 @@ export const TaskCard = React.memo(({
     switch (categoryName) {
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
-      case 'Здоровье': return <Dumbbell className="h-5 w-5" />;
+      case 'Спорт': return <Dumbbell className="h-5 w-5" />;
       case 'Пороки': return <Ban className="h-5 w-5" />;
       default: return <DollarSign className="h-5 w-5" />;
     }
