@@ -532,9 +532,9 @@ export default function Statistics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden">
+          <div className="relative overflow-auto">
+            <div className="w-full inline-block align-middle min-w-full">
+              <div className="overflow-x-auto border rounded-lg shadow-sm">
                 <table className="min-w-full divide-y divide-border">
                   <thead>
                     <tr className="bg-muted/50">
@@ -553,7 +553,7 @@ export default function Statistics() {
                         ))}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-border bg-background">
                     {data.map((day) => {
                       const expenseCategories = day.categories.filter(
                         (category) => category.type === CategoryType.EXPENSE
@@ -591,11 +591,11 @@ export default function Statistics() {
 
                       return (
                         <tr key={day.date} className="border-b border-border/10">
-                          <td className="py-2 px-4 font-medium text-sm font-semibold min-w-[90px]">
+                          <td className="sticky left-0 z-10 bg-background px-4 py-2 text-sm font-medium whitespace-nowrap">
                             {format(new Date(day.date), "dd.MM.yyyy")}
                           </td>
                           <td
-                            className="py-2 px-4 text-center text-sm font-semibold font-bold min-w-[90px]"
+                            className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-medium"
                             style={{
                               backgroundColor: hexToRGBA(
                                 getCssVar(settings.colors.expenses),
@@ -632,7 +632,7 @@ export default function Statistics() {
                       );
                     })}
                     <tr className="border-t-2 border-border font-bold">
-                      <td className="py-2 px-4 text-sm font-semibold">Итого</td>
+                      <td className="sticky left-0 z-10 bg-background px-4 py-2 text-sm font-semibold">Итого</td>
                       {(() => {
                         const grandTotal = data.reduce(
                           (total, day) =>
@@ -672,7 +672,7 @@ export default function Statistics() {
 
                         return (
                           <td
-                            className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                            className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-semibold min-w-[90px]"
                             style={{
                               backgroundColor: hexToRGBA(
                                 getCssVar(settings.colors.expenses),
@@ -745,14 +745,14 @@ export default function Statistics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden">
+          <div className="relative overflow-auto">
+            <div className="w-full inline-block align-middle min-w-full">
+              <div className="overflow-x-auto border rounded-lg shadow-sm">
                 <table className="min-w-full divide-y divide-border">
                   <thead className="sticky top-0 bg-background z-10">
                     <tr className="border-b border-border/20">
-                      <th className="sticky left-0 bg-background py-2 px-4 text-left text-sm font-semibold w-[100px]">Дата</th>
-                      <th className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-semibold w-[80px]">Успех</th>
+                      <th className="sticky left-0 z-20 bg-background py-2 px-4 text-left text-sm font-semibold w-[100px]">Дата</th>
+                      <th className="sticky left-[100px] z-20 bg-background py-2 px-4 text-center text-sm font-semibold w-[80px]">Успех</th>
                       {data[0]?.categories
                         .filter((category) => category.type !== CategoryType.EXPENSE)
                         .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
@@ -760,7 +760,7 @@ export default function Statistics() {
                           <th
                             key={category.name}
                             colSpan={category.tasks.length}
-                            className="py-2 px4 text-center text-sm font-semibold"
+                            className="py-2 px-4 text-center text-sm font-semibold"
                             style={{
                               backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
                               color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
@@ -795,14 +795,14 @@ export default function Statistics() {
                         )}
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-border bg-background">
                     {data.map((day) => (
                       <tr key={day.date} className="border-b border-border/10">
-                        <td className="sticky left-0 bg-background py-2 px-4 font-medium">
+                        <td className="sticky left-0 z-10 bg-background px-4 py-2 font-medium">
                           {format(new Date(day.date), "dd.MM")}
                         </td>
                         <td
-                          className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-medium"
+                          className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-medium"
                           style={{
                             backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6))
                           }}
@@ -845,14 +845,14 @@ export default function Statistics() {
                                   {task.type === TaskType.CALORIE && 'ккал'}
                                 </td>
                               );
-                            })
+                                                        })
                           )}
                       </tr>
                     ))}
                     <tr className="border-t-2 border-border font-bold">
-                      <td className="sticky left-0 bg-background py-2 px-4 text-sm font-semibold">Итого</td>
+                      <td className="sticky left-0 z-10 bg-background px-4 py-2 text-sm font-semibold">Итого</td>
                       <td
-                        className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-semibold"
+                        className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
                             getCssVar(settings.colors.daySuccess),
