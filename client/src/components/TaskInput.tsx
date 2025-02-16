@@ -28,31 +28,38 @@ interface TaskInputProps {
   categoryColor?: string;
 }
 
-// Обновляем стили для использования цветов
-const getButtonStyles = (completed: boolean, categoryColor: string) => `
-  w-full h-9 text-base
-  ${completed 
-    ? `bg-${categoryColor} text-white hover:opacity-90` 
-    : 'bg-zinc-800 text-white/60 hover:text-white hover:bg-zinc-700'
-  } 
-  border-0 font-bold transition-colors duration-200
-`;
+const getButtonStyles = (completed: boolean, categoryColor: string) => ({
+  width: '100%',
+  height: '2.25rem',
+  fontSize: '1rem',
+  backgroundColor: completed ? `hsl(var(--${categoryColor}))` : 'rgb(39 39 42)',
+  color: completed ? 'white' : 'rgba(255, 255, 255, 0.6)',
+  border: 'none',
+  fontWeight: 'bold',
+  transition: 'all 0.2s',
+});
 
-const getSelectStyles = (value: number, categoryColor: string) => `
-  w-full h-9 
-  ${value > 0 ? `bg-${categoryColor}` : 'bg-zinc-800'} 
-  hover:opacity-90 border-0 font-bold text-center 
-  ${value > 0 ? 'text-white' : 'text-white/60'}
-`;
+const getSelectStyles = (value: number, categoryColor: string) => ({
+  width: '100%',
+  height: '2.25rem',
+  backgroundColor: value > 0 ? `hsl(var(--${categoryColor}))` : 'rgb(39 39 42)',
+  color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+  border: 'none',
+  fontWeight: 'bold',
+  textAlign: 'center',
+});
 
-const getInputStyles = (hasValue: boolean, categoryColor: string) => `
-  w-full h-9 
-  ${hasValue ? `bg-${categoryColor}` : 'bg-zinc-800'} 
-  border-0 text-left pl-8 text-base font-bold transition-colors
-  ${hasValue ? 'text-white' : 'text-white/60'}
-  focus:ring-1 focus:ring-${categoryColor} hover:opacity-90
-  [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
-`;
+const getInputStyles = (hasValue: boolean, categoryColor: string) => ({
+  width: '100%',
+  height: '2.25rem',
+  backgroundColor: hasValue ? `hsl(var(--${categoryColor}))` : 'rgb(39 39 42)',
+  border: 'none',
+  paddingLeft: '2rem',
+  fontSize: '1rem',
+  fontWeight: 'bold',
+  color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
+  transition: 'all 0.2s',
+});
 
 const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor = 'zinc-500' }: TaskInputProps) => {
   const handleChange = useCallback((value: number | boolean | string) => {
@@ -67,7 +74,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onValueChange={(value) => handleChange(parseInt(value))}
       >
         <SelectTrigger 
-          className={getSelectStyles(value, categoryColor)}
+          style={getSelectStyles(value, categoryColor)}
         >
           <SelectValue placeholder="Время" />
         </SelectTrigger>
@@ -90,7 +97,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onValueChange={(value) => handleChange(parseInt(value))}
       >
         <SelectTrigger 
-          className={getSelectStyles(value, categoryColor)}
+          style={getSelectStyles(value, categoryColor)}
         >
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
@@ -111,7 +118,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         variant="ghost"
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        className={getButtonStyles(task.completed, categoryColor)}
+        style={getButtonStyles(task.completed, categoryColor)}
       >
         {task.completed ? 'Выполнено' : 'Отметить'}
       </Button>
@@ -126,11 +133,18 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           type="number"
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          className={getInputStyles(hasValue, categoryColor)}
+          style={getInputStyles(hasValue, categoryColor)}
           placeholder="0"
         />
-        <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold 
-          ${hasValue ? 'text-white' : 'text-white/60'}`}>
+        <span style={{
+          position: 'absolute',
+          left: '0.5rem',
+          top: '50%',
+          transform: 'translateY(-50%)',
+          fontSize: '0.875rem',
+          fontWeight: 'bold',
+          color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)'
+        }}>
           zł
         </span>
       </div>
@@ -143,8 +157,10 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         type="text"
         value={task.textValue || ''}
         onChange={(e) => handleChange(e.target.value)}
-        className={`w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium
-          focus:ring-1 focus:ring-${categoryColor}`}
+        className="w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium"
+        style={{
+          '--tw-ring-color': `hsl(var(--${categoryColor}))`,
+        } as React.CSSProperties}
         placeholder="Описание..."
         maxLength={255}
       />

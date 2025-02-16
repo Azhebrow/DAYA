@@ -24,6 +24,16 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     --radius: 0.75rem;
+
+    /* Category Colors */
+    --purple-500: 271 91% 65%;
+    --blue-500: 217 91% 60%;
+    --green-500: 142 71% 45%;
+    --red-500: 0 84% 60%;
+    --orange-500: 24 94% 53%;
+    --yellow-500: 48 96% 53%;
+    --pink-500: 330 81% 60%;
+    --teal-500: 172 66% 40%;
   }
 }
 
@@ -57,6 +67,19 @@
     scrollbar-width: thin;
     scrollbar-color: var(--secondary) var(--muted);
   }
+}
+
+/* Category color utilities */
+.bg-category {
+  background-color: hsl(var(--category-color));
+}
+
+.text-category {
+  color: hsl(var(--category-color));
+}
+
+.ring-category {
+  --tw-ring-color: hsl(var(--category-color));
 }
 
 .task-card {

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -18,7 +18,7 @@ export const TaskCard = React.memo(({
   onTaskUpdate, 
   isExpenseCard = false 
 }: TaskCardProps) => {
-  const [settings] = useState(() => {
+  const [settings] = React.useState(() => {
     try {
       const stored = localStorage.getItem('day_success_tracker_settings');
       if (!stored) return settingsSchema.parse({});
@@ -38,7 +38,6 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  // Получение цвета из настроек
   const getCategoryColor = () => {
     switch (category.name) {
       case 'Разум':
@@ -54,7 +53,6 @@ export const TaskCard = React.memo(({
     }
   };
 
-  // Получение иконки для категории
   const getCategoryIcon = () => {
     switch (category.name) {
       case 'Разум':
@@ -84,7 +82,7 @@ export const TaskCard = React.memo(({
           {/* Header row with category name and progress bar */}
           <div className="flex items-center h-[3.5rem]">
             <div className="w-1/2 px-4 flex items-center gap-2">
-              <div className={`text-${categoryColor}`}>
+              <div style={{ color: `hsl(var(--${categoryColor}))` }}>
                 {getCategoryIcon()}
               </div>
               <span className="text-base font-medium text-gray-200">
@@ -95,8 +93,10 @@ export const TaskCard = React.memo(({
               {!isExpenseCard && (
                 <Progress 
                   value={progress} 
-                  className={`h-2.5 bg-zinc-800`}
-                  style={{ ['--progress-background' as any]: `var(--${categoryColor})` }}
+                  className="h-2.5 bg-zinc-800"
+                  style={{ 
+                    '--progress-foreground': `hsl(var(--${categoryColor}))` 
+                  } as React.CSSProperties}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
