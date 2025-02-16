@@ -53,6 +53,10 @@ const getCssVar = (varName: string) => {
 };
 
 function hexToRGBA(hex: string, alpha: number) {
+  if (!hex.startsWith('#')) {
+    // If the color is already in another format, return it with opacity
+    return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+  }
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
@@ -64,26 +68,30 @@ export default function Statistics() {
     try {
       const stored = localStorage.getItem("day_success_tracker_settings");
       if (!stored) return settingsSchema.parse({});
-      return settingsSchema.parse(JSON.parse(stored));
+      const parsedSettings = settingsSchema.parse(JSON.parse(stored));
+      return parsedSettings;
     } catch (error) {
       console.error("Error parsing settings:", error);
       return settingsSchema.parse({});
     }
   });
 
+  const getVarColor = (varName: string) => `var(${varName})`;
+
   const CATEGORY_COLORS = {
-    Разум: `var(${settings.colors.mind})`,
-    Время: `var(${settings.colors.time})`,
-    Спорт: `var(${settings.colors.sport})`,
-    Привычки: `var(${settings.colors.habits})`,
-    Траты: `var(${settings.colors.expenses})`,
+    Разум: getVarColor(settings.colors.mind),
+    Время: getVarColor(settings.colors.time),
+    Спорт: getVarColor(settings.colors.sport),
+    Привычки: getVarColor(settings.colors.habits),
+    Траты: getVarColor(settings.colors.expenses),
+    Успех: getVarColor(settings.colors.time), // Using time color for success by default
   };
 
   const CATEGORY_HEADER_COLORS = {
-    Разум: { bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2), text: "#ffffff" },
-    Время: { bg: hexToRGBA(getCssVar(settings.colors.time), 0.2), text: "#ffffff" },
-    Спорт: { bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2), text: "#ffffff" },
-    Привычки: { bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2), text: "#ffffff" },
+    Разум: { bg: `${CATEGORY_COLORS.Разум}20`, text: "#ffffff" },
+    Время: { bg: `${CATEGORY_COLORS.Время}20`, text: "#ffffff" },
+    Спорт: { bg: `${CATEGORY_COLORS.Спорт}20`, text: "#ffffff" },
+    Привычки: { bg: `${CATEGORY_COLORS.Привычки}20`, text: "#ffffff" },
   };
 
   const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(() => {
@@ -220,7 +228,7 @@ export default function Statistics() {
       .map(([name, { amount, emoji }]) => ({
         name: `${emoji} ${name}`,
         amount,
-        color: `var(${settings.colors.expenses})`,
+        color: CATEGORY_COLORS.Траты,
       }))
       .sort((a, b) => b.amount - a.amount);
 
@@ -297,7 +305,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.daySuccess})` }} />
+              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
               Показатель успеха
             </CardTitle>
           </CardHeader>
@@ -323,11 +331,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke={`var(${settings.colors.daySuccess})`}
-                  fill={`var(${settings.colors.daySuccess})`}
+                  stroke={CATEGORY_COLORS.Успех}
+                  fill={CATEGORY_COLORS.Успех}
                   name="Успех"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: `var(${settings.colors.daySuccess})` }}
+                  label={{ position: "top", fill: CATEGORY_COLORS.Успех }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -337,7 +345,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Flame className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.sport})` }} />
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Спорт }} />
               Калории
             </CardTitle>
           </CardHeader>
@@ -358,11 +366,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="calories"
-                  stroke={`var(${settings.colors.sport})`}
-                  fill={`var(${settings.colors.sport})`}
+                  stroke={CATEGORY_COLORS.Спорт}
+                  fill={CATEGORY_COLORS.Спорт}
                   name="Калории"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: `var(${settings.colors.sport})` }}
+                  label={{ position: "top", fill: CATEGORY_COLORS.Спорт }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -372,7 +380,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.expenses})` }} />
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
               Расходы
             </CardTitle>
           </CardHeader>
@@ -393,11 +401,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke={`var(${settings.colors.expenses})`}
-                  fill={`var(${settings.colors.expenses})`}
+                  stroke={CATEGORY_COLORS.Траты}
+                  fill={CATEGORY_COLORS.Траты}
                   name="Расходы"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: `var(${settings.colors.expenses})` }}
+                  label={{ position: "top", fill: CATEGORY_COLORS.Траты }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -409,7 +417,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.time})` }} />
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Время }} />
               Распределение времени: {formatTimeTotal(timeDistribution.totalMinutes)}
             </CardTitle>
           </CardHeader>
@@ -454,7 +462,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.expenses})` }} />
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
               Распределение расходов: {expenseDistribution.totalExpenses}zł
             </CardTitle>
           </CardHeader>
@@ -495,7 +503,7 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <FileText className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.daySuccess})` }} />
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
             Ежедневный отчет
           </CardTitle>
         </CardHeader>
@@ -563,7 +571,7 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.daySuccess})` }} />
+            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
             Успешность задач по дням
           </CardTitle>
         </CardHeader>
@@ -753,7 +761,7 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.expenses})` }} />
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
             Расходы по категориям
           </CardTitle>
         </CardHeader>
@@ -774,7 +782,7 @@ export default function Statistics() {
                           <th
                             key={category.name}
                             className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                            style={{ backgroundColor: hexToRGBA(getCssVar(settings.colors.expenses), 0.2) }}
+                            style={{ backgroundColor: hexToRGBA(CATEGORY_COLORS.Траты, 0.2) }}
                           >
                             {category.emoji} {category.name}
                           </th>
