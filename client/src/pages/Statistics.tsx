@@ -745,14 +745,14 @@ export default function Statistics() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="relative overflow-auto">
-            <div className="w-full inline-block align-middle min-w-full">
+          <div className="relative overflow-hidden">
+            <div className="w-full inline-block align-middle">
               <div className="overflow-x-auto border rounded-lg shadow-sm">
-                <table className="min-w-full divide-y divide-border">
+                <table className="min-w-full divide-y divide-border relative">
                   <thead className="sticky top-0 bg-background z-10">
                     <tr className="border-b border-border/20">
-                      <th className="sticky left-0 z-20 bg-background py-2 px-4 text-left text-sm font-semibold w-[100px]">Дата</th>
-                      <th className="sticky left-[100px] z-20 bg-background py-2 px-4 text-center text-sm font-semibold w-[80px]">Успех</th>
+                      <th className="sticky left-0 z-20 bg-background py-2 px-4 text-left text-sm font-semibold w-[100px]" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Дата</th>
+                      <th className="sticky left-[100px] z-20 bg-background py-2 px-4 text-center text-sm font-semibold w-[80px]" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Успех</th>
                       {data[0]?.categories
                         .filter((category) => category.type !== CategoryType.EXPENSE)
                         .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
@@ -798,13 +798,14 @@ export default function Statistics() {
                   <tbody className="divide-y divide-border bg-background">
                     {data.map((day) => (
                       <tr key={day.date} className="border-b border-border/10">
-                        <td className="sticky left-0 z-10 bg-background px-4 py-2 font-medium">
+                        <td className="sticky left-0 z-10 bg-background px-4 py-2 font-medium" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>
                           {format(new Date(day.date), "dd.MM")}
                         </td>
                         <td
                           className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-medium"
                           style={{
-                            backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6))
+                            backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6)),
+                            boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)'
                           }}
                         >
                           {calculateDayScore(day)}%
@@ -845,19 +846,20 @@ export default function Statistics() {
                                   {task.type === TaskType.CALORIE && 'ккал'}
                                 </td>
                               );
-                                                        })
+                            })
                           )}
                       </tr>
                     ))}
                     <tr className="border-t-2 border-border font-bold">
-                      <td className="sticky left-0 z-10 bg-background px-4 py-2 text-sm font-semibold">Итого</td>
+                      <td className="sticky left-0 z-10 bg-background px-4 py-2 text-sm font-semibold" style={{ boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)' }}>Итого</td>
                       <td
                         className="sticky left-[100px] z-10 bg-background px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
                             getCssVar(settings.colors.daySuccess),
                             Math.min((data.reduce((sum, day) => sum + calculateDayScore(day), 0) / (data.length * 100)) * 0.4 + 0.1, 0.5)
-                          )
+                          ),
+                          boxShadow: '2px 0 5px -2px rgba(0,0,0,0.2)'
                         }}
                       >
                         {Math.round(data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length)}%
