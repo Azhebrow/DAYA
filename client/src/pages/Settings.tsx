@@ -28,13 +28,37 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+// Определяем доступные цвета для палитры
+const colorPalette = [
+  { name: 'purple', value: 'purple-500', hex: '#A855F7' },
+  { name: 'blue', value: 'blue-500', hex: '#3B82F6' },
+  { name: 'green', value: 'green-500', hex: '#22C55E' },
+  { name: 'red', value: 'red-500', hex: '#EF4444' },
+  { name: 'orange', value: 'orange-500', hex: '#F97316' },
+  { name: 'yellow', value: 'yellow-500', hex: '#EAB308' },
+  { name: 'pink', value: 'pink-500', hex: '#EC4899' },
+  { name: 'teal', value: 'teal-500', hex: '#14B8A6' }
+];
+
+// Компонент выбора цвета
+const ColorPicker = ({ value, onChange, label }: { value: string; onChange: (value: string) => void; label: string }) => (
+  <div className="space-y-2">
+    <Label>{label}</Label>
+    <div className="grid grid-cols-4 gap-2">
+      {colorPalette.map((color) => (
+        <button
+          key={color.value}
+          onClick={() => onChange(color.value)}
+          className={`w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-background transition-all
+            ${value === color.value ? 'ring-white scale-110' : 'ring-transparent hover:scale-105'}`}
+          style={{ backgroundColor: color.hex }}
+          title={color.name}
+        />
+      ))}
+    </div>
+  </div>
+);
 
 // Основной текст клятвы остается без изменений
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
@@ -42,84 +66,6 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
 Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
-
-const availableColors = {
-  purple: {
-    name: 'Фиолетовый',
-    value: 'purple-500'
-  },
-  blue: {
-    name: 'Синий',
-    value: 'blue-500'
-  },
-  green: {
-    name: 'Зеленый',
-    value: 'green-500'
-  },
-  red: {
-    name: 'Красный',
-    value: 'red-500'
-  },
-  orange: {
-    name: 'Оранжевый',
-    value: 'orange-500'
-  },
-  yellow: {
-    name: 'Желтый',
-    value: 'yellow-500'
-  },
-  pink: {
-    name: 'Розовый',
-    value: 'pink-500'
-  },
-  teal: {
-    name: 'Бирюзовый',
-    value: 'teal-500'
-  }
-};
-
-const colorSchemes = {
-  default: {
-    name: 'По умолчанию',
-    mind: 'purple-500',
-    time: 'green-500',
-    sport: 'red-500',
-    habits: 'orange-500',
-    expenses: 'orange-500',
-  },
-  ocean: {
-    name: 'Океан',
-    mind: 'blue-500',
-    time: 'teal-500',
-    sport: 'indigo-500',
-    habits: 'sky-500',
-    expenses: 'cyan-500',
-  },
-  sunset: {
-    name: 'Закат',
-    mind: 'pink-500',
-    time: 'orange-500',
-    sport: 'red-500',
-    habits: 'yellow-500',
-    expenses: 'amber-500',
-  },
-  forest: {
-    name: 'Лес',
-    mind: 'emerald-500',
-    time: 'lime-500',
-    sport: 'green-500',
-    habits: 'teal-500',
-    expenses: 'green-500',
-  },
-  monochrome: {
-    name: 'Монохром',
-    mind: 'gray-500',
-    time: 'zinc-500',
-    habits: 'slate-500',
-    sport: 'neutral-500',
-    expenses: 'stone-500',
-  }
-};
 
 export default function SettingsPage() {
   const [settings, setSettings] = React.useState<Settings>(() => {
@@ -139,13 +85,7 @@ export default function SettingsPage() {
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
-      return { ...parsedSettings, colors: parsedSettings.colors || {
-          mind: 'purple-500',
-          time: 'green-500',
-          sport: 'red-500',
-          habits: 'orange-500',
-          expenses: 'orange-500',
-        } };
+      return parsedSettings;
     } catch (error) {
       console.error('Error parsing settings:', error);
       return settingsSchema.parse({
@@ -173,7 +113,6 @@ export default function SettingsPage() {
     if (key === 'colors') {
       newSettings = { ...settings, colors: {...settings.colors, ...value} };
     } else if (key === 'timeTarget') {
-      // Convert hours to minutes when saving
       newSettings = { ...settings, timeTarget: value * 60 };
     } else {
       newSettings = { ...settings, [key]: value };
@@ -186,24 +125,6 @@ export default function SettingsPage() {
     });
   };
 
-  const handleClearData = () => {
-    try {
-      localStorage.clear();
-      window.location.reload();
-      toast({
-        title: "Данные удалены",
-        description: "Все данные успешно удалены",
-      });
-    } catch (error) {
-      console.error('Clear data error:', error);
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при удалении данных",
-        variant: "destructive"
-      });
-    }
-  };
-
   // Convert minutes to hours for display
   const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
 
@@ -212,9 +133,7 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
       <div className="container mx-auto space-y-4 max-w-7xl">
         <header className="backdrop-blur-sm bg-card/30 rounded-lg p-4 mb-4">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-            Настройки
-          </h1>
+          <h1 className="text-2xl font-bold text-primary">Настройки</h1>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -223,7 +142,7 @@ export default function SettingsPage() {
             <Collapsible open={isOathExpanded} onOpenChange={setIsOathExpanded}>
               <CollapsibleTrigger className="w-full">
                 <CardHeader>
-                  <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent flex items-center justify-between">
+                  <CardTitle className="text-xl text-primary flex items-center justify-between">
                     <span>Текст клятвы</span>
                     {isOathExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                   </CardTitle>
@@ -248,7 +167,7 @@ export default function SettingsPage() {
           {/* Карточка диапазона дат */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
-              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <CardTitle className="text-xl text-primary">
                 Диапазон дат
               </CardTitle>
             </CardHeader>
@@ -300,7 +219,7 @@ export default function SettingsPage() {
           {/* Карточка целевых показателей */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
-              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <CardTitle className="text-xl text-primary">
                 Целевые показатели
               </CardTitle>
             </CardHeader>
@@ -331,138 +250,81 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Карточка цветовой схемы */}
+          {/* Карточка с категориями и цветами */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
-              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <CardTitle className="text-xl text-primary">
                 Цвета категорий
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4">
-                {/* Разум */}
-                <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-${settings.colors.mind} flex items-center justify-center`}>
-                    <Brain className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-grow">
-                    <Label>Разум</Label>
-                    <Select
-                      value={settings.colors.mind}
-                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, mind: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите цвет" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(availableColors).map(([key, color]) => (
-                          <SelectItem key={key} value={color.value}>
-                            {color.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+            <CardContent className="space-y-6">
+              {/* Разум */}
+              <div className="flex items-center gap-4">
+                <div className={`p-4 rounded-lg bg-${settings.colors.mind} flex items-center justify-center`}>
+                  <Brain className="h-5 w-5 text-white" />
                 </div>
-
-                {/* Время */}
-                <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-${settings.colors.time} flex items-center justify-center`}>
-                    <Clock className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-grow">
-                    <Label>Время</Label>
-                    <Select
-                      value={settings.colors.time}
-                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, time: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите цвет" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(availableColors).map(([key, color]) => (
-                          <SelectItem key={key} value={color.value}>
-                            {color.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex-grow">
+                  <ColorPicker
+                    value={settings.colors.mind}
+                    onChange={(value) => handleSettingChange('colors', { mind: value })}
+                    label="Разум"
+                  />
                 </div>
+              </div>
 
-                {/* Спорт */}
-                <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-${settings.colors.sport} flex items-center justify-center`}>
-                    <Dumbbell className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-grow">
-                    <Label>Спорт</Label>
-                    <Select
-                      value={settings.colors.sport}
-                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, sport: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите цвет" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(availableColors).map(([key, color]) => (
-                          <SelectItem key={key} value={color.value}>
-                            {color.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              {/* Время */}
+              <div className="flex items-center gap-4">
+                <div className={`p-4 rounded-lg bg-${settings.colors.time} flex items-center justify-center`}>
+                  <Clock className="h-5 w-5 text-white" />
                 </div>
-
-                {/* Привычки */}
-                <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-${settings.colors.habits} flex items-center justify-center`}>
-                    <Sparkles className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-grow">
-                    <Label>Привычки</Label>
-                    <Select
-                      value={settings.colors.habits}
-                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, habits: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите цвет" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(availableColors).map(([key, color]) => (
-                          <SelectItem key={key} value={color.value}>
-                            {color.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="flex-grow">
+                  <ColorPicker
+                    value={settings.colors.time}
+                    onChange={(value) => handleSettingChange('colors', { time: value })}
+                    label="Время"
+                  />
                 </div>
+              </div>
 
-                {/* Траты */}
-                <div className="flex items-center gap-4">
-                  <div className={`p-4 rounded-lg bg-${settings.colors.expenses} flex items-center justify-center`}>
-                    <DollarSign className="h-5 w-5 text-white" />
-                  </div>
-                  <div className="flex-grow">
-                    <Label>Траты</Label>
-                    <Select
-                      value={settings.colors.expenses}
-                      onValueChange={(value) => handleSettingChange('colors', { ...settings.colors, expenses: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите цвет" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(availableColors).map(([key, color]) => (
-                          <SelectItem key={key} value={color.value}>
-                            {color.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              {/* Спорт */}
+              <div className="flex items-center gap-4">
+                <div className={`p-4 rounded-lg bg-${settings.colors.sport} flex items-center justify-center`}>
+                  <Dumbbell className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-grow">
+                  <ColorPicker
+                    value={settings.colors.sport}
+                    onChange={(value) => handleSettingChange('colors', { sport: value })}
+                    label="Спорт"
+                  />
+                </div>
+              </div>
+
+              {/* Привычки */}
+              <div className="flex items-center gap-4">
+                <div className={`p-4 rounded-lg bg-${settings.colors.habits} flex items-center justify-center`}>
+                  <Sparkles className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-grow">
+                  <ColorPicker
+                    value={settings.colors.habits}
+                    onChange={(value) => handleSettingChange('colors', { habits: value })}
+                    label="Привычки"
+                  />
+                </div>
+              </div>
+
+              {/* Траты */}
+              <div className="flex items-center gap-4">
+                <div className={`p-4 rounded-lg bg-${settings.colors.expenses} flex items-center justify-center`}>
+                  <DollarSign className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-grow">
+                  <ColorPicker
+                    value={settings.colors.expenses}
+                    onChange={(value) => handleSettingChange('colors', { expenses: value })}
+                    label="Траты"
+                  />
                 </div>
               </div>
             </CardContent>
@@ -471,7 +333,7 @@ export default function SettingsPage() {
           {/* Карточка управления данными - всегда в конце и на всю ширину */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <CardHeader>
-              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              <CardTitle className="text-xl text-primary">
                 Управление данными
               </CardTitle>
             </CardHeader>
