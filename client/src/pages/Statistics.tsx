@@ -631,6 +631,103 @@ export default function Statistics() {
                         </tr>
                       );
                     })}
+                    <tr className="border-t-2 border-border font-bold">
+                      <td className="py-2 px-4 text-sm font-semibold">Итого</td>
+                      {(() => {
+                        const grandTotal = data.reduce(
+                          (total, day) =>
+                            total +
+                            day.categories
+                              .filter((c) => c.type === CategoryType.EXPENSE)
+                              .reduce(
+                                (catSum, category) =>
+                                  catSum +
+                                  category.tasks.reduce(
+                                    (taskSum, task) =>
+                                      taskSum +
+                                      (task.type === TaskType.EXPENSE ? task.value || 0 : 0),
+                                    0
+                                  ),
+                                0
+                              ),
+                          0
+                        );
+
+                        const maxDayTotal = Math.max(
+                          ...data.map((day) =>
+                            day.categories
+                              .filter((c) => c.type === CategoryType.EXPENSE)
+                              .reduce(
+                                (sum, c) =>
+                                  sum +
+                                  c.tasks.reduce(
+                                    (tSum, t) =>
+                                      tSum + (t.type === TaskType.EXPENSE ? t.value || 0 : 0),
+                                    0
+                                  ),
+                                0
+                              )
+                          )
+                        );
+
+                        return (
+                          <td
+                            className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                            style={{
+                              backgroundColor: hexToRGBA(
+                                getCssVar(settings.colors.expenses),
+                                Math.min((grandTotal / (maxDayTotal * data.length)) * 0.4 + 0.3, 0.8)
+                              ),
+                            }}
+                          >
+                            {grandTotal} zł
+                          </td>
+                        );
+                      })()}
+                      {data[0]?.categories
+                        .filter((category) => category.type === CategoryType.EXPENSE)
+                        .map((category) => {
+                          const categoryTotal = data.reduce((sum, day) => {
+                            const cat = day.categories.find((c) => c.name === category.name);
+                            return (
+                              sum +
+                              (cat?.tasks.reduce(
+                                (taskSum, task) =>
+                                  taskSum + (task.type === TaskType.EXPENSE ? task.value || 0 : 0),
+                                0
+                              ) || 0)
+                            );
+                          }, 0);
+
+                          const maxCategoryDayTotal = Math.max(
+                            ...data.map((d) => {
+                              const cat = d.categories.find((c) => c.name === category.name);
+                              return (
+                                cat?.tasks.reduce(
+                                  (taskSum, task) =>
+                                    taskSum + (task.type === TaskType.EXPENSE ? task.value || 0 : 0),
+                                  0
+                                ) || 0
+                              );
+                            })
+                          );
+
+                          return (
+                            <td
+                              key={`total-${category.name}`}
+                              className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                              style={{
+                                backgroundColor: hexToRGBA(
+                                  getCssVar(settings.colors.expenses),
+                                  Math.min((categoryTotal / (maxCategoryDayTotal * data.length)) * 0.4 + 0.3, 0.8)
+                                ),
+                              }}
+                            >
+                              {categoryTotal} zł
+                            </td>
+                          );
+                        })}
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -700,71 +797,144 @@ export default function Statistics() {
                   </thead>
                   <tbody>
                     {data.map((day) => (
-                                  <tr key={day.date} className="border-b border-border/10">
-                                    <td className="sticky left-0 bg-background py-2 px-4 font-medium">
-                                      {format(new Date(day.date), "dd.MM")}
-                                    </td>
-                                    <td
-                                      className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-medium"
-                                      style={{
-                                        backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6))
-                                      }}
-                                    >
-                                      {calculateDayScore(day)}%
-                                    </td>
-                                    {day.categories
-                                      .filter(
-                                        (category) => category.type !== CategoryType.EXPENSE,
-                                      )
-                                      .sort(
-                                        (a, b) =>
-                                          CATEGORY_ORDER.indexOf(a.name) -
-                                          CATEGORY_ORDER.indexOf(b.name),
-                                      )
-                                      .flatMap((category) =>
-                                        category.tasks.map((task) => {
-                                          let displayValue = "";
-                                          let bgColor = "transparent";
+                      <tr key={day.date} className="border-b border-border/10">
+                        <td className="sticky left-0 bg-background py-2 px-4 font-medium">
+                          {format(new Date(day.date), "dd.MM")}
+                        </td>
+                        <td
+                          className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-medium"
+                          style={{
+                            backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6))
+                          }}
+                        >
+                          {calculateDayScore(day)}%
+                        </td>
+                        {day.categories
+                          .filter(
+                            (category) => category.type !== CategoryType.EXPENSE,
+                          )
+                          .sort(
+                            (a, b) =>
+                              CATEGORY_ORDER.indexOf(a.name) -
+                              CATEGORY_ORDER.indexOf(b.name),
+                          )
+                          .flatMap((category) =>
+                            category.tasks.map((task) => {
+                              let displayValue = "";
+                              let bgColor = "transparent";
 
-                                          if (task.type === TaskType.CHECKBOX) {
-                                            displayValue = task.completed ? "✓" : "✗";
-                                            bgColor = task.completed
-                                              ? hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), 0.5)
-                                              : "transparent";
-                                          } else if (task.type === TaskType.TIME) {
-                                            displayValue = formatTimeTotal(task.value || 0);
-                                            const maxValue = 8 * 60;
-                                            const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                            bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
-                                          } else if (task.type === TaskType.CALORIE) {
-                                            displayValue = `${task.value || 0}`;
-                                            const maxValue = 3000;
-                                            const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                            bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
-                                          }
+                              if (task.type === TaskType.CHECKBOX) {
+                                displayValue = task.completed ? "✓" : "✗";
+                                bgColor = task.completed
+                                  ? hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), 0.5)
+                                  : "transparent";
+                              } else if (task.type === TaskType.TIME) {
+                                displayValue = formatTimeTotal(task.value || 0);
+                                const maxValue = 8 * 60;
+                                const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
+                                bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
+                              } else if (task.type === TaskType.CALORIE) {
+                                displayValue = `${task.value || 0}`;
+                                const maxValue = 3000;
+                                const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
+                                bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
+                              }
 
-                                          return (
-                                            <td
-                                              key={`${category.name}-${task.name}`}
-                                              className="py-2 px-4 text-center text-sm font-semibold"
-                                              style={{ backgroundColor: bgColor }}
-                                            >
-                                              {displayValue}
-                                              {task.type === TaskType.TIME && 'ч'}
-                                              {task.type === TaskType.CALORIE && 'ккал'}
-                                            </td>
-                                          );
-                                        }),
-                                      )}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                              return (
+                                <td
+                                  key={`${category.name}-${task.name}`}
+                                  className="py-2 px-4 text-center text-sm font-semibold"
+                                  style={{ backgroundColor: bgColor }}
+                                >
+                                  {displayValue}
+                                  {task.type === TaskType.TIME && 'ч'}
+                                  {task.type === TaskType.CALORIE && 'ккал'}
+                                </td>
+                              );
+                            })
+                          )}
+                      </tr>
+                    ))}
+                    <tr className="border-t-2 border-border font-bold">
+                      <td className="sticky left-0 bg-background py-2 px-4 text-sm font-semibold">Итого</td>
+                      <td
+                        className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-semibold"
+                        style={{
+                          backgroundColor: hexToRGBA(
+                            getCssVar(settings.colors.daySuccess),
+                            Math.min((data.reduce((sum, day) => sum + calculateDayScore(day), 0) / (data.length * 100)) * 0.5 + 0.3, 0.8)
+                          )
+                        }}
+                      >
+                        {Math.round(data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length)}%
+                      </td>
+                      {data[0]?.categories
+                        .filter((category) => category.type !== CategoryType.EXPENSE)
+                        .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                        .flatMap((category) =>
+                          category.tasks.map((task) => {
+                            let totalValue = "";
+                            let bgColor = "transparent";
+
+                            if (task.type === TaskType.CHECKBOX) {
+                              const completedCount = data.reduce((sum, day) => {
+                                const cat = day.categories.find((c) => c.name === category.name);
+                                const t = cat?.tasks.find((t) => t.name === task.name);
+                                return sum + (t?.completed ? 1 : 0);
+                              }, 0);
+                              const totalPercentage = Math.round((completedCount / data.length) * 100);
+                              totalValue = `${totalPercentage}%`;
+                              bgColor = hexToRGBA(
+                                getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]),
+                                Math.min((totalPercentage / 100) * 0.4 + 0.3, 0.8)
+                              );
+                            } else if (task.type === TaskType.TIME) {
+                              const totalMinutes = data.reduce((sum, day) => {
+                                const cat = day.categories.find((c) => c.name === category.name);
+                                const t = cat?.tasks.find((t) => t.name === task.name);
+                                return sum + (t?.value || 0);
+                              }, 0);
+                              totalValue = formatTimeTotal(totalMinutes);
+                              const maxValue = 8 * 60 * data.length;
+                              bgColor = hexToRGBA(
+                                getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]),
+                                Math.min((totalMinutes / maxValue) * 0.4 + 0.3, 0.8)
+                              );
+                            } else if (task.type === TaskType.CALORIE) {
+                              const totalCalories = data.reduce((sum, day) => {
+                                const cat = day.categories.find((c) => c.name === category.name);
+                                const t = cat?.tasks.find((t) => t.name === task.name);
+                                return sum + (t?.value || 0);
+                              }, 0);
+                              totalValue = `${totalCalories}`;
+                              const maxValue = 3000 * data.length;
+                              bgColor = hexToRGBA(
+                                getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]),
+                                Math.min((totalCalories / maxValue) * 0.4 + 0.3, 0.8)
+                              );
+                            }
+
+                            return (
+                              <td
+                                key={`total-${category.name}-${task.name}`}
+                                className="py-2 px-4 text-center text-sm font-semibold"
+                                style={{ backgroundColor: bgColor }}
+                              >
+                                {totalValue}
+                                {task.type === TaskType.TIME && 'ч'}
+                                {task.type === TaskType.CALORIE && 'ккал'}
+                              </td>
+                            );
+                          })
+                        )}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="space-y-1 pb-2">
@@ -849,6 +1019,7 @@ export default function Statistics() {
           </div>
         </CardContent>
       </Card>
+
       {/* Графики распределения */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card className="w-full">
