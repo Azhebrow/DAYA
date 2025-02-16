@@ -5,7 +5,6 @@ import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 import { Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
-import { storage } from '@/lib/storage';
 
 interface TaskCardProps {
   category: Category;
@@ -18,16 +17,6 @@ export const TaskCard = React.memo(({
   onTaskUpdate, 
   isExpenseCard = false 
 }: TaskCardProps) => {
-  const [storedTasks, setStoredTasks] = React.useState(() => storage.getTasks());
-  const settings = storage.getSettings();
-
-  React.useEffect(() => {
-    const unsubscribe = storage.subscribe(() => {
-      setStoredTasks(storage.getTasks());
-    });
-    return unsubscribe;
-  }, []);
-
   const progress = React.useMemo(() => 
     calculateCategoryProgress(category.tasks, category.type),
     [category.tasks, category.type]
@@ -38,12 +27,33 @@ export const TaskCard = React.memo(({
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
-    const colors = settings.colors;
+    const stored = localStorage.getItem('day_success_tracker_settings');
+    let colors;
+    try {
+      if (stored) {
+        const settings = JSON.parse(stored);
+        colors = settings.colors;
+      }
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+    }
+
+    if (!colors) {
+      colors = {
+        mind: '--purple',
+        time: '--green',
+        sport: '--red',
+        habits: '--orange',
+        expenses: '--blue'
+      };
+    }
+
     switch (category.name) {
       case 'Разум': return `var(${colors.mind})`;
       case 'Время': return `var(${colors.time})`;
       case 'Спорт': return `var(${colors.sport})`;
-      case 'Пороки': return `var(${colors.habits})`;
+      case 'Привычки': return `var(${colors.habits})`; 
+      case 'Пороки': return `var(${colors.habits})`; 
       default: return `var(${colors.expenses})`;
     }
   };
@@ -53,13 +63,13 @@ export const TaskCard = React.memo(({
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
+      case 'Привычки': 
       case 'Пороки': return <Ban className="h-5 w-5" />;
       default: return <DollarSign className="h-5 w-5" />;
     }
   };
 
   const iconColor = getIconColor();
-  const storedCategory = storedTasks.find(c => c.name === category.name);
 
   return (
     <motion.div
@@ -72,7 +82,7 @@ export const TaskCard = React.memo(({
           <div className="flex items-center gap-2">
             <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
             <span className="text-base font-medium text-gray-200">
-              {category.name}
+              {category.name === 'Привычки' ? 'Пороки' : category.name}
             </span>
           </div>
 
@@ -92,30 +102,24 @@ export const TaskCard = React.memo(({
         </div>
 
         <div>
-          {category.tasks.map((task) => {
-            const storedTask = storedCategory?.tasks.find(t => t.id === task.id);
-
-            return (
-              <div 
-                key={task.id} 
-                className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
-              >
-                {!isExpenseCard && (
-                  <span className="w-1/2 text-gray-400">
-                    {storedTask ? `${storedTask.emoji} ${storedTask.name}` : task.name}
-                  </span>
-                )}
-                <div className={isExpenseCard ? "w-full" : "w-1/2"}>
-                  <TaskInput
-                    task={storedTask || task}
-                    onChange={(value) => handleTaskUpdate(task.id, value)}
-                    isExpenseCard={isExpenseCard}
-                    categoryColor={iconColor}
-                  />
-                </div>
+          {category.tasks.map((task) => (
+            <div 
+              key={task.id} 
+              className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
+            >
+              {!isExpenseCard && (
+                <span className="w-1/2 text-gray-400">{task.name}</span>
+              )}
+              <div className={isExpenseCard ? "w-full" : "w-1/2"}>
+                <TaskInput
+                  task={task}
+                  onChange={(value) => handleTaskUpdate(task.id, value)}
+                  isExpenseCard={isExpenseCard}
+                  categoryColor={iconColor}
+                />
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </Card>
     </motion.div>

@@ -5,10 +5,9 @@ import {
   settingsSchema
 } from '@shared/schema';
 import { eq } from 'drizzle-orm';
+import { users, type User, type InsertUser } from "@shared/schema";
 
 export interface IStorage {
-  getTasks(): Task[];
-  saveTasks(tasks: Task[]): void;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -20,15 +19,6 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  getTasks(): Task[] {
-    const stored = localStorage.getItem('day_success_tracker_tasks');
-    if (!stored) return [];
-    return JSON.parse(stored);
-  }
-
-  saveTasks(tasks: Task[]): void {
-    localStorage.setItem('day_success_tracker_tasks', JSON.stringify(tasks));
-  }
   async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
@@ -64,28 +54,20 @@ export class DatabaseStorage implements IStorage {
           .from(tasks)
           .where(eq(tasks.categoryId, cat.id));
 
-        // Get task names and emojis from local storage
-        const storedTasks = this.getTasks();
-        const categoryTasks = storedTasks.find(c => c.name === cat.name)?.tasks || [];
-
         return {
           id: cat.id.toString(),
           name: cat.name,
           emoji: cat.emoji,
           type: cat.type,
-          tasks: catTasks.map(t => {
-            const storedTask = categoryTasks.find(st => st.id === t.id);
-            return {
-              id: t.id.toString(),
-              name: storedTask?.name || t.name,
-              emoji: storedTask?.emoji || "📝",
-              type: t.type,
-              value: t.value || 0,
-              textValue: t.textValue || '',
-              completed: t.completed,
-              createdAt: t.createdAt?.toISOString() || new Date().toISOString()
-            };
-          })
+          tasks: catTasks.map(t => ({
+            id: t.id.toString(),
+            name: t.name,
+            type: t.type,
+            value: t.value || 0,
+            textValue: t.textValue || '',
+            completed: t.completed,
+            createdAt: t.createdAt.toISOString()
+          }))
         };
       })
     );
