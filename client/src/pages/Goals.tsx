@@ -10,6 +10,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Target, DollarSign, Book, Weight, Video, CodeSquare, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { Settings, settingsSchema } from '@shared/schema';
 
 interface Goal {
   id: number;
@@ -19,7 +20,7 @@ interface Goal {
   start?: number;
   unit: string;
   iconName: string;
-  color: string;
+  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses';
 }
 
 interface HistoryEntry {
@@ -64,7 +65,7 @@ const initialGoals: Goal[] = [
     current: 0,
     unit: "злотых",
     iconName: "DollarSign",
-    color: "from-green-500 to-emerald-700"
+    category: 'expenses'
   },
   {
     id: 2,
@@ -73,7 +74,7 @@ const initialGoals: Goal[] = [
     current: 0,
     unit: "страниц",
     iconName: "Book",
-    color: "from-blue-500 to-indigo-700"
+    category: 'mind'
   },
   {
     id: 3,
@@ -83,7 +84,7 @@ const initialGoals: Goal[] = [
     start: 72,
     unit: "кг",
     iconName: "Weight",
-    color: "from-purple-500 to-violet-700"
+    category: 'sport'
   },
   {
     id: 4,
@@ -92,7 +93,7 @@ const initialGoals: Goal[] = [
     current: 0,
     unit: "видео",
     iconName: "Video",
-    color: "from-red-500 to-rose-700"
+    category: 'time'
   },
   {
     id: 5,
@@ -101,7 +102,7 @@ const initialGoals: Goal[] = [
     current: 0,
     unit: "$",
     iconName: "CodeSquare",
-    color: "from-yellow-500 to-orange-700"
+    category: 'expenses'
   }
 ];
 
@@ -111,9 +112,31 @@ export default function Goals() {
     return stored ? JSON.parse(stored) : initialGoals;
   });
 
-  const [history, setHistory] = useState<HistoryEntry[]>(() => {
-    const stored = localStorage.getItem('goals_history');
-    return stored ? JSON.parse(stored) : [];
+  const [settings, setSettings] = useState<Settings>(() => {
+    try {
+      const stored = localStorage.getItem('day_success_tracker_settings');
+      if (!stored) return settingsSchema.parse({
+        colors: {
+          mind: 'from-purple-500 to-violet-700',
+          time: 'from-green-500 to-emerald-700',
+          sport: 'from-red-500 to-rose-700',
+          habits: 'from-orange-500 to-amber-700',
+          expenses: 'from-orange-500 to-amber-700',
+        }
+      });
+      return settingsSchema.parse(JSON.parse(stored));
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+      return settingsSchema.parse({
+        colors: {
+          mind: 'from-purple-500 to-violet-700',
+          time: 'from-green-500 to-emerald-700',
+          sport: 'from-red-500 to-rose-700',
+          habits: 'from-orange-500 to-amber-700',
+          expenses: 'from-orange-500 to-amber-700',
+        }
+      });
+    }
   });
 
   const [newValues, setNewValues] = useState<{ [key: number]: string }>({});
@@ -183,6 +206,12 @@ export default function Goals() {
     setHistory(prev => prev.filter(entry => entry.id !== entryId));
   };
 
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    const stored = localStorage.getItem('goals_history');
+    return stored ? JSON.parse(stored) : [];
+  });
+
+
   return (
     <div className="min-h-screen p-8 space-y-8">
       <motion.div
@@ -216,7 +245,7 @@ export default function Goals() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {goals.map(goal => (
                   <div key={`input-${goal.id}`} className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${settings.colors[goal.category]}`}>
                       {getIconByName(goal.iconName)}
                     </div>
                     <Input
@@ -249,11 +278,11 @@ export default function Goals() {
               transition={{ delay: index * 0.1 }}
             >
               <Card className="relative overflow-hidden p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
-                <div className={`absolute inset-0 bg-gradient-to-br ${goal.color} opacity-10`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${settings.colors[goal.category]} opacity-10`} />
                 <div className="relative space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}>
+                      <div className={`p-2 rounded-lg bg-gradient-to-br ${settings.colors[goal.category]}`}>
                         {getIconByName(goal.iconName)}
                       </div>
                       <h3 className="text-xl font-semibold">{goal.title}</h3>
@@ -333,7 +362,7 @@ export default function Goals() {
                           {changes.map(({ goal }) => (
                             <div
                               key={`icon-${goal.id}`}
-                              className={`p-2 rounded-lg bg-gradient-to-br ${goal.color}`}
+                              className={`p-2 rounded-lg bg-gradient-to-br ${settings.colors[goal.category]}`}
                             >
                               {getIconByName(goal.iconName)}
                             </div>
