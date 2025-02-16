@@ -47,19 +47,33 @@ import {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
-// Updated color utility functions
-const getCssVar = (varName: string) => {
-  return getComputedStyle(document.documentElement).getPropertyValue(varName.replace('--', '')).trim();
+// Updated color utility functions with proper error handling
+const getCssVar = (varName: string): string => {
+  if (typeof document === 'undefined') return '#000000'; // Fallback for SSR
+  const cssVar = varName.startsWith('--') ? varName : `--${varName}`;
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(cssVar)
+    .trim();
 };
 
-function hexToRGBA(hex: string, alpha: number) {
-  if (!hex.startsWith('#')) {
-    // If the color is already in another format, return it with opacity
+function hexToRGBA(hex: string, alpha: number): string {
+  if (!hex) return `rgba(0, 0, 0, ${alpha})`; // Fallback for undefined colors
+
+  // Handle CSS variable values
+  if (hex.startsWith('var(')) {
+    hex = getCssVar(hex.slice(4, -1));
+  }
+
+  // Handle RGB/RGBA values
+  if (hex.startsWith('rgb')) {
     return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
   }
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+
+  // Handle hex values
+  const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
+  const r = parseInt(cleanHex.slice(0, 2), 16);
+  const g = parseInt(cleanHex.slice(2, 4), 16);
+  const b = parseInt(cleanHex.slice(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -76,7 +90,10 @@ export default function Statistics() {
     }
   });
 
-  const getVarColor = (varName: string) => `var(${varName})`;
+  const getVarColor = (varName: string): string => {
+    if (!varName) return '#000000'; // Fallback for undefined variables
+    return `var(${varName})`;
+  };
 
   const CATEGORY_COLORS: { [key: string]: string } = {
     'Разум': getVarColor(settings.colors.mind),
@@ -84,14 +101,26 @@ export default function Statistics() {
     'Спорт': getVarColor(settings.colors.sport),
     'Привычки': getVarColor(settings.colors.habits),
     'Траты': getVarColor(settings.colors.expenses),
-    'Успех': getVarColor('--success') // Use a CSS variable for success color
+    'Успех': getVarColor('--success')
   };
 
   const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
-    'Разум': { bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2), text: "#ffffff" },
-    'Время': { bg: hexToRGBA(getCssVar(settings.colors.time), 0.2), text: "#ffffff" },
-    'Спорт': { bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2), text: "#ffffff" },
-    'Привычки': { bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2), text: "#ffffff" }
+    'Разум': { 
+      bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2), 
+      text: "#ffffff" 
+    },
+    'Время': { 
+      bg: hexToRGBA(getCssVar(settings.colors.time), 0.2), 
+      text: "#ffffff" 
+    },
+    'Спорт': { 
+      bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2), 
+      text: "#ffffff" 
+    },
+    'Привычки': { 
+      bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2), 
+      text: "#ffffff" 
+    }
   };
 
   const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(() => {
@@ -780,8 +809,7 @@ export default function Statistics() {
         <CardContent>
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-border">
+              <div className="overflow-hidden"><table className="min-w-full divide-y divide-border">
                   <thead>
                     <tr className="bg-muted/50">
                       <th scope="col" className="px-4 py-2 text-left text-sm font-semibold min-w-[90px]">Дата</th>
