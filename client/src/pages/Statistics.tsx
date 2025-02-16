@@ -123,25 +123,25 @@ export default function Statistics() {
     'Спорт': getVarColor(settings.colors.sport),
     'Привычки': getVarColor(settings.colors.habits),
     'Траты': getVarColor(settings.colors.expenses),
-    'Успех': getVarColor('--success')
+    'Успех': getVarColor(settings.colors.daySuccess) // Use daySuccess from settings
   };
 
   const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
-    'Разум': { 
-      bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2), 
-      text: "#ffffff" 
+    'Разум': {
+      bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2),
+      text: "#ffffff"
     },
-    'Время': { 
-      bg: hexToRGBA(getCssVar(settings.colors.time), 0.2), 
-      text: "#ffffff" 
+    'Время': {
+      bg: hexToRGBA(getCssVar(settings.colors.time), 0.2),
+      text: "#ffffff"
     },
-    'Спорт': { 
-      bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2), 
-      text: "#ffffff" 
+    'Спорт': {
+      bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2),
+      text: "#ffffff"
     },
-    'Привычки': { 
-      bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2), 
-      text: "#ffffff" 
+    'Привычки': {
+      bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2),
+      text: "#ffffff"
     }
   };
 
@@ -687,7 +687,7 @@ export default function Statistics() {
                           <td
                             className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-medium"
                             style={{
-                              backgroundColor: `${CATEGORY_COLORS.Успех}${Math.round(10 + (dayScore / 100) * 40).toString(16)}`,
+                              backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((dayScore / 100) * 0.5 + 0.1, 0.6))
                             }}
                           >
                             {dayScore}%
@@ -751,8 +751,10 @@ export default function Statistics() {
                       <td
                         className="py-2 px-4 text-center text-sm font-semibold w-[100px]"
                         style={{
-                          backgroundColor: `${CATEGORY_COLORS.Успех}${Math.round(10 + 
-                            (data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length / 100) * 40).toString(16)}`,
+                          backgroundColor: hexToRGBA(
+                            getCssVar(settings.colors.daySuccess),
+                            Math.min((data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length / 100) * 0.5 + 0.1, 0.6)
+                          )
                         }}
                       >
                         {Math.round(
