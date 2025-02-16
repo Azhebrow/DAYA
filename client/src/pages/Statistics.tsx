@@ -403,6 +403,57 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Время }} />
+              Общее время
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[250px] sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={data.map((day) => ({
+                  date: format(new Date(day.date), "dd.MM"),
+                  totalTime: day.categories
+                    .filter(category => category.type === CategoryType.TIME)
+                    .reduce((sum, category) => 
+                      sum + category.tasks.reduce((taskSum, task) =>
+                        taskSum + (task.type === TaskType.TIME ? task.value || 0 : 0), 0
+                      ), 0
+                  )
+                }))}
+              >
+                <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    border: "none",
+                  }}
+                  itemStyle={{ color: "#ffffff" }}
+                  labelStyle={{ color: "#ffffff" }}
+                  formatter={(value: any) => formatTimeTotal(value as number)}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="totalTime"
+                  stroke={CATEGORY_COLORS.Время}
+                  fill={CATEGORY_COLORS.Время}
+                  name="Время"
+                  dot={{ r: 4 }}
+                  label={{
+                    position: "top",
+                    fill: CATEGORY_COLORS.Время,
+                    formatter: (value: any) => formatTimeTotal(value as number)
+                  }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="w-full">
+          <CardHeader className="space-y-1 pb-2">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
               <Flame className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Спорт }} />
               Калории
             </CardTitle>
@@ -985,6 +1036,9 @@ export default function Statistics() {
                                 style={{ backgroundColor: bgColor }}
                               >
                                 {totalValue}
+                                {task.type === TaskType.TIME ? 'ч' : ''}
+                                {task.type === TaskType.CALORIE ? 'ккал' : ''}
+                                {task.type === TaskType.CHECKBOX ? '%' : ''}
                               </td>
                             );
                           }),
