@@ -5,6 +5,8 @@ import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 import { Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { storage } from '@/lib/storage';
 
 interface TaskCardProps {
   category: Category;
@@ -22,39 +24,25 @@ export const TaskCard = React.memo(({
     [category.tasks, category.type]
   );
 
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => storage.getSettings(),
+  });
+
   const handleTaskUpdate = useCallback((taskId: string, value: number | boolean | string) => {
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
-    const stored = localStorage.getItem('day_success_tracker_settings');
-    let colors;
-    try {
-      if (stored) {
-        const settings = JSON.parse(stored);
-        colors = settings.colors;
-      }
-    } catch (error) {
-      console.error('Error parsing settings:', error);
-    }
-
-    if (!colors) {
-      colors = {
-        mind: '--purple',
-        time: '--green',
-        sport: '--red',
-        habits: '--orange',
-        expenses: '--blue'
-      };
-    }
+    if (!settings?.colors) return '--purple';
 
     switch (category.name) {
-      case 'Разум': return `var(${colors.mind})`;
-      case 'Время': return `var(${colors.time})`;
-      case 'Спорт': return `var(${colors.sport})`;
-      case 'Привычки': return `var(${colors.habits})`; 
-      case 'Пороки': return `var(${colors.habits})`; 
-      default: return `var(${colors.expenses})`;
+      case 'Разум': return `var(${settings.colors.mind})`;
+      case 'Время': return `var(${settings.colors.time})`;
+      case 'Спорт': return `var(${settings.colors.sport})`;
+      case 'Привычки': return `var(${settings.colors.habits})`; 
+      case 'Пороки': return `var(${settings.colors.habits})`; 
+      default: return `var(${settings.colors.expenses})`;
     }
   };
 
@@ -67,6 +55,19 @@ export const TaskCard = React.memo(({
       case 'Пороки': return <Ban className="h-5 w-5" />;
       default: return <DollarSign className="h-5 w-5" />;
     }
+  };
+
+  const getTaskName = (taskId: string) => {
+    if (!settings?.subcategories) return '';
+
+    // Find the task name in the appropriate subcategory
+    for (const [categoryKey, subcategories] of Object.entries(settings.subcategories)) {
+      const subcategory = subcategories.find(sub => sub.id === taskId);
+      if (subcategory) {
+        return subcategory.name;
+      }
+    }
+    return taskId;
   };
 
   const iconColor = getIconColor();
@@ -108,7 +109,7 @@ export const TaskCard = React.memo(({
               className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
             >
               {!isExpenseCard && (
-                <span className="w-1/2 text-gray-400">{task.name}</span>
+                <span className="w-1/2 text-gray-400">{getTaskName(task.id)}</span>
               )}
               <div className={isExpenseCard ? "w-full" : "w-1/2"}>
                 <TaskInput
