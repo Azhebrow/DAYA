@@ -12,22 +12,8 @@ import { format } from 'date-fns';
 import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2, Pencil, Smile } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const EMOJIS = {
   activities: ["🫁", "🍵", "🧹", "💼", "📚", "🎯", "💊", "🍔", "💸", "🔞", "🏃", "📖", "🎨", "🎵", "🎮", "⚽️", "🎭", "🎪", "🎲", "🎱"],
@@ -36,25 +22,28 @@ const EMOJIS = {
   symbols: ["❤️", "⭐️", "✨", "💫", "🔥", "💯", "❌", "✅", "⚠️", "🔄"],
 };
 
-const TaskNameEditor = ({
-  taskName,
-  emoji,
-  onChange,
-  icon: Icon,
-  color
-}: {
+interface TaskNameEditorProps {
   taskName: string;
   emoji: string;
   onChange: (newName: string, newEmoji: string) => void;
   icon: React.ElementType;
   color: string;
-}) => {
+  toast: ReturnType<typeof useToast>['toast'];
+}
+
+const TaskNameEditor = ({
+  taskName,
+  emoji,
+  onChange,
+  icon: Icon,
+  color,
+  toast
+}: TaskNameEditorProps) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [name, setName] = React.useState(taskName);
   const [emojiValue, setEmojiValue] = React.useState(emoji);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
   const [error, setError] = React.useState("");
-  const { toast } = useToast();
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const validateAndSave = () => {
@@ -94,79 +83,558 @@ const TaskNameEditor = ({
 
   return (
     <div
-      className="w-full p-3 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-between gap-3"
+      className="w-full p-4 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center gap-4"
       style={{ backgroundColor: `var(${color})` }}
     >
-      <div className="flex items-center gap-2 flex-1">
-        <Icon className="h-4 w-4 text-white" />
-        {isEditing ? (
-          <div className="flex gap-2 flex-1">
-            <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-7 px-2 bg-white/10 hover:bg-white/20 text-white"
-                >
-                  {emojiValue} <Smile className="h-4 w-4 ml-1" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-[280px] p-2">
-                <div className="space-y-2">
-                  {Object.entries(EMOJIS).map(([category, emojis]) => (
-                    <div key={category} className="space-y-1">
-                      <Label className="text-xs text-muted-foreground capitalize">{category}</Label>
-                      <div className="grid grid-cols-8 gap-1">
-                        {emojis.map((emoji) => (
-                          <Button
-                            key={emoji}
-                            variant="ghost"
-                            className="h-8 w-8 p-0 hover:bg-accent"
-                            onClick={() => {
-                              setEmojiValue(emoji);
-                              setIsEmojiPickerOpen(false);
-                            }}
-                          >
-                            {emoji}
-                          </Button>
-                        ))}
-                      </div>
+      <Icon className="h-5 w-5 text-white shrink-0" />
+      {isEditing ? (
+        <div className="flex gap-3 flex-1 items-center">
+          <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-9 px-3 bg-white/10 hover:bg-white/20 text-white min-w-[60px]"
+              >
+                {emojiValue} <Smile className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[320px] p-3">
+              <div className="space-y-3">
+                {Object.entries(EMOJIS).map(([category, emojis]) => (
+                  <div key={category} className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground capitalize">{category}</Label>
+                    <div className="grid grid-cols-8 gap-1.5">
+                      {emojis.map((emoji) => (
+                        <Button
+                          key={emoji}
+                          variant="ghost"
+                          className="h-9 w-9 p-0 hover:bg-accent"
+                          onClick={() => {
+                            setEmojiValue(emoji);
+                            setIsEmojiPickerOpen(false);
+                          }}
+                        >
+                          {emoji}
+                        </Button>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-            <Input
-              ref={inputRef}
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setError("");
-              }}
-              onBlur={validateAndSave}
-              onKeyDown={handleKeyDown}
-              className={`h-7 flex-1 bg-white/10 border-none text-white ${error ? 'ring-2 ring-red-500' : ''}`}
-              maxLength={7}
-            />
-          </div>
-        ) : (
-          <span className="text-sm text-white font-medium">
+                  </div>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Input
+            ref={inputRef}
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+              setError("");
+            }}
+            onBlur={validateAndSave}
+            onKeyDown={handleKeyDown}
+            className={`h-9 flex-1 bg-white/10 border-none text-white text-base ${error ? 'ring-2 ring-red-500' : ''}`}
+            maxLength={7}
+            placeholder="3-7 символов"
+          />
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center">
+          <span className="text-base text-white">
             {emojiValue} {taskName}
           </span>
-        )}
-      </div>
+        </div>
+      )}
       <Button
         variant="ghost"
         size="icon"
-        className="h-7 w-7 hover:bg-white/20"
+        className="h-8 w-8 hover:bg-white/20 shrink-0"
         onClick={() => setIsEditing(!isEditing)}
       >
-        <Pencil className="h-3 w-3 text-white" />
+        <Pencil className="h-4 w-4 text-white" />
       </Button>
     </div>
   );
 };
 
-// Updated colorPalette - organized by color groups
+const DEFAULT_OATH_TEXT = `[Your oath text here]`;
+
+export default function SettingsPage() {
+  const { toast } = useToast();
+  const [settings, setSettings] = React.useState<Settings>(() => {
+    try {
+      const stored = localStorage.getItem('day_success_tracker_settings');
+      if (!stored) return settingsSchema.parse({});
+      return settingsSchema.parse(JSON.parse(stored));
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+      return settingsSchema.parse({});
+    }
+  });
+
+  const [isOathExpanded, setIsOathExpanded] = React.useState(false);
+
+  const handleTaskNameChange = React.useCallback((categoryName: string, taskName: string, newName: string, newEmoji: string) => {
+    try {
+      const tasks = localStorage.getItem('tasks');
+      if (!tasks) {
+        throw new Error('No tasks found in storage');
+      }
+
+      const parsedTasks = JSON.parse(tasks);
+      const category = parsedTasks.find((c: any) => c.name === categoryName);
+
+      if (!category) {
+        throw new Error(`Category ${categoryName} not found`);
+      }
+
+      const task = category.tasks.find((t: any) => t.name === taskName);
+      if (!task) {
+        throw new Error(`Task ${taskName} not found in ${categoryName}`);
+      }
+
+      const updatedTasks = parsedTasks.map((category: any) => {
+        if (category.name === categoryName) {
+          return {
+            ...category,
+            tasks: category.tasks.map((task: any) =>
+              task.name === taskName
+                ? { ...task, name: newName, emoji: newEmoji }
+                : task
+            )
+          };
+        }
+        return category;
+      });
+
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      toast({
+        title: "Задача обновлена",
+        description: `${newEmoji} ${newName} успешно сохранено`,
+      });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить задачу",
+        variant: "destructive"
+      });
+    }
+  }, [toast]);
+
+  // Other handler functions...
+  const handleSettingChange = (key: keyof Settings, value: any) => {
+    let newSettings = {...settings};
+
+    if (key === 'colors') {
+      newSettings = { ...settings, colors: {...settings.colors, ...value} };
+    } else if (key === 'timeTarget') {
+      newSettings = { ...settings, timeTarget: value * 60 };
+    } else {
+      newSettings = { ...settings, [key]: value };
+    }
+    setSettings(newSettings);
+    storage.saveSettings(newSettings);
+    toast({
+      title: "Настройки сохранены",
+      description: "Ваши изменения успешно применены",
+    });
+  };
+
+  const handleClearData = () => {
+    try {
+      localStorage.clear();
+      window.location.reload();
+      toast({
+        title: "Данные удалены",
+        description: "Все данные успешно удалены",
+      });
+    } catch (error) {
+      console.error('Clear data error:', error);
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при удалении данных",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <div className="container max-w-7xl mx-auto p-4 space-y-6">
+      {/* Task Names Section */}
+      <Card className="backdrop-blur-sm bg-card/80 border-accent/20 col-span-full">
+        <CardHeader>
+          <CardTitle className="text-xl text-primary">
+            Названия задач
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Mind tasks */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Разум</Label>
+              <TaskNameEditor
+                taskName="Дыхание"
+                emoji="🫁"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Дыхание', newName, newEmoji)}
+                icon={Brain}
+                color={settings.colors.mind}
+                toast={toast}
+              />
+              <TaskNameEditor
+                taskName="Чай"
+                emoji="🍵"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Чай', newName, newEmoji)}
+                icon={Brain}
+                color={settings.colors.mind}
+                toast={toast}
+              />
+            </div>
+
+            {/* Time tasks */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Время</Label>
+              <TaskNameEditor
+                taskName="Уборка"
+                emoji="🧹"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Уборка', newName, newEmoji)}
+                icon={Clock}
+                color={settings.colors.time}
+                toast={toast}
+              />
+              <TaskNameEditor
+                taskName="Работа"
+                emoji="💼"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Работа', newName, newEmoji)}
+                icon={Clock}
+                color={settings.colors.time}
+                toast={toast}
+              />
+              <TaskNameEditor
+                taskName="Учёба"
+                emoji="📚"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Учёба', newName, newEmoji)}
+                icon={Clock}
+                color={settings.colors.time}
+                toast={toast}
+              />
+              <TaskNameEditor
+                taskName="Проект"
+                emoji="🎯"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Проект', newName, newEmoji)}
+                icon={Clock}
+                color={settings.colors.time}
+                toast={toast}
+              />
+            </div>
+
+            {/* Health tasks */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Здоровье</Label>
+              <TaskNameEditor
+                taskName="Таблетки"
+                emoji="💊"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', 'Таблетки', newName, newEmoji)}
+                icon={Dumbbell}
+                color={settings.colors.sport}
+                toast={toast}
+              />
+            </div>
+
+            {/* Habits tasks */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Пороки</Label>
+              <TaskNameEditor
+                taskName="Дерьмо"
+                emoji="🍔"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Дерьмо', newName, newEmoji)}
+                icon={Ban}
+                color={settings.colors.habits}
+                toast={toast}
+              />
+              <TaskNameEditor
+                taskName="Порно"
+                emoji="🔞"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Порно', newName, newEmoji)}
+                icon={Ban}
+                color={settings.colors.habits}
+                toast={toast}
+              />
+            </div>
+
+            {/* Expenses tasks */}
+            <div className="space-y-3">
+              <Label className="text-sm text-muted-foreground">Траты</Label>
+              <TaskNameEditor
+                taskName="Траты"
+                emoji="💸"
+                onChange={(newName, newEmoji) => handleTaskNameChange('Траты', 'Траты', newName, newEmoji)}
+                icon={DollarSign}
+                color={settings.colors.expenses}
+                toast={toast}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+        <CardHeader>
+          <CardTitle className="text-xl text-primary">
+            Текст клятвы
+          </CardTitle>
+        </CardHeader>
+        <Collapsible open={isOathExpanded} onOpenChange={setIsOathExpanded}>
+          <CollapsibleTrigger className="w-full">
+            <CardHeader>
+              <CardTitle className="text-xl text-primary flex items-center justify-between">
+                <span>Текст клятвы</span>
+                {isOathExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              </CardTitle>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="oathText">Отредактируйте текст клятвы</Label>
+                <Textarea
+                  id="oathText"
+                  value={settings.oathText || DEFAULT_OATH_TEXT}
+                  onChange={(e) => handleSettingChange('oathText', e.target.value)}
+                  className="min-h-[200px] font-medium"
+                />
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+          <CardHeader>
+            <CardTitle className="text-xl text-primary">
+              Диапазон дат
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label>Начальная дата</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {settings.startDate ? format(new Date(settings.startDate), 'PP') : 'Выберите дату'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={settings.startDate ? new Date(settings.startDate) : undefined}
+                      onSelect={(date) => date && handleSettingChange('startDate', format(date, 'yyyy-MM-dd'))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Конечная дата</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {settings.endDate ? format(new Date(settings.endDate), 'PP') : 'Выберите дату'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={settings.endDate ? new Date(settings.endDate) : undefined}
+                      onSelect={(date) => date && handleSettingChange('endDate', format(date, 'yyyy-MM-dd'))}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+          <CardHeader>
+            <CardTitle className="text-xl text-primary">
+              Целевые показатели
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="calorieTarget">Целевые калории (ккал/день)</Label>
+                <Input
+                  id="calorieTarget"
+                  type="number"
+                  value={settings.calorieTarget}
+                  onChange={(e) => handleSettingChange('calorieTarget', parseInt(e.target.value))}
+                  className="transition-shadow hover:shadow-md focus:shadow-lg"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="timeTarget">Целевое время (часов/день)</Label>
+                <Input
+                  id="timeTarget"
+                  type="number"
+                  value={settings.timeTarget / 60}
+                  onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value))}
+                  className="transition-shadow hover:shadow-md focus:shadow-lg"
+                  step="0.5"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+          <CardHeader>
+            <CardTitle className="text-xl text-primary">
+              Цвета категорий
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div>
+                <ColorPicker
+                  value={settings.colors.daySuccess}
+                  onChange={(value) => handleSettingChange('colors', { daySuccess: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.expenses
+                  ]}
+                  categoryName="Успех дня"
+                  icon={CheckCircle2}
+                />
+              </div>
+              <div>
+                <ColorPicker
+                  value={settings.colors.mind}
+                  onChange={(value) => handleSettingChange('colors', { mind: value })}
+                  usedColors={[
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
+                  categoryName="Разум"
+                  icon={Brain}
+                />
+              </div>
+              <div>
+                <ColorPicker
+                  value={settings.colors.time}
+                  onChange={(value) => handleSettingChange('colors', { time: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
+                  categoryName="Время"
+                  icon={Clock}
+                />
+              </div>
+              <div>
+                <ColorPicker
+                  value={settings.colors.sport}
+                  onChange={(value) => handleSettingChange('colors', { sport: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.habits,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
+                  categoryName="Спорт"
+                  icon={Dumbbell}
+                />
+              </div>
+              <div>
+                <ColorPicker
+                  value={settings.colors.habits}
+                  onChange={(value) => handleSettingChange('colors', { habits: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
+                  categoryName="Пороки"
+                  icon={Ban}
+                />
+              </div>
+              <div>
+                <ColorPicker
+                  value={settings.colors.expenses}
+                  onChange={(value) => handleSettingChange('colors', { expenses: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.daySuccess
+                  ]}
+                  categoryName="Траты"
+                  icon={DollarSign}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
+          <CardHeader>
+            <CardTitle className="text-xl text-primary">
+              Управление данными
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ExportImport />
+            <div className="pt-4">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="w-full sm:w-auto"
+                  >
+                    Очистить все данные
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Это действие нельзя отменить. Это приведет к удалению всех ваших данных и настроек.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Отмена</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleClearData}>
+                      Удалить
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 const colorPalette = [
   // Красные и оранжевые оттенки
   { name: 'red', value: '--red', hex: 'var(--red)' },
@@ -262,512 +730,3 @@ const ColorPicker = ({
     </Popover>
   );
 };
-
-
-const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
-Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
-Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
-Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
-Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
-
-const handleTaskNameChange = (categoryName: string, taskName: string, newName: string, newEmoji: string) => {
-  try {
-    const tasks = localStorage.getItem('tasks');
-    if (!tasks) {
-      throw new Error('No tasks found in storage');
-    }
-
-    const parsedTasks = JSON.parse(tasks);
-    const category = parsedTasks.find((c: any) => c.name === categoryName);
-
-    if (!category) {
-      throw new Error(`Category ${categoryName} not found`);
-    }
-
-    const task = category.tasks.find((t: any) => t.name === taskName);
-    if (!task) {
-      throw new Error(`Task ${taskName} not found in ${categoryName}`);
-    }
-
-    const updatedTasks = parsedTasks.map((category: any) => {
-      if (category.name === categoryName) {
-        return {
-          ...category,
-          tasks: category.tasks.map((task: any) =>
-            task.name === taskName
-              ? { ...task, name: newName, emoji: newEmoji }
-              : task
-          )
-        };
-      }
-      return category;
-    });
-
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    toast({
-      title: "Задача обновлена",
-      description: `${newEmoji} ${newName} успешно сохранено`,
-    });
-  } catch (error) {
-    console.error('Error updating task:', error);
-    toast({
-      title: "Ошибка",
-      description: "Не удалось обновить задачу",
-      variant: "destructive"
-    });
-  }
-};
-
-export default function SettingsPage() {
-  const [settings, setSettings] = React.useState<Settings>(() => {
-    try {
-      const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({
-        startDate: '2025-02-07',
-        endDate: '2025-09-09',
-        oathText: DEFAULT_OATH_TEXT,
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--red',
-          habits: '--orange',
-          expenses: '--orange',
-          daySuccess: '--green'
-        }
-      });
-      const parsedSettings = settingsSchema.parse(JSON.parse(stored));
-      // Конвертируем старые значения цветов в новый формат
-      if (parsedSettings.colors) {
-        Object.keys(parsedSettings.colors).forEach(key => {
-          const colorValue = parsedSettings.colors[key];
-          if (!colorValue.startsWith('--')) {
-            parsedSettings.colors[key] = `--${colorValue.split('-')[0]}`;
-          }
-        });
-      }
-      return parsedSettings;
-    } catch (error) {
-      console.error('Error parsing settings:', error);
-      return settingsSchema.parse({
-        startDate: '2025-02-07',
-        endDate: '2025-09-09',
-        oathText: DEFAULT_OATH_TEXT,
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--red',
-          habits: '--orange',
-          expenses: '--orange',
-          daySuccess: '--green'
-        }
-      });
-    }
-  });
-
-  const [isOathExpanded, setIsOathExpanded] = React.useState(false);
-  const { toast } = useToast();
-
-  const handleSettingChange = (key: keyof Settings, value: any) => {
-    let newSettings = {...settings};
-
-    if (key === 'colors') {
-      newSettings = { ...settings, colors: {...settings.colors, ...value} };
-    } else if (key === 'timeTarget') {
-      newSettings = { ...settings, timeTarget: value * 60 };
-    } else {
-      newSettings = { ...settings, [key]: value };
-    }
-    setSettings(newSettings);
-    storage.saveSettings(newSettings);
-    toast({
-      title: "Настройки сохранены",
-      description: "Ваши изменения успешно применены",
-    });
-  };
-
-  const handleClearData = () => {
-    try {
-      localStorage.clear();
-      window.location.reload();
-      toast({
-        title: "Данные удалены",
-        description: "Все данные успешно удалены",
-      });
-    } catch (error) {
-      console.error('Clear data error:', error);
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при удалении данных",
-        variant: "destructive"
-      });
-    }
-  };
-
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
-      <div className="container mx-auto space-y-4 max-w-7xl">
-        <header className="backdrop-blur-sm bg-card/30 rounded-lg p-4 mb-4">
-          <h1 className="text-2xl font-bold text-primary">Настройки</h1>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
-            <Collapsible open={isOathExpanded} onOpenChange={setIsOathExpanded}>
-              <CollapsibleTrigger className="w-full">
-                <CardHeader>
-                  <CardTitle className="text-xl text-primary flex items-center justify-between">
-                    <span>Текст клятвы</span>
-                    {isOathExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-                  </CardTitle>
-                </CardHeader>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Label htmlFor="oathText">Отредактируйте текст клятвы</Label>
-                    <Textarea
-                      id="oathText"
-                      value={settings.oathText || DEFAULT_OATH_TEXT}
-                      onChange={(e) => handleSettingChange('oathText', e.target.value)}
-                      className="min-h-[200px] font-medium"
-                    />
-                  </div>
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary">
-                Диапазон дат
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <Label>Начальная дата</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {settings.startDate ? format(new Date(settings.startDate), 'PP') : 'Выберите дату'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={settings.startDate ? new Date(settings.startDate) : undefined}
-                        onSelect={(date) => date && handleSettingChange('startDate', format(date, 'yyyy-MM-dd'))}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Конечная дата</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start text-left font-normal">
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {settings.endDate ? format(new Date(settings.endDate), 'PP') : 'Выберите дату'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={settings.endDate ? new Date(settings.endDate) : undefined}
-                        onSelect={(date) => date && handleSettingChange('endDate', format(date, 'yyyy-MM-dd'))}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary">
-                Целевые показатели
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="calorieTarget">Целевые калории (ккал/день)</Label>
-                  <Input
-                    id="calorieTarget"
-                    type="number"
-                    value={settings.calorieTarget}
-                    onChange={(e) => handleSettingChange('calorieTarget', parseInt(e.target.value))}
-                    className="transition-shadow hover:shadow-md focus:shadow-lg"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="timeTarget">Целевое время (часов/день)</Label>
-                  <Input
-                    id="timeTarget"
-                    type="number"
-                    value={settings.timeTarget / 60}
-                    onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value))}
-                    className="transition-shadow hover:shadow-md focus:shadow-lg"
-                    step="0.5"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary">
-                Цвета категорий
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div>
-                  <ColorPicker
-                    value={settings.colors.daySuccess}
-                    onChange={(value) => handleSettingChange('colors', { daySuccess: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.expenses
-                    ]}
-                    categoryName="Успех дня"
-                    icon={CheckCircle2}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.mind}
-                    onChange={(value) => handleSettingChange('colors', { mind: value })}
-                    usedColors={[
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Разум"
-                    icon={Brain}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.time}
-                    onChange={(value) => handleSettingChange('colors', { time: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Время"
-                    icon={Clock}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.sport}
-                    onChange={(value) => handleSettingChange('colors', { sport: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.habits,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Спорт"
-                    icon={Dumbbell}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.habits}
-                    onChange={(value) => handleSettingChange('colors', { habits: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Пороки"
-                    icon={Ban}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.expenses}
-                    onChange={(value) => handleSettingChange('colors', { expenses: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Траты"
-                    icon={DollarSign}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary">
-                Названия задач
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                {/* Mind tasks */}
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Разум</Label>
-                  <TaskNameEditor
-                    taskName="Дыхание"
-                    emoji="🫁"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Дыхание', newName, newEmoji)}
-                    icon={Brain}
-                    color={settings.colors.mind}
-                  />
-                  <TaskNameEditor
-                    taskName="Чай"
-                    emoji="🍵"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Разум', 'Чай', newName, newEmoji)}
-                    icon={Brain}
-                    color={settings.colors.mind}
-                  />
-                </div>
-
-                {/* Time tasks */}
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Время</Label>
-                  <TaskNameEditor
-                    taskName="Уборка"
-                    emoji="🧹"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Уборка', newName, newEmoji)}
-                    icon={Clock}
-                    color={settings.colors.time}
-                  />
-                  <TaskNameEditor
-                    taskName="Работа"
-                    emoji="💼"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Работа', newName, newEmoji)}
-                    icon={Clock}
-                    color={settings.colors.time}
-                  />
-                  <TaskNameEditor
-                    taskName="Учёба"
-                    emoji="📚"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Учёба', newName, newEmoji)}
-                    icon={Clock}
-                    color={settings.colors.time}
-                  />
-                  <TaskNameEditor
-                    taskName="Проект"
-                    emoji="🎯"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Время', 'Проект', newName, newEmoji)}
-                    icon={Clock}
-                    color={settings.colors.time}
-                  />
-                </div>
-
-                {/* Health tasks */}
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Здоровье</Label>
-                  <TaskNameEditor
-                    taskName="Таблетки"
-                    emoji="💊"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Здоровье', 'Таблетки', newName, newEmoji)}
-                    icon={Dumbbell}
-                    color={settings.colors.sport}
-                  />
-                </div>
-
-                {/* Habits tasks */}
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Пороки</Label>
-                  <TaskNameEditor
-                    taskName="Дерьмо"
-                    emoji="🍔"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Дерьмо', newName, newEmoji)}
-                    icon={Ban}
-                    color={settings.colors.habits}
-                  />
-                  <TaskNameEditor
-                    taskName="Порно"
-                    emoji="🔞"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Пороки', 'Порно', newName, newEmoji)}
-                    icon={Ban}
-                    color={settings.colors.habits}
-                  />
-                </div>
-
-                {/* Expenses tasks */}
-                <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">Траты</Label>
-                  <TaskNameEditor
-                    taskName="Траты"
-                    emoji="💸"
-                    onChange={(newName, newEmoji) => handleTaskNameChange('Траты', 'Траты', newName, newEmoji)}
-                    icon={DollarSign}
-                    color={settings.colors.expenses}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary">
-                Управление данными
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <ExportImport />
-              <div className="pt-4">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      className="w-full sm:w-auto"
-                    >
-                      Очистить все данные
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Это действие нельзя отменить. Это приведет к удалению всех ваших данных и настроек.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Отмена</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleClearData}>
-                        Удалить
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
