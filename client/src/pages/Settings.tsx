@@ -9,7 +9,7 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2, Pencil } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2, Pencil, Smile } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -28,6 +28,143 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+
+const EMOJIS = {
+  activities: ["🫁", "🍵", "🧹", "💼", "📚", "🎯", "💊", "🍔", "💸", "🔞", "🏃", "📖", "🎨", "🎵", "🎮", "⚽️", "🎭", "🎪", "🎲", "🎱"],
+  food: ["🍎", "🍕", "🍜", "🍳", "🥗", "🍖", "🥩", "🌮", "🥪", "🥤"],
+  objects: ["📱", "💻", "⌚️", "📷", "🎮", "📚", "✏️", "📎", "💡", "🔑"],
+  symbols: ["❤️", "⭐️", "✨", "💫", "🔥", "💯", "❌", "✅", "⚠️", "🔄"],
+};
+
+const TaskNameEditor = ({
+  taskName,
+  emoji,
+  onChange,
+  icon: Icon,
+  color
+}: {
+  taskName: string;
+  emoji: string;
+  onChange: (newName: string, newEmoji: string) => void;
+  icon: React.ElementType;
+  color: string;
+}) => {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [name, setName] = React.useState(taskName);
+  const [emojiValue, setEmojiValue] = React.useState(emoji);
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = React.useState(false);
+  const [error, setError] = React.useState("");
+  const { toast } = useToast();
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const validateAndSave = () => {
+    if (name.length < 3 || name.length > 7) {
+      setError("Название должно быть от 3 до 7 символов");
+      toast({
+        title: "Ошибка",
+        description: "Название должно быть от 3 до 7 символов",
+        variant: "destructive"
+      });
+      return false;
+    }
+    setError("");
+    onChange(name, emojiValue);
+    setIsEditing(false);
+    setIsEmojiPickerOpen(false);
+    return true;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      validateAndSave();
+    } else if (e.key === 'Escape') {
+      setName(taskName);
+      setEmojiValue(emoji);
+      setIsEditing(false);
+      setIsEmojiPickerOpen(false);
+      setError("");
+    }
+  };
+
+  React.useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  return (
+    <div
+      className="w-full p-3 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-between gap-3"
+      style={{ backgroundColor: `var(${color})` }}
+    >
+      <div className="flex items-center gap-2 flex-1">
+        <Icon className="h-4 w-4 text-white" />
+        {isEditing ? (
+          <div className="flex gap-2 flex-1">
+            <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-7 px-2 bg-white/10 hover:bg-white/20 text-white"
+                >
+                  {emojiValue} <Smile className="h-4 w-4 ml-1" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-2">
+                <div className="space-y-2">
+                  {Object.entries(EMOJIS).map(([category, emojis]) => (
+                    <div key={category} className="space-y-1">
+                      <Label className="text-xs text-muted-foreground capitalize">{category}</Label>
+                      <div className="grid grid-cols-8 gap-1">
+                        {emojis.map((emoji) => (
+                          <Button
+                            key={emoji}
+                            variant="ghost"
+                            className="h-8 w-8 p-0 hover:bg-accent"
+                            onClick={() => {
+                              setEmojiValue(emoji);
+                              setIsEmojiPickerOpen(false);
+                            }}
+                          >
+                            {emoji}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Input
+              ref={inputRef}
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                setError("");
+              }}
+              onBlur={validateAndSave}
+              onKeyDown={handleKeyDown}
+              className={`h-7 flex-1 bg-white/10 border-none text-white ${error ? 'ring-2 ring-red-500' : ''}`}
+              maxLength={7}
+            />
+          </div>
+        ) : (
+          <span className="text-sm text-white font-medium">
+            {emojiValue} {taskName}
+          </span>
+        )}
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 hover:bg-white/20"
+        onClick={() => setIsEditing(!isEditing)}
+      >
+        <Pencil className="h-3 w-3 text-white" />
+      </Button>
+    </div>
+  );
+};
 
 // Updated colorPalette - organized by color groups
 const colorPalette = [
@@ -126,89 +263,6 @@ const ColorPicker = ({
   );
 };
 
-const TaskNameEditor = ({
-  taskName,
-  emoji,
-  onChange,
-  icon: Icon,
-  color
-}: {
-  taskName: string;
-  emoji: string;
-  onChange: (newName: string, newEmoji: string) => void;
-  icon: React.ElementType;
-  color: string;
-}) => {
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [name, setName] = React.useState(taskName);
-  const [emojiValue, setEmojiValue] = React.useState(emoji);
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const emojiInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleSave = () => {
-    onChange(name, emojiValue);
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSave();
-    } else if (e.key === 'Escape') {
-      setName(taskName);
-      setEmojiValue(emoji);
-      setIsEditing(false);
-    }
-  };
-
-  React.useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isEditing]);
-
-  return (
-    <div
-      className="w-full p-3 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-between gap-3"
-      style={{ backgroundColor: `var(${color})` }}
-    >
-      <div className="flex items-center gap-2 flex-1">
-        <Icon className="h-4 w-4 text-white" />
-        {isEditing ? (
-          <div className="flex gap-2 flex-1">
-            <Input
-              ref={emojiInputRef}
-              value={emojiValue}
-              onChange={(e) => setEmojiValue(e.target.value)}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
-              className="h-7 w-12 bg-white/10 border-none text-white text-center"
-            />
-            <Input
-              ref={inputRef}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={handleSave}
-              onKeyDown={handleKeyDown}
-              className="h-7 flex-1 bg-white/10 border-none text-white"
-            />
-          </div>
-        ) : (
-          <span className="text-sm text-white font-medium">
-            {emojiValue} {taskName}
-          </span>
-        )}
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7 hover:bg-white/20"
-        onClick={() => setIsEditing(!isEditing)}
-      >
-        <Pencil className="h-3 w-3 text-white" />
-      </Button>
-    </div>
-  );
-};
 
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
 Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
@@ -217,24 +271,49 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
 
 const handleTaskNameChange = (categoryName: string, taskName: string, newName: string, newEmoji: string) => {
-  const tasks = localStorage.getItem('tasks');
-  if (tasks) {
+  try {
+    const tasks = localStorage.getItem('tasks');
+    if (!tasks) {
+      throw new Error('No tasks found in storage');
+    }
+
     const parsedTasks = JSON.parse(tasks);
+    const category = parsedTasks.find((c: any) => c.name === categoryName);
+
+    if (!category) {
+      throw new Error(`Category ${categoryName} not found`);
+    }
+
+    const task = category.tasks.find((t: any) => t.name === taskName);
+    if (!task) {
+      throw new Error(`Task ${taskName} not found in ${categoryName}`);
+    }
+
     const updatedTasks = parsedTasks.map((category: any) => {
       if (category.name === categoryName) {
         return {
           ...category,
           tasks: category.tasks.map((task: any) =>
-            task.name === taskName ? { ...task, name: newName, emoji: newEmoji } : task
+            task.name === taskName
+              ? { ...task, name: newName, emoji: newEmoji }
+              : task
           )
         };
       }
       return category;
     });
+
     localStorage.setItem('tasks', JSON.stringify(updatedTasks));
     toast({
       title: "Задача обновлена",
-      description: "Название и эмодзи успешно сохранены",
+      description: `${newEmoji} ${newName} успешно сохранено`,
+    });
+  } catch (error) {
+    console.error('Error updating task:', error);
+    toast({
+      title: "Ошибка",
+      description: "Не удалось обновить задачу",
+      variant: "destructive"
     });
   }
 };
