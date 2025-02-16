@@ -15,12 +15,26 @@ import {
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign } from 'lucide-react';
 import { calculateDayScore } from '@/lib/utils';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
+// Используем цвета из настроек пользователя
+const getSuccessColor = (opacity = 1) => {
+  const settings = storage.getSettings();
+  const color = settings.colors?.daySuccess;
+  if (!color) return `rgba(16, 185, 129, ${opacity})`;
+  return `${color.replace('--', 'var(--')}`;
+};
+
+const getExpenseColor = (opacity = 1) => {
+  const settings = storage.getSettings();
+  const color = settings.colors?.expenses;
+  if (!color) return `rgba(249, 115, 22, ${opacity})`;
+  return `${color.replace('--', 'var(--')}`;
+};
+
 const CATEGORY_COLORS: { [key: string]: string } = {
-  'Разум': '#6B7280',    // Серый
-  'Время': '#10B981',    // Зеленый
-  'Спорт': '#EF4444',    // Красный (для активности)
-  'Привычки': '#8B5CF6'  // Фиолетовый
+  'Разум': 'var(--purple)',
+  'Время': 'var(--green)',
+  'Спорт': 'var(--red)',
+  'Привычки': 'var(--purple)'
 };
 
 type ViewType = 'weekly' | 'monthly';
@@ -165,7 +179,7 @@ export default function MonthlyStats() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <LineChart className="h-5 w-5 text-category-mind" />
+              <LineChart className="h-5 w-5" style={{ color: getSuccessColor() }} />
               Показатель успеха
             </CardTitle>
           </CardHeader>
@@ -183,14 +197,14 @@ export default function MonthlyStats() {
                 <Area
                   type="stepAfter"
                   dataKey="score"
-                  stroke={CATEGORY_COLORS['Разум']}
-                  fill={CATEGORY_COLORS['Разум']}
+                  stroke={getSuccessColor()}
+                  fill={getSuccessColor(0.5)}
                   name="Успех"
                   connectNulls={true}
                   dot={{ r: 4 }}
                   label={{
                     position: 'top',
-                    fill: CATEGORY_COLORS['Разум'],
+                    fill: getSuccessColor(),
                     formatter: (value: any) => value ? `${value}%` : ''
                   }}
                 />
@@ -202,7 +216,7 @@ export default function MonthlyStats() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-category-time" />
+              <Clock className="h-5 w-5" style={{ color: CATEGORY_COLORS['Время'] }} />
               Время
             </CardTitle>
           </CardHeader>
@@ -240,7 +254,7 @@ export default function MonthlyStats() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Flame className="h-5 w-5 text-category-sport" />
+              <Flame className="h-5 w-5" style={{ color: CATEGORY_COLORS['Спорт'] }} />
               Калории
             </CardTitle>
           </CardHeader>
@@ -277,7 +291,7 @@ export default function MonthlyStats() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-category-expenses" />
+              <DollarSign className="h-5 w-5" style={{ color: getExpenseColor() }} />
               Расходы
             </CardTitle>
           </CardHeader>
@@ -295,14 +309,14 @@ export default function MonthlyStats() {
                 <Area
                   type="stepAfter"
                   dataKey="expenses"
-                  stroke={CATEGORY_COLORS['Спорт']}
-                  fill={CATEGORY_COLORS['Спорт']}
+                  stroke={getExpenseColor()}
+                  fill={getExpenseColor(0.5)}
                   name="Расходы"
                   connectNulls={true}
                   dot={{ r: 4 }}
                   label={{
                     position: 'top',
-                    fill: CATEGORY_COLORS['Спорт'],
+                    fill: getExpenseColor(),
                     formatter: (value: any) => value ? `${value}` : ''
                   }}
                 />
