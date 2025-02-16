@@ -26,6 +26,16 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
+  const getIconColor = () => {
+    switch (category.name) {
+      case 'Разум': return 'var(--purple)';
+      case 'Время': return 'var(--green)';
+      case 'Спорт': return 'var(--red)';
+      case 'Привычки': return 'var(--orange)';
+      default: return 'var(--orange)';
+    }
+  };
+
   const getCategoryIcon = () => {
     switch (category.name) {
       case 'Разум': return <Brain className="h-5 w-5" />;
@@ -36,6 +46,8 @@ export const TaskCard = React.memo(({
     }
   };
 
+  const iconColor = getIconColor();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -43,27 +55,27 @@ export const TaskCard = React.memo(({
       transition={{ duration: 0.3 }}
     >
       <Card className="bg-zinc-900/50">
-        {/* Заголовок карточки */}
         <div className="flex items-center h-14 px-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
-            <span className="text-primary">{getCategoryIcon()}</span>
+            <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
             <span className="text-base font-medium text-gray-200">{category.name}</span>
           </div>
 
-          {/* Прогресс бар */}
           {!isExpenseCard && (
             <div className="ml-auto w-1/3">
               <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-primary transition-all duration-300"
-                  style={{ width: `${progress}%` }}
+                  className="h-full transition-all duration-300"
+                  style={{ 
+                    width: `${progress}%`,
+                    backgroundColor: iconColor
+                  }}
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* Список задач */}
         <div>
           {category.tasks.map((task) => (
             <div 
@@ -78,6 +90,7 @@ export const TaskCard = React.memo(({
                   task={task}
                   onChange={(value) => handleTaskUpdate(task.id, value)}
                   isExpenseCard={isExpenseCard}
+                  categoryColor={iconColor}
                 />
               </div>
             </div>

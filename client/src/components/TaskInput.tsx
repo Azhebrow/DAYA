@@ -25,46 +25,45 @@ interface TaskInputProps {
   task: Task;
   onChange: (value: number | boolean | string) => void;
   isExpenseCard?: boolean;
-  categoryColor?: string;
+  categoryColor: string;
 }
 
-const getButtonStyles = (completed: boolean, categoryColor: string) => ({
-  width: '100%',
-  height: '2.25rem',
-  fontSize: '1rem',
-  backgroundColor: completed ? `hsl(var(--${categoryColor}))` : 'rgb(39 39 42)',
-  color: completed ? 'white' : 'rgba(255, 255, 255, 0.6)',
-  border: 'none',
-  fontWeight: 'bold',
-  transition: 'all 0.2s',
-});
-
-const getSelectStyles = (value: number, categoryColor: string) => ({
-  width: '100%',
-  height: '2.25rem',
-  backgroundColor: value > 0 ? `hsl(var(--${categoryColor}))` : 'rgb(39 39 42)',
-  color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-  border: 'none',
-  fontWeight: 'bold',
-  textAlign: 'center',
-});
-
-const getInputStyles = (hasValue: boolean, categoryColor: string) => ({
-  width: '100%',
-  height: '2.25rem',
-  backgroundColor: hasValue ? `hsl(var(--${categoryColor}))` : 'rgb(39 39 42)',
-  border: 'none',
-  paddingLeft: '2rem',
-  fontSize: '1rem',
-  fontWeight: 'bold',
-  color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
-  transition: 'all 0.2s',
-});
-
-const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor = 'zinc-500' }: TaskInputProps) => {
+const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor }: TaskInputProps) => {
   const handleChange = useCallback((value: number | boolean | string) => {
     onChange(value);
   }, [onChange]);
+
+  const getButtonStyle = (completed: boolean) => ({
+    width: '100%',
+    height: '2.25rem',
+    fontSize: '1rem',
+    backgroundColor: completed ? categoryColor : 'rgb(39 39 42)',
+    color: completed ? 'white' : 'rgba(255, 255, 255, 0.6)',
+    border: 'none',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+  });
+
+  const getSelectStyle = (value: number) => ({
+    width: '100%',
+    height: '2.25rem',
+    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+    color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+    border: 'none',
+    fontWeight: 'bold',
+  });
+
+  const getInputStyle = (hasValue: boolean) => ({
+    width: '100%',
+    height: '2.25rem',
+    backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
+    color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
+    border: 'none',
+    paddingLeft: '2rem',
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+  });
 
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
@@ -73,9 +72,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger 
-          style={getSelectStyles(value, categoryColor)}
-        >
+        <SelectTrigger style={getSelectStyle(value)}>
           <SelectValue placeholder="Время" />
         </SelectTrigger>
         <SelectContent>
@@ -96,9 +93,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger 
-          style={getSelectStyles(value, categoryColor)}
-        >
+        <SelectTrigger style={getSelectStyle(value)}>
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
@@ -118,7 +113,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         variant="ghost"
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        style={getButtonStyles(task.completed, categoryColor)}
+        style={getButtonStyle(Boolean(task.completed))}
       >
         {task.completed ? 'Выполнено' : 'Отметить'}
       </Button>
@@ -133,7 +128,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           type="number"
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          style={getInputStyles(hasValue, categoryColor)}
+          style={getInputStyle(hasValue)}
           placeholder="0"
         />
         <span style={{
@@ -158,9 +153,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={task.textValue || ''}
         onChange={(e) => handleChange(e.target.value)}
         className="w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium"
-        style={{
-          '--tw-ring-color': `hsl(var(--${categoryColor}))`,
-        } as React.CSSProperties}
         placeholder="Описание..."
         maxLength={255}
       />
