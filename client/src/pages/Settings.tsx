@@ -214,10 +214,26 @@ export default function SettingsPage() {
           daySuccess: '--green'
         },
         subcategories: {
-          mind: [{ id: '1', name: 'Focus', emoji: '🧘' }, { id: '2', name: 'Mindfulness', emoji: '😌' }],
-          time: [{ id: '3', name: 'Work', emoji: '💼' }, { id: '4', name: 'Study', emoji: '📚' }],
-          sport: [{ id: '5', name: 'Gym', emoji: '🏋️' }, { id: '6', name: 'Running', emoji: '🏃' }],
-          habits: [{ id: '7', name: 'Reading', emoji: '📖' }, { id: '8', name: 'Meditation', emoji: '🙏' }]
+          mind: [
+            { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+            { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+            { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+          ],
+          time: [
+            { id: 'work', name: '💼 Работа', emoji: '💼' },
+            { id: 'study', name: '📚 Учёба', emoji: '📚' },
+            { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+          ],
+          sport: [
+            { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+            { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+            { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+          ],
+          habits: [
+            { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+            { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+            { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+          ]
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
@@ -246,10 +262,26 @@ export default function SettingsPage() {
           daySuccess: '--green'
         },
         subcategories: {
-          mind: [{ id: '1', name: 'Focus', emoji: '🧘' }, { id: '2', name: 'Mindfulness', emoji: '😌' }],
-          time: [{ id: '3', name: 'Work', emoji: '💼' }, { id: '4', name: 'Study', emoji: '📚' }],
-          sport: [{ id: '5', name: 'Gym', emoji: '🏋️' }, { id: '6', name: 'Running', emoji: '🏃' }],
-          habits: [{ id: '7', name: 'Reading', emoji: '📖' }, { id: '8', name: 'Meditation', emoji: '🙏' }]
+          mind: [
+            { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+            { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+            { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+          ],
+          time: [
+            { id: 'work', name: '💼 Работа', emoji: '💼' },
+            { id: 'study', name: '📚 Учёба', emoji: '📚' },
+            { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+          ],
+          sport: [
+            { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+            { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+            { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+          ],
+          habits: [
+            { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+            { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+            { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+          ]
         }
       });
     }
