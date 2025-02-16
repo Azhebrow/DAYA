@@ -28,13 +28,10 @@ interface TaskInputProps {
   categoryColor?: string;
 }
 
-const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor = 'bg-primary' }: TaskInputProps) => {
+const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor = 'zinc-500' }: TaskInputProps) => {
   const handleChange = useCallback((value: number | boolean | string) => {
     onChange(value);
   }, [onChange]);
-
-  // Extract base color from settings color string
-  const baseColor = categoryColor.split(' ')[0].replace('from-', '');
 
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
@@ -44,7 +41,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onValueChange={(value) => handleChange(parseInt(value))}
       >
         <SelectTrigger 
-          className={`w-full h-9 ${value > 0 ? `bg-${baseColor}` : 'bg-zinc-800'} 
+          className={`w-full h-9 ${value > 0 ? `bg-${categoryColor}` : 'bg-zinc-800'} 
             hover:bg-opacity-90 border-0 font-bold text-center 
             ${value > 0 ? 'text-white' : 'text-white/60'}`}
         >
@@ -69,7 +66,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onValueChange={(value) => handleChange(parseInt(value))}
       >
         <SelectTrigger 
-          className={`w-full h-9 ${value > 0 ? `bg-${baseColor}` : 'bg-zinc-800'} 
+          className={`w-full h-9 ${value > 0 ? `bg-${categoryColor}` : 'bg-zinc-800'} 
             hover:bg-opacity-90 border-0 font-bold text-center 
             ${value > 0 ? 'text-white' : 'text-white/60'}`}
         >
@@ -94,7 +91,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onClick={() => handleChange(!task.completed)}
         className={`w-full h-9 text-base
           ${task.completed 
-            ? `bg-${baseColor} text-white hover:bg-opacity-90` 
+            ? `bg-${categoryColor} text-white hover:bg-opacity-90` 
             : 'bg-zinc-800 text-white/60 hover:text-white hover:bg-zinc-700'
           } 
           border-0 font-bold transition-colors duration-200`}
@@ -113,10 +110,10 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
           className={`w-full h-9 
-            ${hasValue ? `bg-${baseColor}` : 'bg-zinc-800'} 
+            ${hasValue ? `bg-${categoryColor}` : 'bg-zinc-800'} 
             border-0 text-left pl-8 text-base font-bold transition-colors
             ${hasValue ? 'text-white' : 'text-white/60'}
-            focus:ring-1 focus:ring-${baseColor} hover:bg-opacity-90
+            focus:ring-1 focus:ring-${categoryColor} hover:bg-opacity-90
             [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           placeholder="0"
         />
@@ -135,7 +132,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={task.textValue || ''}
         onChange={(e) => handleChange(e.target.value)}
         className={`w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium
-          focus:ring-1 focus:ring-${baseColor}`}
+          focus:ring-1 focus:ring-${categoryColor}`}
         placeholder="Описание..."
         maxLength={255}
       />
