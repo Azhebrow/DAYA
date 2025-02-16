@@ -84,7 +84,7 @@ export default function Statistics() {
     Спорт: getVarColor(settings.colors.sport),
     Привычки: getVarColor(settings.colors.habits),
     Траты: getVarColor(settings.colors.expenses),
-    Успех: getVarColor(settings.colors.time), // Using time color for success by default
+    Успех: getVarColor(settings.colors.success), // Using time color for success by default
   };
 
   const CATEGORY_HEADER_COLORS = {
@@ -636,7 +636,7 @@ export default function Statistics() {
                           <td
                             className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-medium"
                             style={{
-                              backgroundColor: `rgba(16, 185, 129, ${0.1 + (dayScore / 100) * 0.4})`,
+                              backgroundColor: `${CATEGORY_COLORS.Успех}${Math.round(10 + (dayScore / 100) * 40).toString(16)}`,
                             }}
                           >
                             {dayScore}%
@@ -694,7 +694,13 @@ export default function Statistics() {
                     {/* Add totals row */}
                     <tr className="border-t-2 border-border font-bold">
                       <td className="py-2 px-4 text-sm font-semibold">Итого</td>
-                      <td className="py-2 px-4 text-center text-sm font-semibold w-[100px]">
+                      <td
+                        className="py-2 px-4 text-center text-sm font-semibold w-[100px]"
+                        style={{
+                          backgroundColor: `${CATEGORY_COLORS.Успех}${Math.round(10 + 
+                            (data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length / 100) * 40).toString(16)}`,
+                        }}
+                      >
                         {Math.round(
                           data.reduce(
                             (sum, day) => sum + calculateDayScore(day),
@@ -718,7 +724,7 @@ export default function Statistics() {
                                 return sum + (t?.completed ? 1 : 0);
                               }, 0);
                               const percentage = Math.round((completedCount / data.length) * 100);
-                              bgColor = `rgba(16, 185, 129, ${0.1 + (percentage / 100) * 0.4})`;
+                              bgColor = `${CATEGORY_COLORS[category.name]}${Math.round(10 + (percentage / 100) * 40).toString(16)}`;
                               totalValue = `${percentage}%`;
                             } else if (task.type === TaskType.TIME) {
                               const totalMinutes = data.reduce((sum, day) => {
@@ -818,8 +824,7 @@ export default function Statistics() {
                                 sum +
                                 c.tasks.reduce(
                                   (tSum, t) =>
-                                    tSum +
-                                    (t.type === TaskType.EXPENSE
+                                    tSum +                                    (t.type === TaskType.EXPENSE
                                       ? t.value || 0
                                       : 0),
                                   0
