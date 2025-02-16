@@ -28,18 +28,14 @@ interface TaskInputProps {
   categoryColor: string;
 }
 
-const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryColor }: TaskInputProps) => {
-  const handleChange = useCallback((value: number | boolean | string) => {
-    onChange(value);
-  }, [onChange]);
-
+const TaskInput = ({ task, onChange, isExpenseCard = false, categoryColor }: TaskInputProps) => {
   // Checkbox component
   if (task.type === TaskType.CHECKBOX) {
     return (
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => handleChange(!task.completed)}
+        onClick={() => onChange(!task.completed)}
         className={`w-full h-9 font-bold transition-all ${
           task.completed 
             ? 'text-white' 
@@ -58,8 +54,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   if (task.type === TaskType.TIME) {
     return (
       <Select
-        value={task.value ? String(task.value) : "0"}
-        onValueChange={(val) => handleChange(Number(val))}
+        value={String(task.value || 0)}
+        onValueChange={(newValue) => {
+          const numValue = parseInt(newValue);
+          if (!isNaN(numValue)) {
+            onChange(numValue);
+          }
+        }}
       >
         <SelectTrigger 
           className={`w-full h-9 font-bold border-0 transition-all ${
@@ -92,8 +93,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   if (task.type === TaskType.CALORIE) {
     return (
       <Select
-        value={task.value ? String(task.value) : "0"}
-        onValueChange={(val) => handleChange(Number(val))}
+        value={String(task.value || 0)}
+        onValueChange={(newValue) => {
+          const numValue = parseInt(newValue);
+          if (!isNaN(numValue)) {
+            onChange(numValue);
+          }
+        }}
       >
         <SelectTrigger 
           className={`w-full h-9 font-bold border-0 transition-all ${
@@ -129,7 +135,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         <Input
           type="number"
           value={task.value || ''}
-          onChange={(e) => handleChange(Number(e.target.value) || 0)}
+          onChange={(e) => onChange(Number(e.target.value) || 0)}
           className={`w-full h-9 pl-8 font-bold border-0 transition-all ${
             task.value 
               ? 'text-white' 
@@ -157,7 +163,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
       <Input
         type="text"
         value={task.textValue || ''}
-        onChange={(e) => handleChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
         className="w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium"
         placeholder="Описание..."
         maxLength={255}
@@ -166,8 +172,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   }
 
   return null;
-});
-
-TaskInput.displayName = 'TaskInput';
+};
 
 export default TaskInput;
