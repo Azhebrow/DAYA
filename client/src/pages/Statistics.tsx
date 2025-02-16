@@ -673,12 +673,6 @@ export default function Statistics() {
                         return (
                           <td
                             className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                            style={{
-                              backgroundColor: hexToRGBA(
-                                getCssVar(settings.colors.expenses),
-                                Math.min((grandTotal / maxExpense) * 0.4 + 0.1, 0.5)
-                              ),
-                            }}
                           >
                             {grandTotal} zł
                           </td>
@@ -716,12 +710,6 @@ export default function Statistics() {
                             <td
                               key={`total-${category.name}`}
                               className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                              style={{
-                                backgroundColor: hexToRGBA(
-                                  getCssVar(settings.colors.expenses),
-                                  Math.min((categoryTotal / maxExpenseInCategory) * 0.4 + 0.1, 0.5)
-                                ),
-                              }}
                             >
                               {categoryTotal} zł
                             </td>
@@ -853,12 +841,6 @@ export default function Statistics() {
                       <td className="sticky left-0 bg-background py-2 px-4 text-sm font-semibold">Итого</td>
                       <td
                         className="sticky left-[100px] bg-background py-2 px-4 text-center text-sm font-semibold"
-                        style={{
-                          backgroundColor: hexToRGBA(
-                            getCssVar(settings.colors.daySuccess),
-                            Math.min((data.reduce((sum, day) => sum + calculateDayScore(day), 0) / (data.length * 100)) * 0.5 + 0.3, 0.8)
-                          )
-                        }}
                       >
                         {Math.round(data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length)}%
                       </td>
@@ -868,9 +850,8 @@ export default function Statistics() {
                         .flatMap((category) =>
                           category.tasks.map((task) => {
                             let totalValue = "";
-                            let bgColor = "transparent";
 
-                            if (task.type === TaskType.CHECKBOX) {
+                            if (task.type=== TaskType.CHECKBOX) {
                               const completedCount = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
                                 const t = cat?.tasks.find((t) => t.name === task.name);
@@ -878,10 +859,6 @@ export default function Statistics() {
                               }, 0);
                               const totalPercentage = Math.round((completedCount / data.length) * 100);
                               totalValue = `${totalPercentage}%`;
-                              bgColor = hexToRGBA(
-                                getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]),
-                                Math.min((totalPercentage / 100) * 0.4 + 0.3, 0.8)
-                              );
                             } else if (task.type === TaskType.TIME) {
                               const totalMinutes = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
@@ -902,7 +879,6 @@ export default function Statistics() {
                               <td
                                 key={`total-${category.name}-${task.name}`}
                                 className="py-2 px-4 text-center text-sm font-semibold"
-                                style={{ backgroundColor: bgColor }}
                               >
                                 {totalValue}
                                 {task.type === TaskType.TIME && 'ч'}
