@@ -29,6 +29,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import EmojiPicker from 'emoji-picker-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Updated colorPalette - organized by color groups
 const colorPalette = [
@@ -198,99 +199,51 @@ const SubcategoryEditor = ({
 };
 
 export default function SettingsPage() {
-  const [settings, setSettings] = React.useState<Settings>(() => {
-    try {
-      const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({
-        startDate: '2025-02-07',
-        endDate: '2025-09-09',
-        oathText: DEFAULT_OATH_TEXT,
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--red',
-          habits: '--orange',
-          expenses: '--orange',
-          daySuccess: '--green'
-        },
-        subcategories: {
-          mind: [
-            { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-            { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-            { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-          ],
-          time: [
-            { id: 'work', name: '💼 Работа', emoji: '💼' },
-            { id: 'study', name: '📚 Учёба', emoji: '📚' },
-            { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-          ],
-          sport: [
-            { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-            { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-            { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-          ],
-          habits: [
-            { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-            { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-            { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-          ]
-        }
-      });
-      const parsedSettings = settingsSchema.parse(JSON.parse(stored));
-      // Конвертируем старые значения цветов в новый формат
-      if (parsedSettings.colors) {
-        Object.keys(parsedSettings.colors).forEach(key => {
-          const colorValue = parsedSettings.colors[key];
-          if (!colorValue.startsWith('--')) {
-            parsedSettings.colors[key] = `--${colorValue.split('-')[0]}`;
-          }
-        });
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [isOathExpanded, setIsOathExpanded] = React.useState(false);
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => storage.getSettings(),
+    initialData: settingsSchema.parse({
+      startDate: '2025-02-07',
+      endDate: '2025-09-09',
+      oathText: DEFAULT_OATH_TEXT,
+      colors: {
+        mind: '--purple',
+        time: '--green',
+        sport: '--red',
+        habits: '--orange',
+        expenses: '--orange',
+        daySuccess: '--green'
+      },
+      subcategories: {
+        mind: [
+          { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+          { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+          { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+        ],
+        time: [
+          { id: 'work', name: '💼 Работа', emoji: '💼' },
+          { id: 'study', name: '📚 Учёба', emoji: '📚' },
+          { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+        ],
+        sport: [
+          { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+          { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+          { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+        ],
+        habits: [
+          { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+          { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+          { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+        ]
       }
-      return parsedSettings;
-    } catch (error) {
-      console.error('Error parsing settings:', error);
-      return settingsSchema.parse({
-        startDate: '2025-02-07',
-        endDate: '2025-09-09',
-        oathText: DEFAULT_OATH_TEXT,
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--red',
-          habits: '--orange',
-          expenses: '--orange',
-          daySuccess: '--green'
-        },
-        subcategories: {
-          mind: [
-            { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-            { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-            { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-          ],
-          time: [
-            { id: 'work', name: '💼 Работа', emoji: '💼' },
-            { id: 'study', name: '📚 Учёба', emoji: '📚' },
-            { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-          ],
-          sport: [
-            { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-            { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-            { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-          ],
-          habits: [
-            { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-            { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-            { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-          ]
-        }
-      });
-    }
+    })
   });
 
-  const [isOathExpanded, setIsOathExpanded] = React.useState(false);
-  const { toast } = useToast();
-
-  const handleSettingChange = (key: keyof Settings, value: any) => {
+  const handleSettingChange = async (key: keyof Settings, value: any) => {
     let newSettings = { ...settings };
 
     if (key === 'colors') {
@@ -298,21 +251,32 @@ export default function SettingsPage() {
     } else if (key === 'timeTarget') {
       newSettings = { ...settings, timeTarget: value * 60 };
     } else if (key === 'subcategories') {
-        newSettings = {...settings, subcategories: {...settings.subcategories, ...value}}
+      newSettings = { ...settings, subcategories: { ...settings.subcategories, ...value } };
     } else {
       newSettings = { ...settings, [key]: value };
     }
-    setSettings(newSettings);
-    storage.saveSettings(newSettings);
-    toast({
-      title: "Настройки сохранены",
-      description: "Ваши изменения успешно применены",
-    });
+
+    try {
+      await storage.saveSettings(newSettings);
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      toast({
+        title: "Настройки сохранены",
+        description: "Ваши изменения успешно применены",
+      });
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сохранить настройки",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleClearData = () => {
+  const handleClearData = async () => {
     try {
-      localStorage.clear();
+      await storage.clearData();
+      queryClient.invalidateQueries();
       window.location.reload();
       toast({
         title: "Данные удалены",
@@ -328,6 +292,9 @@ export default function SettingsPage() {
     }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">

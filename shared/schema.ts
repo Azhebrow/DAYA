@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { pgTable, text, serial, boolean, integer, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, boolean, integer, timestamp, jsonb } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 
 export enum CategoryType {
@@ -70,6 +70,34 @@ export const pomodoroSettings = pgTable('pomodoro_settings', {
   notificationsEnabled: boolean('notifications_enabled').notNull().default(true)
 });
 
+export const settings = pgTable('settings', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id'),
+  darkMode: boolean('dark_mode').default(false),
+  calorieTarget: integer('calorie_target').default(2000),
+  timeTarget: integer('time_target').default(60),
+  startDate: text('start_date').default('2025-02-07'),
+  endDate: text('end_date').default('2025-09-09'),
+  viewMode: text('view_mode').default('normal'),
+  timeRange: text('time_range').default('7'),
+  oathText: text('oath_text'),
+  colors: jsonb('colors').$type<{
+    mind: string;
+    time: string;
+    sport: string;
+    habits: string;
+    expenses: string;
+    daySuccess: string;
+  }>(),
+  subcategories: jsonb('subcategories').$type<{
+    mind: { id: string; name: string; emoji: string; }[];
+    time: { id: string; name: string; emoji: string; }[];
+    sport: { id: string; name: string; emoji: string; }[];
+    habits: { id: string; name: string; emoji: string; }[];
+  }>(),
+  pomodoroSettings: jsonb('pomodoro_settings').$type<PomodoroSettings>()
+});
+
 export const taskSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Task name is required"),
@@ -116,6 +144,8 @@ export const pomodoroSettingsSchema = z.object({
 });
 
 export const settingsSchema = z.object({
+  id: z.number().optional(),
+  userId: z.number().optional(),
   darkMode: z.boolean().default(false),
   calorieTarget: z.number().default(2000),
   timeTarget: z.number().default(60),
@@ -125,57 +155,41 @@ export const settingsSchema = z.object({
   timeRange: z.enum(['7', '14', '30']).default('7'),
   oathText: z.string().optional(),
   colors: z.object({
-    mind: z.string().default('--purple'),
-    time: z.string().default('--green'),
-    sport: z.string().default('--red'),
-    habits: z.string().default('--orange'),
-    expenses: z.string().default('--orange'),
-    daySuccess: z.string().default('--green'),
+    mind: z.string(),
+    time: z.string(),
+    sport: z.string(),
+    habits: z.string(),
+    expenses: z.string(),
+    daySuccess: z.string()
   }).default({
     mind: '--purple',
     time: '--green',
     sport: '--red',
     habits: '--orange',
     expenses: '--orange',
-    daySuccess: '--green',
+    daySuccess: '--green'
   }),
   subcategories: z.object({
     mind: z.array(z.object({
       id: z.string(),
       name: z.string(),
       emoji: z.string()
-    })).default([
-      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-    ]),
+    })),
     time: z.array(z.object({
       id: z.string(),
       name: z.string(),
       emoji: z.string()
-    })).default([
-      { id: 'work', name: '💼 Работа', emoji: '💼' },
-      { id: 'study', name: '📚 Учёба', emoji: '📚' },
-      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-    ]),
+    })),
     sport: z.array(z.object({
       id: z.string(),
       name: z.string(),
       emoji: z.string()
-    })).default([
-      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-    ]),
+    })),
     habits: z.array(z.object({
       id: z.string(),
       name: z.string(),
       emoji: z.string()
-    })).default([
-      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-    ])
+    }))
   }).default({
     mind: [
       { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
@@ -201,21 +215,22 @@ export const settingsSchema = z.object({
   pomodoroSettings: pomodoroSettingsSchema.optional()
 });
 
-export type Task = z.infer<typeof taskSchema>;
-export type Category = z.infer<typeof categorySchema>;
-export type DayEntry = z.infer<typeof dayEntrySchema>;
-export type Settings = z.infer<typeof settingsSchema>;
-export type PomodoroSession = z.infer<typeof pomodoroSessionSchema>;
-export type PomodoroSettings = z.infer<typeof pomodoroSettingsSchema>;
-
 export const insertTaskSchema = createInsertSchema(tasks);
 export const insertCategorySchema = createInsertSchema(categories);
 export const insertDayEntrySchema = createInsertSchema(dayEntries);
 export const insertPomodoroSessionSchema = createInsertSchema(pomodoroSessions);
 export const insertPomodoroSettingsSchema = createInsertSchema(pomodoroSettings);
+export const insertSettingsSchema = createInsertSchema(settings);
 
+export type Task = z.infer<typeof taskSchema>;
+export type Category = z.infer<typeof categorySchema>;
+export type DayEntry = z.infer<typeof dayEntrySchema>;
+export type PomodoroSession = z.infer<typeof pomodoroSessionSchema>;
+export type PomodoroSettings = z.infer<typeof pomodoroSettingsSchema>;
 export type InsertTask = z.infer<typeof insertTaskSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type InsertDayEntry = z.infer<typeof insertDayEntrySchema>;
 export type InsertPomodoroSession = z.infer<typeof insertPomodoroSessionSchema>;
 export type InsertPomodoroSettings = z.infer<typeof insertPomodoroSettingsSchema>;
+export type InsertSettings = z.infer<typeof insertSettingsSchema>;
+export type Settings = z.infer<typeof settingsSchema>;

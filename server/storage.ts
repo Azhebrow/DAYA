@@ -1,39 +1,21 @@
 import { db } from './db';
 import { 
-  tasks, categories, dayEntries,
+  tasks, categories, dayEntries, settings,
   type Task, type Category, type DayEntry, type Settings,
-  settingsSchema
+  settingsSchema, type InsertSettings
 } from '@shared/schema';
 import { eq } from 'drizzle-orm';
-import { users, type User, type InsertUser } from "@shared/schema";
 
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
   getDayEntry(date: string): Promise<DayEntry | null>;
   saveDayEntry(entry: DayEntry): Promise<void>;
   removeDayEntry(date: string): Promise<void>;
-  getSettings(): Settings;
-  saveSettings(settings: Settings): void;
+  getSettings(): Promise<Settings>;
+  saveSettings(settings: Settings): Promise<void>;
+  clearData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
-    return user;
-  }
-
   async getDayEntry(date: string): Promise<DayEntry | null> {
     const [entry] = await db
       .select()
@@ -66,7 +48,7 @@ export class DatabaseStorage implements IStorage {
             value: t.value || 0,
             textValue: t.textValue || '',
             completed: t.completed,
-            createdAt: t.createdAt.toISOString()
+            createdAt: t.createdAt?.toISOString() || new Date().toISOString()
           }))
         };
       })
@@ -88,6 +70,17 @@ export class DatabaseStorage implements IStorage {
 
     if (existingEntry) {
       dayEntryId = existingEntry.id;
+
+      // Delete existing categories and tasks
+      const entryCats = await db
+        .select()
+        .from(categories)
+        .where(eq(categories.dayEntryId, dayEntryId));
+
+      for (const cat of entryCats) {
+        await db.delete(tasks).where(eq(tasks.categoryId, cat.id));
+      }
+      await db.delete(categories).where(eq(categories.dayEntryId, dayEntryId));
     } else {
       const [newEntry] = await db
         .insert(dayEntries)
@@ -96,7 +89,7 @@ export class DatabaseStorage implements IStorage {
       dayEntryId = newEntry.id;
     }
 
-    // Handle categories
+    // Insert new categories and tasks
     for (const cat of entry.categories) {
       const [category] = await db
         .insert(categories)
@@ -108,7 +101,6 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      // Handle tasks
       for (const task of cat.tasks) {
         await db
           .insert(tasks)
@@ -136,33 +128,41 @@ export class DatabaseStorage implements IStorage {
         .from(categories)
         .where(eq(categories.dayEntryId, entry.id));
 
-      // Delete tasks for each category
       for (const cat of entryCats) {
-        await db
-          .delete(tasks)
-          .where(eq(tasks.categoryId, cat.id));
+        await db.delete(tasks).where(eq(tasks.categoryId, cat.id));
       }
-
-      // Delete categories
-      await db
-        .delete(categories)
-        .where(eq(categories.dayEntryId, entry.id));
-
-      // Delete day entry
-      await db
-        .delete(dayEntries)
-        .where(eq(dayEntries.id, entry.id));
+      await db.delete(categories).where(eq(categories.dayEntryId, entry.id));
+      await db.delete(dayEntries).where(eq(dayEntries.id, entry.id));
     }
   }
 
-  getSettings(): Settings {
-    const stored = localStorage.getItem('day_success_tracker_settings');
-    if (!stored) return settingsSchema.parse({});
-    return settingsSchema.parse(JSON.parse(stored));
+  async getSettings(): Promise<Settings> {
+    const [dbSettings] = await db.select().from(settings);
+    if (!dbSettings) {
+      const defaultSettings = settingsSchema.parse({});
+      const [newSettings] = await db.insert(settings).values(defaultSettings).returning();
+      return settingsSchema.parse(newSettings);
+    }
+    return settingsSchema.parse(dbSettings);
   }
 
-  saveSettings(settings: Settings): void {
-    localStorage.setItem('day_success_tracker_settings', JSON.stringify(settings));
+  async saveSettings(newSettings: Settings): Promise<void> {
+    const [existingSettings] = await db.select().from(settings);
+    if (existingSettings) {
+      await db.update(settings)
+        .set(newSettings)
+        .where(eq(settings.id, existingSettings.id));
+    } else {
+      await db.insert(settings).values(newSettings);
+    }
+  }
+
+  async clearData(): Promise<void> {
+    // Delete all data in reverse order of dependencies
+    await db.delete(tasks);
+    await db.delete(categories);
+    await db.delete(dayEntries);
+    await db.delete(settings);
   }
 }
 
