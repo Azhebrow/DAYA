@@ -5,6 +5,7 @@ import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 import { Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
+import { storage } from '@/lib/storage';
 
 interface TaskCardProps {
   category: Category;
@@ -17,6 +18,14 @@ export const TaskCard = React.memo(({
   onTaskUpdate, 
   isExpenseCard = false 
 }: TaskCardProps) => {
+  const [tasks, setTasks] = React.useState(() => storage.getTasks());
+
+  React.useEffect(() => {
+    return storage.subscribe(() => {
+      setTasks(storage.getTasks());
+    });
+  }, []);
+
   const progress = React.useMemo(() => 
     calculateCategoryProgress(category.tasks, category.type),
     [category.tasks, category.type]
@@ -27,26 +36,8 @@ export const TaskCard = React.memo(({
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
-    const stored = localStorage.getItem('day_success_tracker_settings');
-    let colors;
-    try {
-      if (stored) {
-        const settings = JSON.parse(stored);
-        colors = settings.colors;
-      }
-    } catch (error) {
-      console.error('Error parsing settings:', error);
-    }
-
-    if (!colors) {
-      colors = {
-        mind: '--purple',
-        time: '--green',
-        sport: '--red',
-        habits: '--orange',
-        expenses: '--blue'
-      };
-    }
+    const settings = storage.getSettings();
+    const colors = settings.colors;
 
     switch (category.name) {
       case 'Разум': return `var(${colors.mind})`;
@@ -102,24 +93,32 @@ export const TaskCard = React.memo(({
         </div>
 
         <div>
-          {category.tasks.map((task) => (
-            <div 
-              key={task.id} 
-              className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
-            >
-              {!isExpenseCard && (
-                <span className="w-1/2 text-gray-400">{task.name}</span>
-              )}
-              <div className={isExpenseCard ? "w-full" : "w-1/2"}>
-                <TaskInput
-                  task={task}
-                  onChange={(value) => handleTaskUpdate(task.id, value)}
-                  isExpenseCard={isExpenseCard}
-                  categoryColor={iconColor}
-                />
+          {category.tasks.map((task) => {
+            // Find the task definition from storage
+            const categoryData = tasks.find(c => c.name === category.name);
+            const taskData = categoryData?.tasks.find(t => t.id === task.id);
+
+            return (
+              <div 
+                key={task.id} 
+                className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
+              >
+                {!isExpenseCard && (
+                  <span className="w-1/2 text-gray-400">
+                    {taskData ? `${taskData.emoji} ${taskData.name}` : task.name}
+                  </span>
+                )}
+                <div className={isExpenseCard ? "w-full" : "w-1/2"}>
+                  <TaskInput
+                    task={task}
+                    onChange={(value) => handleTaskUpdate(task.id, value)}
+                    isExpenseCard={isExpenseCard}
+                    categoryColor={iconColor}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Card>
     </motion.div>
