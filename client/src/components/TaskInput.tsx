@@ -56,9 +56,10 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
 
   // Time select component
   if (task.type === TaskType.TIME) {
+    const currentValue = task.value ? String(task.value) : '';
     return (
       <Select
-        defaultValue={task.value ? String(task.value) : undefined}
+        value={currentValue}
         onValueChange={(val) => handleChange(Number(val))}
       >
         <SelectTrigger 
@@ -90,9 +91,10 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
 
   // Calorie select component
   if (task.type === TaskType.CALORIE) {
+    const currentValue = task.value ? String(task.value) : '';
     return (
       <Select
-        defaultValue={task.value ? String(task.value) : undefined}
+        value={currentValue}
         onValueChange={(val) => handleChange(Number(val))}
       >
         <SelectTrigger 
