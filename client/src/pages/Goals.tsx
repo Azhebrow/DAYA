@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
@@ -107,9 +107,24 @@ const initialGoals: Goal[] = [
 ];
 
 export default function Goals() {
+  const [history, setHistory] = useState<HistoryEntry[]>(() => {
+    try {
+      const stored = localStorage.getItem('goals_history');
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error loading history:', error);
+      return [];
+    }
+  });
+
   const [goals, setGoals] = useState<Goal[]>(() => {
-    const stored = localStorage.getItem('goals_data');
-    return stored ? JSON.parse(stored) : initialGoals;
+    try {
+      const stored = localStorage.getItem('goals_data');
+      return stored ? JSON.parse(stored) : initialGoals;
+    } catch (error) {
+      console.error('Error loading goals:', error);
+      return initialGoals;
+    }
   });
 
   const [settings, setSettings] = useState<Settings>(() => {
@@ -117,11 +132,12 @@ export default function Goals() {
       const stored = localStorage.getItem('day_success_tracker_settings');
       if (!stored) return settingsSchema.parse({
         colors: {
-          mind: 'from-purple-500 to-violet-700',
-          time: 'from-green-500 to-emerald-700',
-          sport: 'from-red-500 to-rose-700',
-          habits: 'from-orange-500 to-amber-700',
-          expenses: 'from-orange-500 to-amber-700',
+          mind: '--purple',
+          time: '--green',
+          sport: '--red',
+          habits: '--orange',
+          expenses: '--orange',
+          daySuccess: '--green'
         }
       });
       return settingsSchema.parse(JSON.parse(stored));
@@ -129,11 +145,12 @@ export default function Goals() {
       console.error('Error parsing settings:', error);
       return settingsSchema.parse({
         colors: {
-          mind: 'from-purple-500 to-violet-700',
-          time: 'from-green-500 to-emerald-700',
-          sport: 'from-red-500 to-rose-700',
-          habits: 'from-orange-500 to-amber-700',
-          expenses: 'from-orange-500 to-amber-700',
+          mind: '--purple',
+          time: '--green',
+          sport: '--red',
+          habits: '--orange',
+          expenses: '--orange',
+          daySuccess: '--green'
         }
       });
     }
@@ -143,11 +160,19 @@ export default function Goals() {
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('goals_data', JSON.stringify(goals));
+    try {
+      localStorage.setItem('goals_data', JSON.stringify(goals));
+    } catch (error) {
+      console.error('Error saving goals:', error);
+    }
   }, [goals]);
 
   useEffect(() => {
-    localStorage.setItem('goals_history', JSON.stringify(history));
+    try {
+      localStorage.setItem('goals_history', JSON.stringify(history));
+    } catch (error) {
+      console.error('Error saving history:', error);
+    }
   }, [history]);
 
   const calculateProgress = (goal: Goal) => {
@@ -205,11 +230,6 @@ export default function Goals() {
   const handleDeleteHistoryEntry = (entryId: string) => {
     setHistory(prev => prev.filter(entry => entry.id !== entryId));
   };
-
-  const [history, setHistory] = useState<HistoryEntry[]>(() => {
-    const stored = localStorage.getItem('goals_history');
-    return stored ? JSON.parse(stored) : [];
-  });
 
 
   return (
