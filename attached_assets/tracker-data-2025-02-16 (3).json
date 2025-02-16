@@ -1,0 +1,2107 @@
+{
+  "settings": {
+    "days": [
+      {
+        "date": "2025-02-14",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 25,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 80,
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-14T14:43:29.391Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-02-10",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 60,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 3000,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 14,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:17.181Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-02-11",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 180,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 100,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 140,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 1800,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 29,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:18.886Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-02-12",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 20,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 80,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 29,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 100,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "Replit",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:21.496Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-02-13",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 160,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 3000,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 29,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 20,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 80,
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-14T15:19:25.665Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-02-16",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 100,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 120,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 60,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 2200,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 25,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 25,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-16T03:56:23.530Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-01-30",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 200,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 80,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 2000,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": true,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 25,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-16T08:24:11.264Z"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "date": "2025-01-31",
+        "categories": [
+          {
+            "id": "mind",
+            "name": "Разум",
+            "emoji": "🧠",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "breathing",
+                "name": "🫁 Дыхание",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.780Z"
+              },
+              {
+                "id": "tea",
+                "name": "🍵 Чай",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.780Z"
+              },
+              {
+                "id": "cleaning",
+                "name": "🧹 Уборка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.780Z"
+              }
+            ]
+          },
+          {
+            "id": "time",
+            "name": "Время",
+            "emoji": "⏱️",
+            "type": "time",
+            "tasks": [
+              {
+                "id": "work",
+                "name": "💼 Работа",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              },
+              {
+                "id": "study",
+                "name": "📚 Учёба",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              },
+              {
+                "id": "project",
+                "name": "🎯 Проект",
+                "type": "time",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "sport",
+            "name": "Спорт",
+            "emoji": "🏃‍♂️",
+            "type": "calorie",
+            "tasks": [
+              {
+                "id": "pills",
+                "name": "💊 Таблетки",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              },
+              {
+                "id": "training",
+                "name": "🏋️‍♂️ Тренировка",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              },
+              {
+                "id": "calories",
+                "name": "🔥 Калории",
+                "type": "calorie",
+                "value": 2200,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "habits",
+            "name": "Привычки",
+            "emoji": "🚫",
+            "type": "checkbox",
+            "tasks": [
+              {
+                "id": "no_junk_food",
+                "name": "🍔 Дерьмо",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              },
+              {
+                "id": "no_money_waste",
+                "name": "💸 Траты",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              },
+              {
+                "id": "no_adult",
+                "name": "🔞 Порно",
+                "type": "checkbox",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp1",
+            "name": "Еда",
+            "emoji": "🍽️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "food_expense",
+                "name": "Еда",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp2",
+            "name": "Дерьмо",
+            "emoji": "💩",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "shit_expense",
+                "name": "Дерьмо",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp3",
+            "name": "Город",
+            "emoji": "🌆",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "city_expense",
+                "name": "Город",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp4",
+            "name": "Спорт",
+            "emoji": "🏃",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "sport_expense",
+                "name": "Спорт",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp5",
+            "name": "Отдых",
+            "emoji": "🎮",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "leisure_expense",
+                "name": "Отдых",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp6",
+            "name": "Сервис",
+            "emoji": "📱",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "apps_expense",
+                "name": "Сервис",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp7",
+            "name": "Разное",
+            "emoji": "📝",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "misc_expense",
+                "name": "Разное",
+                "type": "expense",
+                "value": 0,
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          },
+          {
+            "id": "exp8",
+            "name": "Отчет",
+            "emoji": "✏️",
+            "type": "expense",
+            "tasks": [
+              {
+                "id": "description",
+                "name": "Отчет",
+                "type": "expense_note",
+                "value": 0,
+                "textValue": "",
+                "completed": false,
+                "createdAt": "2025-02-16T08:37:24.781Z"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "settings": {
+      "darkMode": true,
+      "calorieTarget": 3000,
+      "timeTarget": 300,
+      "startDate": "2025-01-30",
+      "endDate": "2025-09-09",
+      "viewMode": "weekly",
+      "timeRange": "30",
+      "oathText": "Смотреть порно — значит уничтожать свою силу. Это убивает концентрацию, ворует энергию, делает слабым. Я теряю контроль над собой и становлюсь зависимым от пустого удовольствия. Это приближает меня к провалу. Если я поддамся, я не смогу накопить 5000 злотых и не смогу уехать. Я останусь на месте, без душевного спокойствия.  \n\nТратить время на ерунду — значит убивать своё будущее. Каждая минута в телефоне, каждое бессмысленное видео — это минус к моему прогрессу. Если я отвлекаюсь, я не изучаю польский. Я остаюсь чужим в чужой стране. Я выбираю одиночество и беспомощность.  \n\nБездумные траты разрушают мою независимость. Если я покупаю ерунду, я теряю шанс заработать 1500 долларов на фрилансе и получить знак Top Rated. Я выбираю работу за копейки и отказ от свободы. Я становлюсь рабом своих слабостей.  \n\nЕсли я пропускаю тренировки, я остаюсь слабым. Без мышц я не выгляжу как мужчина и не чувствую себя мужчиной. Я выбираю быть слабым и незаметным, вместо того чтобы быть сильным и уверенным. Я не уважаю себя, если позволяю себе слабость.  \n\nЕсли я не снимаю видео, я убиваю свою мечту. Я не начинаю свой путь, не реализую своё предназначение. Я остаюсь в тени, незаметным, несуществующим. Я выбираю пустую жизнь без смысла и цели.  \n\nКаждый раз, когда я отвлекаюсь, я разрушаю себя. Слабость — это выбор, который ведёт к провалу. Я выбираю дисциплину, контроль и силу. Никаких оправданий. Только действия.",
+      "colors": {
+        "mind": "--purple",
+        "time": "--green",
+        "sport": "--sky",
+        "habits": "--red-dark",
+        "expenses": "--orange",
+        "daySuccess": "--green"
+      }
+    }
+  },
+  "goals": {
+    "goals": [
+      {
+        "id": 1,
+        "title": "Накопить",
+        "target": 5000,
+        "current": 0,
+        "unit": "злотых",
+        "iconName": "DollarSign",
+        "color": "from-green-500 to-emerald-700"
+      },
+      {
+        "id": 2,
+        "title": "Изучить учебник",
+        "target": 804,
+        "current": 0,
+        "unit": "страниц",
+        "iconName": "Book",
+        "color": "from-blue-500 to-indigo-700"
+      },
+      {
+        "id": 3,
+        "title": "Набрать вес",
+        "target": 82,
+        "current": 0,
+        "start": 72,
+        "unit": "кг",
+        "iconName": "Weight",
+        "color": "from-purple-500 to-violet-700"
+      },
+      {
+        "id": 4,
+        "title": "Сделать видео",
+        "target": 15,
+        "current": 0,
+        "unit": "видео",
+        "iconName": "Video",
+        "color": "from-red-500 to-rose-700"
+      },
+      {
+        "id": 5,
+        "title": "Заработать на фрилансе",
+        "target": 1500,
+        "current": 0,
+        "unit": "$",
+        "iconName": "CodeSquare",
+        "color": "from-yellow-500 to-orange-700"
+      }
+    ],
+    "history": []
+  }
+}

@@ -445,26 +445,56 @@ function Statistics() {
   };
 
   const aggregateTasksByPeriod = () => {
-    const periodData: { [key: string]: { tasks: { [key: string]: any }; avgScore: number } } = {};
+    const periodData: { [key: string]: { tasks: { [key: string]: any }; avgScore: number; daysCount: number } } = {};
 
     data.forEach(day => {
-      const periodKey = getDateRangeKey(new Date(day.date), displayType);
-      const taskData = aggregateTaskData([day], periodKey);
+      const date = new Date(day.date);
+      const periodKey = getDateRangeKey(date, displayType);
 
       if (!periodData[periodKey]) {
         periodData[periodKey] = {
           tasks: {},
           avgScore: 0,
+          daysCount: 0
         };
       }
-      Object.assign(periodData[periodKey].tasks, taskData);
+
+      periodData[periodKey].daysCount++;
       periodData[periodKey].avgScore += calculateDayScore(day);
+
+      day.categories
+        .filter(category => category.type !== CategoryType.EXPENSE)
+        .forEach(category => {
+          category.tasks.forEach(task => {
+            const key = `${category.name}-${task.name}`;
+            if (!periodData[periodKey].tasks[key]) {
+              periodData[periodKey].tasks[key] = {
+                completedCount: 0,
+                totalCount: 0,
+                totalTime: 0,
+                totalCalories: 0
+              };
+            }
+
+            if (task.type === TaskType.CHECKBOX) {
+              periodData[periodKey].tasks[key].totalCount++;
+              if (task.completed) {
+                periodData[periodKey].tasks[key].completedCount++;
+              }
+            } else if (task.type === TaskType.TIME && typeof task.value === 'number') {
+              periodData[periodKey].tasks[key].totalTime += task.value;
+            } else if (task.type === TaskType.CALORIE && typeof task.value === 'number') {
+              periodData[periodKey].tasks[key].totalCalories += task.value;
+            }
+          });
+        });
     });
 
-
-    for (const periodKey in periodData) {
-      periodData[periodKey].avgScore /= data.filter(day => getDateRangeKey(new Date(day.date), displayType) === periodKey).length;
-    }
+    Object.keys(periodData).forEach(periodKey => {
+      periodData[periodKey].avgScore = Math.round(
+        periodData[periodKey].avgScore / periodData[periodKey].daysCount
+      );
+    });
 
     return periodData;
   };
@@ -486,7 +516,6 @@ function Statistics() {
     )
   );
 
-  // Вычисляем максимальные расходы для всех периодов
   const maxExpense = Object.values(expensesByPeriod).reduce((max, period) =>
     Math.max(max, Object.values(period).reduce((sum, value) => sum + value, 0)), 0);
 
@@ -525,7 +554,6 @@ function Statistics() {
         </div>
       </div>
 
-      {/* Графики */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
@@ -673,7 +701,6 @@ function Statistics() {
         </Card>
       </div>
 
-      {/* Таблица расходов по категориям */}
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
@@ -780,7 +807,6 @@ function Statistics() {
         </CardContent>
       </Card>
 
-      {/* Таблица успешности задач по дням */}
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
@@ -1004,7 +1030,6 @@ function Statistics() {
         </CardContent>
       </Card>
 
-      {/* Графики распределения */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
