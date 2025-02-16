@@ -385,6 +385,9 @@ function Statistics() {
   const timeDistribution = calculateTimeDistribution();
   const expenseDistribution = calculateExpenseDistribution();
 
+  const avgDayScore = Math.round(data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length);
+
+
   return (
     <div className="container mx-auto p-4 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -824,13 +827,13 @@ function Statistics() {
                           category.tasks.map((task) => (
                             <th
                               key={`${category.name}-${task.name}`}
-                              className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
-                                style={{
-                                  backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
-                                  color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
-                                  opacity: 0.8,
-                                  minWidth: "80px",
-                                }}
+                                                            className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
+                              style={{
+                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
+                                color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff',
+                                opacity: 0.8,
+                                minWidth: "80px",
+                              }}
                             >
                               {task.name}
                             </th>
@@ -863,35 +866,21 @@ function Statistics() {
                           )
                           .flatMap((category) =>
                             category.tasks.map((task) => {
+                              
                               let displayValue = "";
                               let bgColor = "transparent";
 
                               if (task.type === TaskType.CHECKBOX) {
-                                displayValue = task.completed ? "✓" : "✗";
-                                bgColor = task.completed
-                                  ? hexToRGBA(getCssVar(CATEGORY_COLORS[category.name]), 0.3)
-                                  : "transparent";
+                                const isCompleted = task.completed;
+                                displayValue = isCompleted ? "✓" : "×";
+                                if (isCompleted) {
+                                  bgColor = hexToRGBA(getCssVar(settings.colors.daySuccess), 0.3);
+                                }
                               } else if (task.type === TaskType.TIME) {
-                                if (typeof task.value === "number" && task.value > 0) {
-                                  const hours = Math.floor(task.value / 60);
-                                  displayValue = `${hours}`;
-                                  bgColor = hexToRGBA(
-                                    getCssVar(CATEGORY_COLORS[category.name]),
-                                    0.3
-                                  );
-                                } else {
-                                  displayValue = "✗";
-                                }
+                                const hours = Math.floor((task.value || 0) / 60);
+                                displayValue = `${hours}ч`;
                               } else if (task.type === TaskType.CALORIE) {
-                                if (typeof task.value === "number" && task.value > 0) {
-                                  displayValue = task.value.toString();
-                                  bgColor = hexToRGBA(
-                                    getCssVar(CATEGORY_COLORS[category.name]),
-                                    0.3
-                                  );
-                                } else {
-                                  displayValue = "✗";
-                                }
+                                displayValue = `${task.value || 0}ккал`;
                               }
 
                               return (
@@ -912,15 +901,15 @@ function Statistics() {
                     <tr className="border-t-2 border-border font-bold">
                       <td className="bg-background px-4 py-2 text-sm font-semibold">Итого</td>
                       <td
-                        className="bg-background px-4 py-2 text-center text-sm font-semibold"
+                        className="px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
                             getCssVar(settings.colors.daySuccess),
-                            Math.min((data.reduce((sum, day) => sum + calculateDayScore(day), 0) / (data.length * 100)) * 0.4 + 0.1, 0.5)
-                          )
+                            Math.min((avgDayScore / 100) * 0.4 + 0.1, 0.5)
+                          ),
                         }}
                       >
-                        {Math.round(data.reduce((sum, day) => sum + calculateDayScore(day), 0) / data.length)}%
+                        {avgDayScore}%
                       </td>
                       {data[0]?.categories
                         .filter((category) => category.type !== CategoryType.EXPENSE)
@@ -946,7 +935,7 @@ function Statistics() {
                               const totalPercentage = Math.round((completedCount / data.length) * 100);
                               totalValue = `${totalPercentage}%`;
                               bgColor = hexToRGBA(
-                                getCssVar(CATEGORY_COLORS[category.name]),
+                                getCssVar(settings.colors.daySuccess),
                                 Math.min((totalPercentage / 100) * 0.4 + 0.1, 0.5)
                               );
                             } else if (task.type === TaskType.TIME) {
@@ -964,10 +953,6 @@ function Statistics() {
                               );
                               const hours = Math.floor(totalMinutes / 60);
                               totalValue = `${hours}ч`;
-                              bgColor = hexToRGBA(
-                                getCssVar(CATEGORY_COLORS[category.name]),
-                                Math.min((hours / 24) * 0.4 + 0.1, 0.5)
-                              );
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce(
                                 (sum, day) => {
@@ -982,10 +967,6 @@ function Statistics() {
                                 0
                               );
                               totalValue = `${totalCalories}ккал`;
-                              bgColor = hexToRGBA(
-                                getCssVar(CATEGORY_COLORS[category.name]),
-                                Math.min((totalCalories / 1000) * 0.4 + 0.1, 0.5)
-                              );
                             }
 
                             return (
