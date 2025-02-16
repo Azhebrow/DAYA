@@ -47,34 +47,51 @@ import {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
-// Updated color utility functions with proper error handling
+// Updated color utility functions with proper error handling and type safety
 const getCssVar = (varName: string): string => {
   if (typeof document === 'undefined') return '#000000'; // Fallback for SSR
-  const cssVar = varName.startsWith('--') ? varName : `--${varName}`;
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(cssVar)
-    .trim();
+  if (!varName) return '#000000'; // Fallback for undefined values
+
+  try {
+    const cssVar = varName.startsWith('--') ? varName : `--${varName}`;
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(cssVar)
+      .trim() || '#000000'; // Fallback if the CSS variable is not found
+  } catch (error) {
+    console.error('Error getting CSS variable:', error);
+    return '#000000'; // Fallback for any errors
+  }
 };
 
 function hexToRGBA(hex: string, alpha: number): string {
-  if (!hex) return `rgba(0, 0, 0, ${alpha})`; // Fallback for undefined colors
+  try {
+    if (!hex) return `rgba(0, 0, 0, ${alpha})`; // Fallback for undefined colors
 
-  // Handle CSS variable values
-  if (hex.startsWith('var(')) {
-    hex = getCssVar(hex.slice(4, -1));
+    // Handle CSS variable values
+    if (hex.startsWith('var(')) {
+      const varName = hex.slice(4, -1);
+      hex = getCssVar(varName);
+    }
+
+    // Handle RGB/RGBA values
+    if (hex.startsWith('rgb')) {
+      return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
+    }
+
+    // Handle hex values
+    const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
+    if (cleanHex.length !== 6) return `rgba(0, 0, 0, ${alpha})`; // Invalid hex
+
+    const r = parseInt(cleanHex.slice(0, 2), 16);
+    const g = parseInt(cleanHex.slice(2, 4), 16);
+    const b = parseInt(cleanHex.slice(4, 6), 16);
+
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return `rgba(0, 0, 0, ${alpha})`; // Invalid hex values
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } catch (error) {
+    console.error('Error converting color to RGBA:', error);
+    return `rgba(0, 0, 0, ${alpha})`; // Fallback for any errors
   }
-
-  // Handle RGB/RGBA values
-  if (hex.startsWith('rgb')) {
-    return hex.replace(')', `, ${alpha})`).replace('rgb', 'rgba');
-  }
-
-  // Handle hex values
-  const cleanHex = hex.startsWith('#') ? hex.slice(1) : hex;
-  const r = parseInt(cleanHex.slice(0, 2), 16);
-  const g = parseInt(cleanHex.slice(2, 4), 16);
-  const b = parseInt(cleanHex.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export default function Statistics() {
@@ -92,7 +109,12 @@ export default function Statistics() {
 
   const getVarColor = (varName: string): string => {
     if (!varName) return '#000000'; // Fallback for undefined variables
-    return `var(${varName})`;
+    try {
+      return `var(${varName})`; // Return CSS variable syntax
+    } catch (error) {
+      console.error('Error getting var color:', error);
+      return '#000000'; // Fallback for any errors
+    }
   };
 
   const CATEGORY_COLORS: { [key: string]: string } = {
