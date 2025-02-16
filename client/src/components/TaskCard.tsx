@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Category, CategoryType, settingsSchema } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
-import { Brain, Clock, Dumbbell, Sparkles } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Sparkles, DollarSign } from 'lucide-react';
 
 interface TaskCardProps {
   category: Category;
@@ -66,7 +66,7 @@ export const TaskCard = React.memo(({
       case 'Привычки':
         return <Sparkles className="h-5 w-5" />;
       default:
-        return null;
+        return <DollarSign className="h-5 w-5" />;
     }
   };
 
@@ -95,7 +95,8 @@ export const TaskCard = React.memo(({
               {!isExpenseCard && (
                 <Progress 
                   value={progress} 
-                  className={`h-2.5 bg-zinc-800 [&>div]:bg-${categoryColor}`}
+                  className={`h-2.5 bg-zinc-800`}
+                  style={{ ['--progress-background' as any]: `var(--${categoryColor})` }}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
