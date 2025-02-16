@@ -72,11 +72,14 @@ export default function Ranges() {
 
   const getSuccessColor = (value: number, maxValue: number) => {
     const settings = storage.getSettings();
+    console.log('Success color settings:', settings.colors);
     if (maxValue === 0) return 'transparent';
     const normalizedValue = value / maxValue;
     const opacity = 0.1 + (normalizedValue * 0.4);
 
     const color = settings.colors.daySuccess;
+    console.log('daySuccess color:', color);
+
     if (!color) return `rgba(16, 185, 129, ${opacity})`; // fallback to default green
 
     if (color.startsWith('rgb')) {
@@ -100,11 +103,14 @@ export default function Ranges() {
 
   const getExpenseColor = (value: number, maxValue: number) => {
     const settings = storage.getSettings();
+    console.log('Expense color settings:', settings.colors);
     if (maxValue === 0) return 'transparent';
     const normalizedValue = value / maxValue;
     const opacity = 0.1 + (normalizedValue * 0.4);
 
     const color = settings.colors.expenses;
+    console.log('expenses color:', color);
+
     if (!color) return `rgba(249, 115, 22, ${opacity})`; // fallback to orange
 
     if (color.startsWith('rgb')) {
