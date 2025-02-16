@@ -471,6 +471,232 @@ export default function Statistics() {
         </Card>
       </div>
 
+      {/* New Card Component for Detailed Expense Breakdown */}
+      <Card>
+        <CardHeader className="space-y-1 pb-2">
+          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
+            Расходы по категориям
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <div className="min-w-full inline-block align-middle">
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-border">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th scope="col" className="px-4 py-2 text-left text-sm font-semibold min-w-[90px]">Дата</th>
+                      <th scope="col" className="px-4 py-2 text-center text-sm font-semibold font-bold min-w-[90px]">Итого</th>
+                      {data[0]?.categories
+                        .filter((category) => category.type === CategoryType.EXPENSE)
+                        .map((category) => (
+                          <th
+                            key={category.name}
+                            className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                            style={{ backgroundColor: hexToRGBA(getCssVar(settings.colors.expenses), 0.2) }}
+                          >
+                            {category.emoji} {category.name}
+                          </th>
+                        ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.map((day) => {
+                      const expenseCategories = day.categories.filter(
+                        (category) => category.type === CategoryType.EXPENSE
+                      );
+
+                      const dayTotal = expenseCategories.reduce(
+                        (sum, category) =>
+                          sum +
+                          category.tasks.reduce(
+                            (catSum, task) =>
+                              catSum +
+                              (task.type === TaskType.EXPENSE ? task.value || 0 : 0),
+                            0
+                          ),
+                        0
+                      );
+
+                      const maxExpense = Math.max(
+                        ...data.map((d) =>
+                          d.categories
+                            .filter((c) => c.type === CategoryType.EXPENSE)
+                            .reduce(
+                              (sum, c) =>
+                                sum +
+                                c.tasks.reduce(
+                                  (tSum, t) =>
+                                    tSum +
+                                    (t.type === TaskType.EXPENSE ? t.value || 0 : 0),
+                                  0
+                                ),
+                              0
+                            )
+                        )
+                      );
+
+                      return (
+                        <tr key={day.date} className="border-b border-border/10">
+                          <td className="py-2 px-4 font-medium text-sm font-semibold min-w-[90px]">
+                            {format(new Date(day.date), "dd.MM.yyyy")}
+                          </td>
+                          <td
+                            className="py-2 px-4 text-center text-sm font-semibold font-bold min-w-[90px]"
+                            style={{
+                              backgroundColor: hexToRGBA(
+                                getCssVar(settings.colors.expenses),
+                                Math.min((dayTotal / maxExpense) * 0.4 + 0.1, 0.5)
+                              ),
+                            }}
+                          >
+                            {dayTotal} zł
+                          </td>
+                          {expenseCategories.map((category) => {
+                            const categoryTotal = category.tasks.reduce(
+                              (sum, task) =>
+                                sum +
+                                (task.type === TaskType.EXPENSE ? task.value || 0 : 0),
+                              0
+                            );
+
+                            return (
+                              <td
+                                key={category.name}
+                                className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                                style={{
+                                  backgroundColor: hexToRGBA(
+                                    getCssVar(settings.colors.expenses),
+                                    Math.min((categoryTotal / maxExpense) * 0.4 + 0.1, 0.5)
+                                  ),
+                                }}
+                              >
+                                {categoryTotal} zł
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t-2 border-border font-bold">
+                      <td className="py-2 px-4 text-sm font-semibold min-w-[90px]">Итого</td>
+                      {(() => {
+                        const grandTotal = data.reduce(
+                          (total, day) =>
+                            total +
+                            day.categories
+                              .filter((c) => c.type === CategoryType.EXPENSE)
+                              .reduce(
+                                (catSum, category) =>
+                                  catSum +
+                                  category.tasks.reduce(
+                                    (taskSum, task) =>
+                                      taskSum +
+                                      (task.type === TaskType.EXPENSE
+                                        ? task.value || 0
+                                        : 0),
+                                    0
+                                  ),
+                                0
+                              ),
+                          0
+                        );
+
+                        const maxTotal = Math.max(
+                          ...data.map((d) =>
+                            d.categories
+                              .filter((c) => c.type === CategoryType.EXPENSE)
+                              .reduce(
+                                (sum, c) =>
+                                  sum +
+                                  c.tasks.reduce(
+                                    (tSum, t) =>
+                                      tSum +
+                                      (t.type === TaskType.EXPENSE ? t.value || 0 : 0),
+                                    0
+                                  ),
+                                0
+                              )
+                          )
+                        );
+
+                        return (
+                          <td
+                            className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                            style={{
+                              backgroundColor: hexToRGBA(
+                                getCssVar(settings.colors.expenses),
+                                Math.min((grandTotal / (maxTotal * data.length)) * 0.4 + 0.1, 0.5)
+                              ),
+                            }}
+                          >
+                            {grandTotal} zł
+                          </td>
+                        );
+                      })()}
+                      {data[0]?.categories
+                        .filter((category) => category.type === CategoryType.EXPENSE)
+                        .map((category) => {
+                          const categoryTotal = data.reduce((sum, day) => {
+                            const cat = day.categories.find(
+                              (c) => c.name === category.name
+                            );
+                            return (
+                              sum +
+                              (cat?.tasks.reduce(
+                                (taskSum, task) =>
+                                  taskSum +
+                                  (task.type === TaskType.EXPENSE
+                                    ? task.value || 0
+                                    : 0),
+                                0
+                              ) || 0)
+                            );
+                          }, 0);
+
+                          const maxCategoryTotal = Math.max(
+                            ...data.map((d) => {
+                              const cat = d.categories.find(
+                                (c) => c.name === category.name
+                              );
+                              return (
+                                cat?.tasks.reduce(
+                                  (taskSum, task) =>
+                                    taskSum +
+                                    (task.type === TaskType.EXPENSE
+                                      ? task.value || 0
+                                      : 0),
+                                  0
+                                ) || 0
+                              );
+                            })
+                          );
+
+                          return (
+                            <td
+                              key={`total-${category.name}`}
+                              className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                              style={{
+                                backgroundColor: hexToRGBA(
+                                  getCssVar(settings.colors.expenses),
+                                  Math.min((categoryTotal / (maxCategoryTotal * data.length)) * 0.4 + 0.1, 0.5)
+                                ),
+                              }}
+                            >
+                              {categoryTotal} zł
+                            </td>
+                          );
+                        })}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
@@ -653,7 +879,7 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
+            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w5" style={{ color: CATEGORY_COLORS.Успех }} />
             Успешность задач по дням
           </CardTitle>
         </CardHeader>
