@@ -125,8 +125,26 @@ export default function SettingsPage() {
     });
   };
 
-  // Convert minutes to hours for display
-  const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
+  const handleClearData = () => {
+    try {
+      localStorage.clear();
+      window.location.reload();
+      toast({
+        title: "Данные удалены",
+        description: "Все данные успешно удалены",
+      });
+    } catch (error) {
+      console.error('Clear data error:', error);
+      toast({
+        title: "Ошибка",
+        description: "Произошла ошибка при удалении данных",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Convert minutes to hours for display - REMOVED REDUNDANT CODE
+  // const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
 
 
   return (
@@ -240,7 +258,7 @@ export default function SettingsPage() {
                   <Input
                     id="timeTarget"
                     type="number"
-                    value={timeTargetInHours}
+                    value={settings.timeTarget / 60}
                     onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value))}
                     className="transition-shadow hover:shadow-md focus:shadow-lg"
                     step="0.5"
