@@ -53,18 +53,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     fontWeight: 'bold',
   });
 
-  const getInputStyle = (hasValue: boolean) => ({
-    width: '100%',
-    height: '2.25rem',
-    backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
-    color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
-    border: 'none',
-    paddingLeft: '2rem',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    transition: 'all 0.2s',
-  });
-
   if (task.type === TaskType.CHECKBOX) {
     return (
       <Button
@@ -82,8 +70,8 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const value = task.value || 0;
     return (
       <Select
-        value={String(value)}
-        onValueChange={(value) => handleChange(parseInt(value))}
+        value={value > 0 ? String(value) : undefined}
+        onValueChange={(newValue) => handleChange(parseInt(newValue) || 0)}
       >
         <SelectTrigger style={getSelectStyle(value)}>
           <SelectValue placeholder="Время" />
@@ -103,8 +91,8 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const value = task.value || 0;
     return (
       <Select
-        value={String(value)}
-        onValueChange={(value) => handleChange(parseInt(value))}
+        value={value > 0 ? String(value) : undefined}
+        onValueChange={(newValue) => handleChange(parseInt(newValue) || 0)}
       >
         <SelectTrigger style={getSelectStyle(value)}>
           <SelectValue placeholder="Калории" />
@@ -121,14 +109,24 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   }
 
   if (task.type === TaskType.EXPENSE) {
-    const hasValue = task.value && task.value > 0;
+    const value = task.value || 0;
     return (
       <div className="relative w-full">
         <Input
           type="number"
-          value={task.value || ''}
+          value={value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          style={getInputStyle(hasValue)}
+          style={{
+            width: '100%',
+            height: '2.25rem',
+            backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+            color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+            border: 'none',
+            paddingLeft: '2rem',
+            fontSize: '1rem',
+            fontWeight: 'bold',
+            transition: 'all 0.2s',
+          }}
           placeholder="0"
         />
         <span style={{
@@ -138,7 +136,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           transform: 'translateY(-50%)',
           fontSize: '0.875rem',
           fontWeight: 'bold',
-          color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)'
+          color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)'
         }}>
           zł
         </span>
