@@ -139,21 +139,30 @@ const SubcategoryEditor = ({
   subcategories,
   onUpdate,
   title,
-  icon: Icon
+  icon: Icon,
+  colorValue,
+  onColorChange,
+  usedColors,
 }: {
   category: 'mind' | 'time' | 'sport' | 'habits';
   subcategories: { id: string; name: string; emoji: string; }[];
   onUpdate: (category: string, subcategories: { id: string; name: string; emoji: string; }[]) => void;
   title: string;
   icon: React.ElementType;
+  colorValue: string;
+  onColorChange: (value: string) => void;
+  usedColors: string[];
 }) => {
   return (
     <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-      <CardHeader>
-        <CardTitle className="text-xl text-primary flex items-center gap-2">
-          <Icon className="h-5 w-5" />
-          <span>{title}</span>
-        </CardTitle>
+      <CardHeader className="pb-2">
+        <ColorPicker
+          value={colorValue}
+          onChange={onColorChange}
+          usedColors={usedColors}
+          categoryName={title}
+          icon={Icon}
+        />
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -397,112 +406,10 @@ const SettingsPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary">
-                Цвета категорий
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div>
-                  <ColorPicker
-                    value={settings.colors.daySuccess}
-                    onChange={(value) => handleSettingChange('colors', { daySuccess: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.expenses
-                    ]}
-                    categoryName="Успех дня"
-                    icon={CheckCircle2}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.mind}
-                    onChange={(value) => handleSettingChange('colors', { mind: value })}
-                    usedColors={[
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Разум"
-                    icon={Brain}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.time}
-                    onChange={(value) => handleSettingChange('colors', { time: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Время"
-                    icon={Clock}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.sport}
-                    onChange={(value) => handleSettingChange('colors', { sport: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.habits,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Спорт"
-                    icon={Dumbbell}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.habits}
-                    onChange={(value) => handleSettingChange('colors', { habits: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.expenses,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Пороки"
-                    icon={Ban}
-                  />
-                </div>
-                <div>
-                  <ColorPicker
-                    value={settings.colors.expenses}
-                    onChange={(value) => handleSettingChange('colors', { expenses: value })}
-                    usedColors={[
-                      settings.colors.mind,
-                      settings.colors.time,
-                      settings.colors.sport,
-                      settings.colors.habits,
-                      settings.colors.daySuccess
-                    ]}
-                    categoryName="Траты"
-                    icon={DollarSign}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
-                Настройка подкатегорий
+                Настройка категорий
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -518,6 +425,15 @@ const SettingsPage = () => {
                   }}
                   title="Разум"
                   icon={Brain}
+                  colorValue={settings.colors.mind}
+                  onColorChange={(value) => handleSettingChange('colors', { mind: value })}
+                  usedColors={[
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
                 />
                 <SubcategoryEditor
                   category="time"
@@ -530,6 +446,15 @@ const SettingsPage = () => {
                   }}
                   title="Время"
                   icon={Clock}
+                  colorValue={settings.colors.time}
+                  onColorChange={(value) => handleSettingChange('colors', { time: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
                 />
                 <SubcategoryEditor
                   category="sport"
@@ -542,6 +467,15 @@ const SettingsPage = () => {
                   }}
                   title="Спорт"
                   icon={Dumbbell}
+                  colorValue={settings.colors.sport}
+                  onColorChange={(value) => handleSettingChange('colors', { sport: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.habits,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
                 />
                 <SubcategoryEditor
                   category="habits"
@@ -554,6 +488,15 @@ const SettingsPage = () => {
                   }}
                   title="Пороки"
                   icon={Ban}
+                  colorValue={settings.colors.habits}
+                  onColorChange={(value) => handleSettingChange('colors', { habits: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
                 />
               </div>
             </CardContent>
