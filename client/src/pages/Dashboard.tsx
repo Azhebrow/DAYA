@@ -203,13 +203,13 @@ export default function Dashboard() {
         // Generate expense categories from settings
         ...expenseCategories.map((category, index) => ({
           id: `exp${index + 1}`,
-          name: category.name.split(' ')[1], // Remove emoji prefix
+          name: category.name, // Используем полное имя с эмодзи
           emoji: category.emoji,
           type: CategoryType.EXPENSE,
           tasks: [
             {
               id: `${category.id}_expense`,
-              name: category.name.split(' ')[1], // Remove emoji prefix
+              name: category.name, // Используем полное имя с эмодзи
               type: TaskType.EXPENSE,
               value: 0,
               completed: false,
@@ -217,6 +217,7 @@ export default function Dashboard() {
             }
           ]
         })),
+
         // Add expense note category at the end
         {
           id: 'exp8',

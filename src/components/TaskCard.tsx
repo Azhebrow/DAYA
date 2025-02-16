@@ -40,8 +40,13 @@ export const TaskCard = React.memo(({
     if (isExpenseCard && settings?.subcategories?.expenses && typeof expenseIndex === 'number') {
       const expenseCategory = settings.subcategories.expenses[expenseIndex];
       if (expenseCategory) {
-        category.name = expenseCategory.name.split(' ')[1]; // Remove emoji prefix
+        // Используем полное имя с эмодзи
+        category.name = expenseCategory.name;
         category.emoji = expenseCategory.emoji;
+        // Также обновляем имя задачи
+        if (category.tasks[0]) {
+          category.tasks[0].name = expenseCategory.name;
+        }
       }
     }
   }, [settings, category, isExpenseCard, expenseIndex]);
