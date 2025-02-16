@@ -44,7 +44,7 @@ export const TaskCard = React.memo(({
         time: '--green',
         sport: '--red',
         habits: '--orange',
-        expenses: '--orange'
+        expenses: '--blue'
       };
     }
 
@@ -52,7 +52,8 @@ export const TaskCard = React.memo(({
       case 'Разум': return `var(${colors.mind})`;
       case 'Время': return `var(${colors.time})`;
       case 'Спорт': return `var(${colors.sport})`;
-      case 'Пороки': return `var(${colors.habits})`;
+      case 'Привычки': return `var(${colors.habits})`; 
+      case 'Пороки': return `var(${colors.habits})`; 
       default: return `var(${colors.expenses})`;
     }
   };
@@ -62,6 +63,7 @@ export const TaskCard = React.memo(({
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
+      case 'Привычки': 
       case 'Пороки': return <Ban className="h-5 w-5" />;
       default: return <DollarSign className="h-5 w-5" />;
     }
@@ -79,7 +81,9 @@ export const TaskCard = React.memo(({
         <div className="flex items-center h-14 px-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
             <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
-            <span className="text-base font-medium text-gray-200">{category.name}</span>
+            <span className="text-base font-medium text-gray-200">
+              {category.name === 'Привычки' ? 'Пороки' : category.name}
+            </span>
           </div>
 
           {!isExpenseCard && (

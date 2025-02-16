@@ -65,6 +65,19 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     transition: 'all 0.2s',
   });
 
+  if (task.type === TaskType.CHECKBOX) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleChange(!task.completed)}
+        style={getButtonStyle(Boolean(task.completed))}
+      >
+        {task.completed ? 'Выполнено' : 'Отметить'}
+      </Button>
+    );
+  }
+
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     return (
@@ -104,19 +117,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           ))}
         </SelectContent>
       </Select>
-    );
-  }
-
-  if (task.type === TaskType.CHECKBOX) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleChange(!task.completed)}
-        style={getButtonStyle(Boolean(task.completed))}
-      >
-        {task.completed ? 'Выполнено' : 'Отметить'}
-      </Button>
     );
   }
 
