@@ -107,7 +107,7 @@ export const TaskCard = React.memo(({
                 )}
                 <div className={isExpenseCard ? "w-full" : "w-1/2"}>
                   <TaskInput
-                    task={task}
+                    task={storedTask || task}
                     onChange={(value) => handleTaskUpdate(task.id, value)}
                     isExpenseCard={isExpenseCard}
                     categoryColor={iconColor}
