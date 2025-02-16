@@ -9,7 +9,7 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2 } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2, Pencil } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -126,6 +126,73 @@ const ColorPicker = ({
   );
 };
 
+const TaskNameEditor = ({
+  taskName,
+  onChange,
+  icon: Icon,
+  color
+}: {
+  taskName: string;
+  onChange: (value: string) => void;
+  icon: React.ElementType;
+  color: string;
+}) => {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [value, setValue] = React.useState(taskName);
+  const inputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleSave = () => {
+    onChange(value);
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setValue(taskName);
+      setIsEditing(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  return (
+    <div
+      className="w-full p-3 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-between gap-3"
+      style={{ backgroundColor: `var(${color})` }}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-white" />
+        {isEditing ? (
+          <Input
+            ref={inputRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKeyDown}
+            className="h-7 w-40 bg-white/10 border-none text-white"
+          />
+        ) : (
+          <span className="text-sm text-white font-medium">{taskName}</span>
+        )}
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-7 w-7 hover:bg-white/20"
+        onClick={() => setIsEditing(!isEditing)}
+      >
+        <Pencil className="h-3 w-3 text-white" />
+      </Button>
+    </div>
+  );
+};
+
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
 Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
 Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
@@ -217,6 +284,30 @@ export default function SettingsPage() {
     }
   };
 
+
+  const handleTaskNameChange = (categoryName: string, taskName: string, newName: string) => {
+    // Get current tasks from storage
+    const tasks = localStorage.getItem('tasks');
+    if (tasks) {
+      const parsedTasks = JSON.parse(tasks);
+      const updatedTasks = parsedTasks.map((category: any) => {
+        if (category.name === categoryName) {
+          return {
+            ...category,
+            tasks: category.tasks.map((task: any) =>
+              task.name === taskName ? { ...task, name: newName } : task
+            )
+          };
+        }
+        return category;
+      });
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      toast({
+        title: "Название задачи обновлено",
+        description: "Изменения успешно сохранены",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
@@ -432,6 +523,51 @@ export default function SettingsPage() {
                     ]}
                     categoryName="Траты"
                     icon={DollarSign}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
+            <CardHeader>
+              <CardTitle className="text-xl text-primary">
+                Названия задач
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
+                {/* Mind tasks */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Разум</Label>
+                  <TaskNameEditor
+                    taskName="Дыхание"
+                    onChange={(newName) => handleTaskNameChange('Разум', 'Дыхание', newName)}
+                    icon={Brain}
+                    color={settings.colors.mind}
+                  />
+                  <TaskNameEditor
+                    taskName="Чай"
+                    onChange={(newName) => handleTaskNameChange('Разум', 'Чай', newName)}
+                    icon={Brain}
+                    color={settings.colors.mind}
+                  />
+                </div>
+
+                {/* Time tasks */}
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Время</Label>
+                  <TaskNameEditor
+                    taskName="Уборка"
+                    onChange={(newName) => handleTaskNameChange('Время', 'Уборка', newName)}
+                    icon={Clock}
+                    color={settings.colors.time}
+                  />
+                  <TaskNameEditor
+                    taskName="Работа"
+                    onChange={(newName) => handleTaskNameChange('Время', 'Работа', newName)}
+                    icon={Clock}
+                    color={settings.colors.time}
                   />
                 </div>
               </div>
