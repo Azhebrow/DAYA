@@ -855,8 +855,8 @@ export default function Statistics() {
                                   displayValue = formatTimeTotal(task.value || 0);
                                   const maxValue = 8 * 60;
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                  bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.settings.colors]), opacity);
-                                } else if (task.type === TaskType.CALORIE) {
+                                  bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
+                                } else if(task.type === TaskType.CALORIE) {
                                   displayValue = `${task.value || 0}`;
                                   const maxValue = 3000;
                                   const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
@@ -872,7 +872,6 @@ export default function Statistics() {
                                     {displayValue}
                                     {task.type === TaskType.TIME ? 'ч' : ''}
                                     {task.type === TaskType.CALORIE ? 'ккал' : ''}
-                                    {task.type === TaskType.CHECKBOX ? '%' : ''}
                                   </td>
                                 );
                               }),
@@ -906,21 +905,18 @@ export default function Statistics() {
                           category.tasks.map((task) => {
                             let totalValue = "";
                             let bgColor = "transparent";
-                            let totalPercentage = 0;
-                            let totalSuccessCount = 0;
-                            let maxSuccessCount = 0;
+                            let opacity = 0;
 
                             if (task.type === TaskType.CHECKBOX) {
-                              totalSuccessCount = data.reduce((sum, day) => {
+                              const completedCount = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
                                 const t = cat?.tasks.find((t) => t.name === task.name);
                                 return sum + (t?.completed ? 1 : 0);
                               }, 0);
-                              maxSuccessCount = data.length;
-                              totalPercentage = Math.round((totalSuccessCount / maxSuccessCount) * 100);
-                              const opacity = Math.min((totalPercentage / 100) * 0.4 + 0.1, 0.5);
+                              const totalPercentage = Math.round((completedCount / data.length) * 100);
+                              opacity = Math.min((totalPercentage / 100) * 0.4 + 0.1, 0.5);
+                              totalValue = `${totalPercentage}`;
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
-                              totalValue = `${totalPercentage}%`;
                             } else if (task.type === TaskType.TIME) {
                               const totalMinutes = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
@@ -928,8 +924,8 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = formatTimeTotal(totalMinutes);
-                              const maxValue = 8 * 60 * data.length; // Максимальное время для всех дней
-                              const opacity = Math.min((totalMinutes / maxValue) * 0.4 + 0.1, 0.5);
+                              const maxValue = 8 * 60 * data.length;
+                              opacity = Math.min((totalMinutes / maxValue) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce((sum, day) => {
@@ -938,8 +934,8 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
-                              const maxValue = 3000 * data.length; // Максимальные калории для всех дней
-                              const opacity = Math.min((totalCalories / maxValue) * 0.4 + 0.1, 0.5);
+                              const maxValue = 3000 * data.length;
+                              opacity = Math.min((totalCalories / maxValue) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             }
 
@@ -950,9 +946,9 @@ export default function Statistics() {
                                 style={{ backgroundColor: bgColor }}
                               >
                                 {totalValue}
-                                {task.type === TaskType.TIME ? 'ч' : ''}
-                                {task.type === TaskType.CALORIE ? 'ккал' : ''}
-                                {task.type === TaskType.CHECKBOX ? '%' : ''}
+                                {task.type === TaskType.TIME && 'ч'}
+                                {task.type === TaskType.CALORIE && 'ккал'}
+                                {task.type === TaskType.CHECKBOX && '%'}
                               </td>
                             );
                           }),
