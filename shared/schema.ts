@@ -124,20 +124,7 @@ export const settingsSchema = z.object({
   viewMode: z.enum(['normal', 'weekly', 'monthly']).default('normal'),
   timeRange: z.enum(['7', '14', '30']).default('7'),
   oathText: z.string().optional(),
-  pomodoroSettings: pomodoroSettingsSchema.optional(),
-  colors: z.object({
-    primary: z.string().default('#0EA5E9'),
-    accent: z.string().default('#F472B6'),
-    background: z.string().default('#000000'),
-    text: z.string().default('#FFFFFF'),
-    border: z.string().default('#27272A')
-  }).default({
-    primary: '#0EA5E9',
-    accent: '#F472B6',
-    background: '#000000',
-    text: '#FFFFFF',
-    border: '#27272A'
-  })
+  pomodoroSettings: pomodoroSettingsSchema.optional()
 });
 
 export type Task = z.infer<typeof taskSchema>;
