@@ -67,7 +67,17 @@ export default function Dashboard() {
 
   useEffect(() => {
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    const entry = storage.getDayEntry(dateStr) || {
+    const entry = storage.getDayEntry(dateStr);
+
+    if (entry) {
+      setDayEntry(entry);
+      return;
+    }
+
+    // Get expense categories from settings
+    const expenseCategories = settings?.subcategories?.expenses || [];
+
+    const newEntry: DayEntry = {
       date: dateStr,
       categories: [
         {
@@ -110,6 +120,7 @@ export default function Dashboard() {
               name: '💼 Работа',
               type: TaskType.TIME,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             },
             {
@@ -117,6 +128,7 @@ export default function Dashboard() {
               name: '📚 Учёба',
               type: TaskType.TIME,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             },
             {
@@ -124,6 +136,7 @@ export default function Dashboard() {
               name: '🎯 Проект',
               type: TaskType.TIME,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -153,6 +166,7 @@ export default function Dashboard() {
               name: '🔥 Калории',
               type: TaskType.CALORIE,
               value: 0,
+              completed: false,
               createdAt: new Date().toISOString()
             }
           ]
@@ -186,118 +200,24 @@ export default function Dashboard() {
             }
           ]
         },
-        {
-          id: 'exp1',
-          name: 'Еда',
-          emoji: '🍽️',
+        // Generate expense categories from settings
+        ...expenseCategories.map((category, index) => ({
+          id: `exp${index + 1}`,
+          name: category.name.split(' ')[1], // Remove emoji prefix
+          emoji: category.emoji,
           type: CategoryType.EXPENSE,
           tasks: [
             {
-              id: 'food_expense',
-              name: 'Еда',
+              id: `${category.id}_expense`,
+              name: category.name.split(' ')[1], // Remove emoji prefix
               type: TaskType.EXPENSE,
               value: 0,
               completed: false,
               createdAt: new Date().toISOString()
             }
           ]
-        },
-        {
-          id: 'exp2',
-          name: 'Дерьмо',
-          emoji: '🍕',
-          type: CategoryType.EXPENSE,
-          tasks: [
-            {
-              id: 'junk_expense',
-              name: 'Дерьмо',
-              type: TaskType.EXPENSE,
-              value: 0,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-          ]
-        },
-        {
-          id: 'exp3',
-          name: 'Город',
-          emoji: '🌆',
-          type: CategoryType.EXPENSE,
-          tasks: [
-            {
-              id: 'city_expense',
-              name: 'Город',
-              type: TaskType.EXPENSE,
-              value: 0,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-          ]
-        },
-        {
-          id: 'exp4',
-          name: 'Спорт',
-          emoji: '⚽',
-          type: CategoryType.EXPENSE,
-          tasks: [
-            {
-              id: 'sport_expense',
-              name: 'Спорт',
-              type: TaskType.EXPENSE,
-              value: 0,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-          ]
-        },
-        {
-          id: 'exp5',
-          name: 'Отдых',
-          emoji: '🎮',
-          type: CategoryType.EXPENSE,
-          tasks: [
-            {
-              id: 'leisure_expense',
-              name: 'Отдых',
-              type: TaskType.EXPENSE,
-              value: 0,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-          ]
-        },
-        {
-          id: 'exp6',
-          name: 'Сервис',
-          emoji: '🔧',
-          type: CategoryType.EXPENSE,
-          tasks: [
-            {
-              id: 'service_expense',
-              name: 'Сервис',
-              type: TaskType.EXPENSE,
-              value: 0,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-          ]
-        },
-        {
-          id: 'exp7',
-          name: 'Разное',
-          emoji: '📦',
-          type: CategoryType.EXPENSE,
-          tasks: [
-            {
-              id: 'misc_expense',
-              name: 'Разное',
-              type: TaskType.EXPENSE,
-              value: 0,
-              completed: false,
-              createdAt: new Date().toISOString()
-            }
-          ]
-        },
+        })),
+        // Add expense note category at the end
         {
           id: 'exp8',
           name: 'Отчет',
@@ -317,8 +237,8 @@ export default function Dashboard() {
         }
       ]
     };
-    setDayEntry(entry);
-  }, [selectedDate, version]);
+    setDayEntry(newEntry);
+  }, [selectedDate, settings, version]);
 
   useEffect(() => {
     const days: DayEntry[] = [];
