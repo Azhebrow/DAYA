@@ -219,9 +219,7 @@ function Statistics() {
         totalTime: calculateTotalTime(day),
         calories: calculateTotalCalories(day),
         expenses: calculateTotalExpenses(day),
-        score: calculateDayScore(day),
-        rawDate: day.date,
-        entry: day
+        score: calculateDayScore(day)
       }));
     }
 
@@ -232,10 +230,11 @@ function Statistics() {
       let periodKey: string;
 
       if (displayType === "weeks") {
-        const weekNumber = Math.ceil(date.getDate() / 7);
-        periodKey = `${weekNumber} нед.`;
+        const weekStart = format(startOfWeek(date, { locale: ru }), "dd.MM");
+        const weekEnd = format(endOfWeek(date, { locale: ru }), "dd.MM");
+        periodKey = `${weekStart}-${weekEnd}`;
       } else {
-        periodKey = format(date, "MMMM", { locale: ru });
+        periodKey = format(date, "MMMM yyyy", { locale: ru });
       }
 
       if (!aggregatedData[periodKey]) {
@@ -245,8 +244,7 @@ function Statistics() {
           calories: 0,
           expenses: 0,
           score: 0,
-          count: 0,
-          entries: []
+          count: 0
         };
       }
 
@@ -255,7 +253,6 @@ function Statistics() {
       aggregatedData[periodKey].expenses += calculateTotalExpenses(day);
       aggregatedData[periodKey].score += calculateDayScore(day);
       aggregatedData[periodKey].count += 1;
-      aggregatedData[periodKey].entries.push(day);
     });
 
     return Object.values(aggregatedData).map((period: any) => ({
@@ -845,20 +842,20 @@ function Statistics() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-background">
-                    {data.map((entry) => (
-                      <tr key={entry.date} className="border-b border-border/10">
+                    {data.map((day) => (
+                      <tr key={day.date} className="border-b border-border/10">
                         <td className="bg-background px-4 py-2 font-medium">
-                          {entry.date}
+                          {format(new Date(day.date), "dd.MM")}
                         </td>
                         <td
                           className="bg-background px-4 py-2 text-center text-sm font-medium"
                           style={{
-                            backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((entry.score / 100) * 0.4 + 0.1, 0.5))
+                            backgroundColor: hexToRGBA(getCssVar(settings.colors.daySuccess), Math.min((calculateDayScore(day) / 100) * 0.5 + 0.1, 0.6))
                           }}
                         >
-                          {entry.score}%
+                          {calculateDayScore(day)}%
                         </td>
-                        {entry.entries?.[0]?.categories
+                        {day.categories
                           .filter(
                             (category) => category.type !== CategoryType.EXPENSE,
                           )
@@ -869,20 +866,28 @@ function Statistics() {
                           )
                           .flatMap((category) =>
                             category.tasks.map((task) => {
+                              
                               let displayValue = "";
+                              let bgColor = "transparent";
 
                               if (task.type === TaskType.CHECKBOX) {
-                                displayValue = task.completed ? "✓" : "×";
+                                const isCompleted = task.completed;
+                                displayValue = isCompleted ? "✓" : "×";
+                                if (isCompleted) {
+                                  bgColor = hexToRGBA(getCssVar(settings.colors.daySuccess), 0.3);
+                                }
                               } else if (task.type === TaskType.TIME) {
-                                displayValue = `${Math.floor((task.value || 0) / 60)}`;
+                                const hours = Math.floor((task.value || 0) / 60);
+                                displayValue = `${hours}ч`;
                               } else if (task.type === TaskType.CALORIE) {
-                                displayValue = `${task.value || 0}`;
+                                displayValue = `${task.value || 0}ккал`;
                               }
 
                               return (
                                 <td
                                   key={`${category.name}-${task.name}`}
                                   className="px-4 py-2 text-center whitespace-nowrap"
+                                  style={{ backgroundColor: bgColor }}
                                 >
                                   {displayValue}
                                   {task.type === TaskType.TIME && 'ч'}
