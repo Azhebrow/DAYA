@@ -3,14 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
 import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -24,6 +23,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 // Текст клятвы по умолчанию
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
@@ -52,10 +56,16 @@ export default function SettingsPage() {
     }
   });
 
+  const [isOathExpanded, setIsOathExpanded] = React.useState(false);
   const { toast } = useToast();
 
   const handleSettingChange = (key: keyof Settings, value: any) => {
-    const newSettings = { ...settings, [key]: value };
+    let processedValue = value;
+    if (key === 'timeTarget') {
+      // Convert hours to minutes when saving
+      processedValue = value * 60;
+    }
+    const newSettings = { ...settings, [key]: processedValue };
     setSettings(newSettings);
     storage.saveSettings(newSettings);
     toast({
@@ -82,6 +92,9 @@ export default function SettingsPage() {
     }
   };
 
+  // Convert minutes to hours for display
+  const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
       <div className="container mx-auto space-y-4 max-w-7xl">
@@ -94,22 +107,29 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {/* Карточка с текстом клятвы - всегда на всю ширину */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
-            <CardHeader>
-              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Текст клятвы
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Label htmlFor="oathText">Отредактируйте текст клятвы</Label>
-                <Textarea
-                  id="oathText"
-                  value={settings.oathText || DEFAULT_OATH_TEXT}
-                  onChange={(e) => handleSettingChange('oathText', e.target.value)}
-                  className="min-h-[200px] font-medium"
-                />
-              </div>
-            </CardContent>
+            <Collapsible open={isOathExpanded} onOpenChange={setIsOathExpanded}>
+              <CollapsibleTrigger className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent flex items-center justify-between">
+                    <span>Текст клятвы</span>
+                    {isOathExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                  </CardTitle>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Label htmlFor="oathText">Отредактируйте текст клятвы</Label>
+                    <Textarea
+                      id="oathText"
+                      value={settings.oathText || DEFAULT_OATH_TEXT}
+                      onChange={(e) => handleSettingChange('oathText', e.target.value)}
+                      className="min-h-[200px] font-medium"
+                    />
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
           </Card>
 
           {/* Карточка диапазона дат */}
@@ -184,35 +204,16 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="timeTarget">Целевое время (минут/день)</Label>
+                  <Label htmlFor="timeTarget">Целевое время (часов/день)</Label>
                   <Input
                     id="timeTarget"
                     type="number"
-                    value={settings.timeTarget}
-                    onChange={(e) => handleSettingChange('timeTarget', parseInt(e.target.value))}
+                    value={timeTargetInHours}
+                    onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value))}
                     className="transition-shadow hover:shadow-md focus:shadow-lg"
+                    step="0.5"
                   />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Карточка внешнего вида */}
-          <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-            <CardHeader>
-              <CardTitle className="text-xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-                Внешний вид
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="dark-mode">Тёмная тема</Label>
-                <Switch
-                  id="dark-mode"
-                  checked={settings.darkMode}
-                  onCheckedChange={(checked) => handleSettingChange('darkMode', checked)}
-                  className="data-[state=checked]:bg-primary"
-                />
               </div>
             </CardContent>
           </Card>
