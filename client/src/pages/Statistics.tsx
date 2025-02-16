@@ -45,28 +45,47 @@ import {
 } from "lucide-react";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
-const CATEGORY_COLORS: { [key: string]: string } = {
-  Разум: "#8B5CF6", // Фиолетовый
-  Время: "#10B981", // Зеленый
-  Спорт: "#EF4444", // Красный
-  Привычки: "#F59E0B", // Оранжевый
+
+// Utility function to get CSS variable value
+const getCssVar = (varName: string) => {
+  return getComputedStyle(document.documentElement).getPropertyValue(varName.replace('--', '')).trim();
 };
 
-const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
-
-const CATEGORY_HEADER_COLORS: {
-  [key: string]: { bg: string; text: string };
-} = {
-  Разум: { bg: "#8B5CF620", text: "#ffffff" },
-  Время: { bg: "#10B98120", text: "#ffffff" },
-  Спорт: { bg: "#EF444420", text: "#ffffff" },
-  Привычки: { bg: "#F59E0B20", text: "#ffffff" },
-};
-
-type TimeRangeType = "7" | "14" | "30";
+function hexToRGBA(hex: string, alpha: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 export default function Statistics() {
-  const [timeRange, setTimeRange] = useState<TimeRangeType>(() => {
+  const [settings, setSettings] = useState<SettingsType>(() => {
+    try {
+      const stored = localStorage.getItem("day_success_tracker_settings");
+      if (!stored) return settingsSchema.parse({});
+      return settingsSchema.parse(JSON.parse(stored));
+    } catch (error) {
+      console.error("Error parsing settings:", error);
+      return settingsSchema.parse({});
+    }
+  });
+
+  const CATEGORY_COLORS = {
+    Разум: `var(${settings.colors.mind})`,
+    Время: `var(${settings.colors.time})`,
+    Спорт: `var(${settings.colors.sport})`,
+    Привычки: `var(${settings.colors.habits})`,
+    Траты: `var(${settings.colors.expenses})`,
+  };
+
+  const CATEGORY_HEADER_COLORS = {
+    Разум: { bg: hexToRGBA(getCssVar(settings.colors.mind), 0.2), text: "#ffffff" },
+    Время: { bg: hexToRGBA(getCssVar(settings.colors.time), 0.2), text: "#ffffff" },
+    Спорт: { bg: hexToRGBA(getCssVar(settings.colors.sport), 0.2), text: "#ffffff" },
+    Привычки: { bg: hexToRGBA(getCssVar(settings.colors.habits), 0.2), text: "#ffffff" },
+  };
+
+  const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(() => {
     try {
       const stored = localStorage.getItem("day_success_tracker_settings");
       if (!stored) return "7";
@@ -79,16 +98,6 @@ export default function Statistics() {
   });
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState("");
-  const [settings, setSettings] = useState<SettingsType>(() => {
-    try {
-      const stored = localStorage.getItem("day_success_tracker_settings");
-      if (!stored) return settingsSchema.parse({});
-      return settingsSchema.parse(JSON.parse(stored));
-    } catch (error) {
-      console.error("Error parsing settings:", error);
-      return settingsSchema.parse({});
-    }
-  });
 
   useEffect(() => {
     const endDate = startOfDay(new Date());
@@ -210,7 +219,7 @@ export default function Statistics() {
       .map(([name, { amount, emoji }]) => ({
         name: `${emoji} ${name}`,
         amount,
-        color: "#6B7280", // Нейтральный цвет для всех категорий
+        color: `var(${settings.colors.expenses})`,
       }))
       .sort((a, b) => b.amount - a.amount);
 
@@ -254,7 +263,7 @@ export default function Statistics() {
     return total > 0 ? Math.round((score / total) * 100) : 0;
   };
 
-  const handleTimeRangeChange = (value: TimeRangeType) => {
+  const handleTimeRangeChange = (value: "7" | "14" | "30") => {
     setTimeRange(value);
     const updatedSettings = { ...settings, timeRange: value };
     setSettings(updatedSettings);
@@ -287,7 +296,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <LineChart className="h-4 w-4 sm:h-5 sm:w-5 text-category-mind" />
+              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.daySuccess})` }} />
               Показатель успеха
             </CardTitle>
           </CardHeader>
@@ -313,11 +322,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke="#6B7280"
-                  fill="#6B7280"
+                  stroke={`var(${settings.colors.daySuccess})`}
+                  fill={`var(${settings.colors.daySuccess})`}
                   name="Успех"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: "#6B7280" }}
+                  label={{ position: "top", fill: `var(${settings.colors.daySuccess})` }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -327,7 +336,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Flame className="h-4 w-4 sm:h-5 sm:w-5 text-category-sport" />
+              <Flame className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.sport})` }} />
               Калории
             </CardTitle>
           </CardHeader>
@@ -348,11 +357,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="calories"
-                  stroke="#EF4444"
-                  fill="#EF4444"
+                  stroke={`var(${settings.colors.sport})`}
+                  fill={`var(${settings.colors.sport})`}
                   name="Калории"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: "#EF4444" }}
+                  label={{ position: "top", fill: `var(${settings.colors.sport})` }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -362,7 +371,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.expenses})` }} />
               Расходы
             </CardTitle>
           </CardHeader>
@@ -383,11 +392,11 @@ export default function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke="#F59E0B"
-                  fill="#F59E0B"
+                  stroke={`var(${settings.colors.expenses})`}
+                  fill={`var(${settings.colors.expenses})`}
                   name="Расходы"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: "#F59E0B" }}
+                  label={{ position: "top", fill: `var(${settings.colors.expenses})` }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -399,7 +408,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <Clock className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.time})` }} />
               Распределение времени: {formatTimeTotal(timeDistribution.totalMinutes)}
             </CardTitle>
           </CardHeader>
@@ -444,7 +453,7 @@ export default function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.expenses})` }} />
               Распределение расходов: {expenseDistribution.totalExpenses}zł
             </CardTitle>
           </CardHeader>
@@ -481,10 +490,11 @@ export default function Statistics() {
           </CardContent>
         </Card>
       </div>
+
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.daySuccess})` }} />
             Ежедневный отчет
           </CardTitle>
         </CardHeader>
@@ -552,7 +562,7 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.daySuccess})` }} />
             Успешность задач по дням
           </CardTitle>
         </CardHeader>
@@ -574,8 +584,8 @@ export default function Statistics() {
                             colSpan={category.tasks.length}
                             className="py-2 px-4 text-center text-sm font-semibold"
                             style={{
-                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || "#6B728020",
-                              color: CATEGORY_HEADER_COLORS[category.name]?.text || "#ffffff",
+                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg,
+                              color: CATEGORY_HEADER_COLORS[category.name]?.text,
                             }}
                           >
                             {category.name}
@@ -594,8 +604,8 @@ export default function Statistics() {
                               key={`${category.name}-${task.name}`}
                               className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
                               style={{
-                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || "#6B728020",
-                                color: CATEGORY_HEADER_COLORS[category.name]?.text || "#ffffff",
+                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg,
+                                color: CATEGORY_HEADER_COLORS[category.name]?.text,
                                 opacity: 0.8,
                                 minWidth: "80px",
                               }}
@@ -742,7 +752,7 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: `var(${settings.colors.expenses})` }} />
             Расходы по категориям
           </CardTitle>
         </CardHeader>
@@ -763,7 +773,7 @@ export default function Statistics() {
                           <th
                             key={category.name}
                             className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                            style={{ backgroundColor: "#6B728020" }}
+                            style={{ backgroundColor: hexToRGBA(getCssVar(settings.colors.expenses), 0.2) }}
                           >
                             {category.emoji} {category.name}
                           </th>
@@ -816,7 +826,7 @@ export default function Statistics() {
                             {format(new Date(day.date), "dd.MM.yyyy")}
                           </td>
                           <td
-                            className="py-2 px-4 text-center text-sm font-semibold font-bold min-w-[90px]"
+                            className="py                        py-2 px-4 text-center text-sm font-semibold font-bold min-w-[90px]"
                             style={{
                               backgroundColor: `rgba(249, 115, 22, ${0.1 + (dayTotal / maxExpense) * 0.4})`,
                             }}
