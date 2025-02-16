@@ -69,6 +69,7 @@ export const TaskCard = React.memo(({
   };
 
   const categoryColor = getCategoryColor();
+  const colorVar = `var(--${categoryColor})`;
 
   return (
     <motion.div
@@ -79,10 +80,9 @@ export const TaskCard = React.memo(({
     >
       <Card className="bg-zinc-900/50 border-gray-800">
         <div className="divide-y divide-zinc-800">
-          {/* Header row with category name and progress bar */}
           <div className="flex items-center h-[3.5rem]">
             <div className="w-1/2 px-4 flex items-center gap-2">
-              <div style={{ color: `hsl(var(--${categoryColor}))` }}>
+              <div style={{ color: colorVar }}>
                 {getCategoryIcon()}
               </div>
               <span className="text-base font-medium text-gray-200">
@@ -91,19 +91,19 @@ export const TaskCard = React.memo(({
             </div>
             <div className="w-1/2 px-4">
               {!isExpenseCard && (
-                <Progress 
-                  value={progress} 
-                  className="h-2.5 bg-zinc-800"
-                  style={{ 
-                    '--progress-foreground': `hsl(var(--${categoryColor}))` 
-                  } as React.CSSProperties}
-                  aria-label={`Progress for ${category.name}`}
-                />
+                <div className="relative w-full h-2.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div 
+                    className="absolute top-0 left-0 h-full transition-all duration-300 rounded-full"
+                    style={{ 
+                      width: `${progress}%`,
+                      background: colorVar
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>
 
-          {/* Task rows */}
           <div className="divide-y divide-zinc-800">
             {category.tasks.map((task) => (
               <div key={task.id} className="flex items-center h-[3.5rem]">
