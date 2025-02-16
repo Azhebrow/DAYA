@@ -37,40 +37,23 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  // Получаем градиент для категории из настроек
-  const getCategoryGradient = () => {
+  // Получаем цвет для категории из настроек
+  const getCategoryColor = () => {
     switch (category.name) {
       case 'Разум':
-        return settings.colors?.mind || 'from-purple-500 to-violet-700';
+        return settings.colors?.mind?.split(' ')[0].replace('from-', '') || 'purple-500';
       case 'Время':
-        return settings.colors?.time || 'from-green-500 to-emerald-700';
+        return settings.colors?.time?.split(' ')[0].replace('from-', '') || 'green-500';
       case 'Спорт':
-        return settings.colors?.sport || 'from-red-500 to-rose-700';
+        return settings.colors?.sport?.split(' ')[0].replace('from-', '') || 'red-500';
       case 'Привычки':
-        return settings.colors?.habits || 'from-orange-500 to-amber-700';
+        return settings.colors?.habits?.split(' ')[0].replace('from-', '') || 'orange-500';
       default:
-        return settings.colors?.expenses || 'from-orange-500 to-amber-700';
+        return settings.colors?.expenses?.split(' ')[0].replace('from-', '') || 'orange-500';
     }
   };
 
-  // Получаем основной цвет для акцентных элементов
-  const getAccentColor = () => {
-    switch (category.name) {
-      case 'Разум':
-        return 'bg-violet-500';
-      case 'Время':
-        return 'bg-emerald-500';
-      case 'Спорт':
-        return 'bg-red-500';
-      case 'Привычки':
-        return 'bg-amber-500';
-      default:
-        return 'bg-orange-500';
-    }
-  };
-
-  const categoryGradient = getCategoryGradient();
-  const accentColor = getAccentColor();
+  const categoryColor = getCategoryColor();
 
   return (
     <motion.div
@@ -96,9 +79,9 @@ export const TaskCard = React.memo(({
                 <Progress 
                   value={progress} 
                   className="h-2.5"
-                  // Используем градиент из настроек для прогресс-бара
                   style={{
-                    backgroundImage: `linear-gradient(to right, var(--${accentColor}) ${progress}%, transparent ${progress}%)`
+                    backgroundColor: 'rgb(39, 39, 42)',
+                    ['--progress-background' as any]: `var(--${categoryColor})`
                   }}
                   aria-label={`Progress for ${category.name}`}
                 />
@@ -119,7 +102,7 @@ export const TaskCard = React.memo(({
                   task={task}
                   onChange={(value) => handleTaskUpdate(task.id, value)}
                   isExpenseCard={isExpenseCard}
-                  categoryColor={categoryGradient} // Передаём градиент в TaskInput
+                  categoryColor={categoryColor}
                 />
               </div>
             </div>

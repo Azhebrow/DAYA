@@ -33,7 +33,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     onChange(value);
   }, [onChange]);
 
-  // Extract base color for elements from gradient string
+  // Extract base color from settings color string
   const baseColor = categoryColor.split(' ')[0].replace('from-', '');
 
   if (task.type === TaskType.TIME) {
@@ -44,7 +44,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onValueChange={(value) => handleChange(parseInt(value))}
       >
         <SelectTrigger 
-          className={`w-full h-9 ${value > 0 ? `bg-gradient-to-r ${categoryColor}` : 'bg-zinc-800'} 
+          className={`w-full h-9 ${value > 0 ? `bg-${baseColor}` : 'bg-zinc-800'} 
             hover:bg-opacity-90 border-0 font-bold text-center 
             ${value > 0 ? 'text-white' : 'text-white/60'}`}
         >
@@ -69,7 +69,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onValueChange={(value) => handleChange(parseInt(value))}
       >
         <SelectTrigger 
-          className={`w-full h-9 ${value > 0 ? `bg-gradient-to-r ${categoryColor}` : 'bg-zinc-800'} 
+          className={`w-full h-9 ${value > 0 ? `bg-${baseColor}` : 'bg-zinc-800'} 
             hover:bg-opacity-90 border-0 font-bold text-center 
             ${value > 0 ? 'text-white' : 'text-white/60'}`}
         >
@@ -94,7 +94,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onClick={() => handleChange(!task.completed)}
         className={`w-full h-9 text-base
           ${task.completed 
-            ? `bg-gradient-to-r ${categoryColor} text-white hover:bg-opacity-90` 
+            ? `bg-${baseColor} text-white hover:bg-opacity-90` 
             : 'bg-zinc-800 text-white/60 hover:text-white hover:bg-zinc-700'
           } 
           border-0 font-bold transition-colors duration-200`}
@@ -113,7 +113,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
           className={`w-full h-9 
-            ${hasValue ? `bg-gradient-to-r ${categoryColor}` : 'bg-zinc-800'} 
+            ${hasValue ? `bg-${baseColor}` : 'bg-zinc-800'} 
             border-0 text-left pl-8 text-base font-bold transition-colors
             ${hasValue ? 'text-white' : 'text-white/60'}
             focus:ring-1 focus:ring-${baseColor} hover:bg-opacity-90
