@@ -486,6 +486,10 @@ function Statistics() {
     )
   );
 
+  // Вычисляем максимальные расходы для всех периодов
+  const maxExpense = Object.values(expensesByPeriod).reduce((max, period) =>
+    Math.max(max, Object.values(period).reduce((sum, value) => sum + value, 0)), 0);
+
   const aggregateTasksData = aggregateTasksByPeriod();
 
   return (
@@ -700,10 +704,6 @@ function Statistics() {
                   <tbody className="divide-y divide-border bg-background">
                     {Object.entries(expensesByPeriod).map(([periodKey, categoryTotals]) => {
                       const periodTotal = Object.values(categoryTotals).reduce((sum, value) => sum + value, 0);
-                      let maxExpense = 0;
-                      for (const key in expensesByPeriod){
-                        maxExpense = Math.max(maxExpense, Object.values(expensesByPeriod[key]).reduce((a,b)=> a + b, 0))
-                      }
 
                       return (
                         <tr key={periodKey} className="border-b border-border/10">
@@ -745,16 +745,16 @@ function Statistics() {
                         style={{
                           backgroundColor: hexToRGBA(
                             getCssVar(settings.colors.expenses),
-                            Math.min((Object.values(expensesByPeriod).reduce((sum, categoryTotals) => 
+                            Math.min((Object.values(expensesByPeriod).reduce((sum, categoryTotals) =>
                               sum + Object.values(categoryTotals).reduce((a, b) => a + b, 0), 0) / maxExpense) * 0.4 + 0.1, 0.5)
                           ),
                         }}
                       >
-                        {Object.values(expensesByPeriod).reduce((sum, categoryTotals) => 
+                        {Object.values(expensesByPeriod).reduce((sum, categoryTotals) =>
                           sum + Object.values(categoryTotals).reduce((a, b) => a + b, 0), 0)} zł
                       </td>
                       {uniqueCategories.map(categoryName => {
-                        const categoryTotal = Object.values(expensesByPeriod).reduce((sum, period) => 
+                        const categoryTotal = Object.values(expensesByPeriod).reduce((sum, period) =>
                           sum + (period[categoryName] || 0), 0);
                         return (
                           <td
