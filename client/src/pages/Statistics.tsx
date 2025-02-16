@@ -143,8 +143,11 @@ function Statistics() {
     }
   };
 
-  const [timeRange, setTimeRange] = useState<"7" | "14" | "30">("7");
-  const [displayType, setDisplayType] = useState<"days" | "weeks" | "months">("days");
+  const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(settings.timeRange || "7");
+  const [displayType, setDisplayType] = useState<"days" | "weeks" | "months">(() => {
+    const savedDisplayType = localStorage.getItem("statistics_display_type");
+    return (savedDisplayType as "days" | "weeks" | "months") || "days";
+  });
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState("");
 
@@ -394,6 +397,11 @@ function Statistics() {
     );
   };
 
+  const handleDisplayTypeChange = (value: "days" | "weeks" | "months") => {
+    setDisplayType(value);
+    localStorage.setItem("statistics_display_type", value);
+  };
+
   const CATEGORY_ICONS: { [key: string]: React.ReactNode } = {
     'Разум': <Brain className="h-4 w-4 inline-block mr-2" />,
     'Время': <Clock className="h-4 w-4 inline-block mr-2" />,
@@ -529,7 +537,7 @@ function Statistics() {
           <p className="text-sm text-muted-foreground">{dateRangeText}</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4">
-          <Select value={displayType} onValueChange={(value: "days" | "weeks" | "months") => setDisplayType(value)}>
+          <Select value={displayType} onValueChange={handleDisplayTypeChange}>
             <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Тип отображения" />
             </SelectTrigger>

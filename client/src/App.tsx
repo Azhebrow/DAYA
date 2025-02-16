@@ -10,10 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LayoutDashboard, LineChart, CalendarDays, Settings2, BarChart, Target, Scroll } from "lucide-react";
+import { LayoutDashboard, LineChart, CalendarDays, Settings2, Target, Scroll } from "lucide-react";
 import Dashboard from "@/pages/Dashboard";
 import Statistics from "@/pages/Statistics";
-import Ranges from "@/pages/Ranges";
 import Settings from "@/pages/Settings";
 import Oath from "@/pages/Oath";
 import Goals from "@/pages/Goals";
@@ -40,7 +39,6 @@ const routes = [
   { href: "/", label: "Главная", icon: LayoutDashboard },
   { href: "/oath", label: "Клятва", icon: Scroll },
   { href: "/goals", label: "Цели", icon: Target },
-  { href: "/ranges", label: "Диапазоны", icon: BarChart },
   { href: "/statistics", label: "Статистика", icon: LineChart },
   { href: "/settings", label: "Настройки", icon: Settings2 },
 ];
@@ -100,7 +98,6 @@ function App() {
             <Route path="/" component={Dashboard} />
             <Route path="/oath" component={Oath} />
             <Route path="/goals" component={Goals} />
-            <Route path="/ranges" component={Ranges} />
             <Route path="/statistics" component={Statistics} />
             <Route path="/settings" component={Settings} />
           </Switch>

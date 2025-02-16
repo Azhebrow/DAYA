@@ -74,12 +74,14 @@ const ColorPicker = ({
   value,
   onChange,
   usedColors,
-  categoryName
+  categoryName,
+  icon: Icon
 }: {
   value: string;
   onChange: (value: string) => void;
   usedColors: string[];
   categoryName: string;
+  icon: React.ElementType;
 }) => {
   const isColorUsed = (color: string) => usedColors.includes(color) && color !== value;
 
@@ -91,28 +93,28 @@ const ColorPicker = ({
           className="w-full p-0 h-auto hover:bg-transparent"
         >
           <div
-            className="w-full p-6 rounded-xl transition-all duration-200 hover:opacity-90 flex items-center justify-center gap-3"
+            className="w-full p-4 rounded-lg transition-all duration-200 hover:opacity-90 flex items-center justify-between gap-3"
             style={{ backgroundColor: `var(${value})` }}
           >
-            <span className="text-white">
-              {categoryName === 'Разум' && <Brain className="h-6 w-6" />}
-              {categoryName === 'Время' && <Clock className="h-6 w-6" />}
-              {categoryName === 'Спорт' && <Dumbbell className="h-6 w-6" />}
-              {categoryName === 'Пороки' && <Ban className="h-6 w-6" />}
-              {categoryName === 'Траты' && <DollarSign className="h-6 w-6" />}
-            </span>
+            <div className="flex items-center gap-2">
+              <Icon className="h-5 w-5 text-white" />
+              <span className="text-white font-medium">{categoryName}</span>
+            </div>
+            <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+              <ChevronDown className="h-4 w-4 text-white" />
+            </div>
           </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[320px] p-4">
-        <div className="color-picker-grid">
+        <div className="grid grid-cols-6 gap-2">
           {colorPalette.map((color) => (
             <button
               key={color.value}
               onClick={() => !isColorUsed(color.value) && onChange(color.value)}
-              className={`color-option ${value === color.value ? 'selected' : ''} ${
-                isColorUsed(color.value) ? 'disabled' : ''
-              }`}
+              className={`w-10 h-10 rounded-lg transition-all duration-200 ${
+                value === color.value ? 'ring-2 ring-white ring-offset-2 ring-offset-background' : ''
+              } ${isColorUsed(color.value) ? 'opacity-25 cursor-not-allowed' : 'hover:scale-110'}`}
               style={{ backgroundColor: color.hex }}
               disabled={isColorUsed(color.value)}
               title={isColorUsed(color.value) ? 'Этот цвет уже используется' : color.name}
@@ -340,10 +342,9 @@ export default function SettingsPage() {
                 Цвета категорий
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-6">
-                {/* Успех дня (новая категория) */}
-                <div className="flex items-center gap-4">
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div>
                   <ColorPicker
                     value={settings.colors.daySuccess}
                     onChange={(value) => handleSettingChange('colors', { daySuccess: value })}
@@ -354,15 +355,11 @@ export default function SettingsPage() {
                       settings.colors.habits,
                       settings.colors.expenses
                     ]}
-                    categoryName="Успех"
+                    categoryName="Успех дня"
+                    icon={CheckCircle2}
                   />
-                  <div className="flex-grow">
-                    <Label>Успех дня</Label>
-                  </div>
                 </div>
-
-                {/* Разум */}
-                <div className="flex items-center gap-4">
+                <div>
                   <ColorPicker
                     value={settings.colors.mind}
                     onChange={(value) => handleSettingChange('colors', { mind: value })}
@@ -374,14 +371,10 @@ export default function SettingsPage() {
                       settings.colors.daySuccess
                     ]}
                     categoryName="Разум"
+                    icon={Brain}
                   />
-                  <div className="flex-grow">
-                    <Label>Разум</Label>
-                  </div>
                 </div>
-
-                {/* Время */}
-                <div className="flex items-center gap-4">
+                <div>
                   <ColorPicker
                     value={settings.colors.time}
                     onChange={(value) => handleSettingChange('colors', { time: value })}
@@ -393,14 +386,10 @@ export default function SettingsPage() {
                       settings.colors.daySuccess
                     ]}
                     categoryName="Время"
+                    icon={Clock}
                   />
-                  <div className="flex-grow">
-                    <Label>Время</Label>
-                  </div>
                 </div>
-
-                {/* Спорт */}
-                <div className="flex items-center gap-4">
+                <div>
                   <ColorPicker
                     value={settings.colors.sport}
                     onChange={(value) => handleSettingChange('colors', { sport: value })}
@@ -412,14 +401,10 @@ export default function SettingsPage() {
                       settings.colors.daySuccess
                     ]}
                     categoryName="Спорт"
+                    icon={Dumbbell}
                   />
-                  <div className="flex-grow">
-                    <Label>Спорт</Label>
-                  </div>
                 </div>
-
-                {/* Привычки */}
-                <div className="flex items-center gap-4">
+                <div>
                   <ColorPicker
                     value={settings.colors.habits}
                     onChange={(value) => handleSettingChange('colors', { habits: value })}
@@ -431,14 +416,10 @@ export default function SettingsPage() {
                       settings.colors.daySuccess
                     ]}
                     categoryName="Пороки"
+                    icon={Ban}
                   />
-                  <div className="flex-grow">
-                    <Label>Пороки</Label>
-                  </div>
                 </div>
-
-                {/* Траты */}
-                <div className="flex items-center gap-4">
+                <div>
                   <ColorPicker
                     value={settings.colors.expenses}
                     onChange={(value) => handleSettingChange('colors', { expenses: value })}
@@ -450,10 +431,8 @@ export default function SettingsPage() {
                       settings.colors.daySuccess
                     ]}
                     categoryName="Траты"
+                    icon={DollarSign}
                   />
-                  <div className="flex-grow">
-                    <Label>Траты</Label>
-                  </div>
                 </div>
               </div>
             </CardContent>
