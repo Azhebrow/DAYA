@@ -619,7 +619,23 @@ export default function Statistics() {
                             <td className="py-2 px-4 whitespace-pre-wrap">
                               {reportTask.textValue}
                             </td>
-                            <td className="py-2 px-4 text-right fontmedium">
+                            <td
+                              className="py-2 px-4 text-right font-medium"
+                              style={{
+                                backgroundColor: hexToRGBA(
+                                  getCssVar(settings.colors.expenses),
+                                  Math.min((miscExpenses / Math.max(...data.map(d =>
+                                    d.categories
+                                      .filter(c => c.type === CategoryType.EXPENSE)
+                                      .reduce((sum, category) =>
+                                        sum + category.tasks
+                                          .filter(t => t.type === TaskType.EXPENSE)
+                                          .reduce((taskSum, task) => taskSum + (task.value || 0), 0)
+                                      , 0)
+                                  ))) * 0.4 + 0.1, 0.5)
+                                )
+                              }}
+                            >
                               {miscExpenses} zł
                             </td>
                           </tr>
@@ -806,7 +822,8 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = formatTimeTotal(totalMinutes);
-                              const opacity = Math.min((totalMinutes / (8 * 60 * data.length)) * 0.4 + 0.1, 0.5);
+                              const maxValue = 8 * 60 * data.length; // Максимальное время для всех дней
+                              const opacity = Math.min((totalMinutes / maxValue) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce((sum, day) => {
@@ -815,7 +832,8 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
-                              const opacity = Math.min((totalCalories / (3000 * data.length)) * 0.4 + 0.1, 0.5);
+                              const maxValue = 3000 * data.length; // Максимальные калории для всех дней
+                              const opacity = Math.min((totalCalories / maxValue) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             }
 
@@ -842,194 +860,79 @@ export default function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Траты }} />
-            Расходы по категориям
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
+            Ежедневный отчет
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto -mx-4 sm:mx-0">
             <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden"><table className="min-w-full divide-y divide-border">
+              <div className="overflow-hidden">
+                <table className="min-w-full divide-y divide-border">
                   <thead>
                     <tr className="bg-muted/50">
-                      <th scope="col" className="px-4 py-2 text-left text-sm font-semibold min-w-[90px]">Дата</th>
-                      <th scope="col" className="px-4 py-2 text-center text-sm font-semibold font-bold min-w-[90px]">Итого</th>
-                      {data[0]?.categories
-                        .filter(
-                          (category) => category.type === CategoryType.EXPENSE,
-                        )
-                        .map((category) =>                        (
-                          <th
-                            key={category.name}
-                            className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                            style={{ backgroundColor: hexToRGBA(CATEGORY_COLORS.Траты, 0.2) }}
-                          >
-                            {category.emoji} {category.name}
-                          </th>
-                        ))}
+                      <th scope="col" className="px-4 py-2 text-left text-sm font-semibold">Дата</th>
+                      <th scope="col" className="px-4 py-2 text-left text-sm font-semibold">Отчет</th>
+                      <th scope="col" className="px-4 py-2 text-right text-sm font-semibold">Разное (zł)</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((day) => {
-                      const expenseCategories = day.categories.filter(
-                        (category) => category.type === CategoryType.EXPENSE,
-                      );
-
-                      const dayTotal = expenseCategories.reduce(
-                        (sum, category) =>
-                          sum +
-                          category.tasks.reduce(
-                            (catSum, task) =>
-                              catSum +
-                              (task.type === TaskType.EXPENSE
-                                ? task.value || 0
-                                : 0),
-                            0
-                          ),
-                        0                      );
-
-                      const maxExpense = Math.max(
-                        ...data.map((d) =>
-                          d.categories
-                            .filter((c) => c.type === CategoryType.EXPENSE)
-                            .reduce(
-                              (sum, c) =>
-                                sum +
-                                c.tasks.reduce(
-                                  (tSum, t) =>
-                                    tSum +
-                                    (t.type === TaskType.EXPENSE
-                                      ? t.value || 0
-                                      : 0),
-                                  0
-                                ),
-                              0
-                            )
-                        )
-                      );
-
-                      return (
-                        <tr key={day.date} className="border-b border-border/10">
-                          <td className="py-2 px-4 font-medium text-sm font-semibold min-w-[90px]">
-                            {format(new Date(day.date), "dd.MM.yyyy")}
-                          </td>
-                          <td
-                            className="py-2 px-4 text-center text-smfont-semibold font-bold min-w-[90px]"
-                            style={{
-                              backgroundColor: `rgba(249, 115, 22, ${0.1 + (dayTotal / maxExpense) * 0.4})`,
-                            }}
-                          >
-                            {dayTotal} zł
-                          </td>
-                          {expenseCategories.map((category) => {
-                            const categoryTotal = category.tasks.reduce(
-                              (sum, task) =>
-                                sum +
-                                (task.type === TaskType.EXPENSE
-                                  ? task.value || 0
-                                  : 0),
-                              0,
-                            );
-
-                            return (
-                              <td
-                                key={category.name}
-                                className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
-                                style={{
-                                  backgroundColor: `rgba(249, 115, 22, ${
-                                    0.1 + (categoryTotal / maxExpense) * 0.4
-                                  })`,
-                                }}
-                              >
-                                {categoryTotal} zł
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                    <tr className="border-t-2 border-border font-bold">
-                      <td className="py-2 px-4 text-sm font-semibold min-w-[90px]">Итого</td>
-                      <td className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]">
-                        {data.reduce(
-                          (total, day) =>
-                            total +
-                            day.categories
-                              .filter((c) => c.type === CategoryType.EXPENSE)
-                              .reduce(
-                                (catSum, category) =>
-                                  catSum +
-                                  category.tasks.reduce(
-                                    (taskSum, task) =>
-                                      taskSum +
-                                      (task.type === TaskType.EXPENSE
-                                        ? task.value || 0
-                                        : 0),
-                                    0
-                                  ),
-                                0
-                              ),
-                          0
-                        )}{" "}
-                        zł
-                      </td>
-                      {data[0]?.categories
-                        .filter(
-                          (category) => category.type === CategoryType.EXPENSE,
-                        )
-                        .map((category) => {
-                          const categoryTotal = data.reduce((sum, day) => {
-                            const cat = day.categories.find(
-                              (c) => c.name === category.name
-                            );
+                    {data
+                      .map((day) => {
+                        const reportCategory = day.categories.find(
+                          (c) => c.name === "Отчет",
+                        );
+                        const reportTask = reportCategory?.tasks.find(
+                          (t) => t.type === TaskType.EXPENSE_NOTE,
+                        );
+                        const miscExpenses = day.categories
+                          .filter((c) => c.type === CategoryType.EXPENSE)
+                          .reduce((sum, category) => {
                             return (
                               sum +
-                              (cat?.tasks.reduce(
-                                (taskSum, task) =>
-                                  taskSum +
-                                  (task.type === TaskType.EXPENSE
-                                    ? task.value || 0
-                                    : 0),
-                                0
-                              ) || 0)
+                              category.tasks
+                                .filter((t) => t.type === TaskType.EXPENSE)
+                                .reduce(
+                                  (taskSum, task) =>
+                                    taskSum + (task.value || 0),
+                                  0,
+                                )
                             );
                           }, 0);
 
-                          const maxTotal = Math.max(
-                            ...data.map((d) =>
-                              d.categories
-                                .filter((c) => c.type === CategoryType.EXPENSE)
-                                .reduce(
-                                  (sum, c) =>
-                                    sum +
-                                    c.tasks.reduce(
-                                      (tSum, t) =>
-                                        tSum +
-                                        (t.type === TaskType.EXPENSE
-                                          ? t.value || 0
-                                          : 0),
-                                      0
-                                    ),
-                                  0
-                                )
-                            )
-                          );
+                        if (!reportTask?.textValue) return null;
 
-                          return (
+                        return (
+                          <tr key={day.date} className="border-b border-border/10">
+                            <td className="py-2 px-4 font-medium">
+                              {format(new Date(day.date), "dd.MM.yyyy")}
+                            </td>
+                            <td className="py-2 px-4 whitespace-pre-wrap">
+                              {reportTask.textValue}
+                            </td>
                             <td
-                              key={`total-${category.name}`}
-                              className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                              className="py-2 px-4 text-right font-medium"
                               style={{
-                                backgroundColor: `rgba(249, 115, 22, ${
-                                  0.1 + (categoryTotal / maxTotal) * 0.4
-                                })`,
+                                backgroundColor: hexToRGBA(
+                                  getCssVar(settings.colors.expenses),
+                                  Math.min((miscExpenses / Math.max(...data.map(d =>
+                                    d.categories
+                                      .filter(c => c.type === CategoryType.EXPENSE)
+                                      .reduce((sum, category) =>
+                                        sum + category.tasks
+                                          .filter(t => t.type === TaskType.EXPENSE)
+                                          .reduce((taskSum, task) => taskSum + (task.value || 0), 0)
+                                      , 0)
+                                  ))) * 0.4 + 0.1, 0.5)
+                                )
                               }}
                             >
-                              {categoryTotal} zł
+                              {miscExpenses} zł
                             </td>
-                          );
-                        })}
-                    </tr>
+                          </tr>
+                        );
+                      })
+                      .filter(Boolean)}
                   </tbody>
                 </table>
               </div>
