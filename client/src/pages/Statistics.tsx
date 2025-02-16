@@ -496,12 +496,16 @@ export default function Statistics() {
                     `${entry.name}: ${Math.round(entry.minutes)}ч`
                   }
                 >
-                  {timeDistribution.distribution.map((entry, index) => (
-                    <Cell
-                      key={entry.name}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
+                  {timeDistribution.distribution.map((entry, index) => {
+                    // Calculate opacity based on the proportion of total time
+                    const opacity = Math.min((entry.minutes / timeDistribution.totalMinutes) * 0.8 + 0.2, 1);
+                    return (
+                      <Cell
+                        key={entry.name}
+                        fill={hexToRGBA(getCssVar(settings.colors.time), opacity)}
+                      />
+                    );
+                  })}
                 </Pie>
                 <Tooltip
                   contentStyle={{
