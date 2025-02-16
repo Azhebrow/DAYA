@@ -47,7 +47,6 @@ import {
   Ban,
 } from "lucide-react";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
 const getCssVar = (varName: string): string => {
@@ -537,12 +536,16 @@ export default function Statistics() {
                   outerRadius={80}
                   label={(entry) => `${entry.name}: ${entry.amount}zł`}
                 >
-                  {expenseDistribution.distribution.map((entry, index) => (
-                    <Cell
-                      key={entry.name}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
+                  {expenseDistribution.distribution.map((entry, index) => {
+                    // Calculate opacity based on the proportion of total expenses
+                    const opacity = Math.min((entry.amount / expenseDistribution.totalExpenses) * 0.8 + 0.2, 1);
+                    return (
+                      <Cell
+                        key={entry.name}
+                        fill={hexToRGBA(getCssVar(settings.colors.expenses), opacity)}
+                      />
+                    );
+                  })}
                 </Pie>
                 <Tooltip
                   contentStyle={{
