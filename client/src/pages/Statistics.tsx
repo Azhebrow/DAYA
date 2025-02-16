@@ -47,7 +47,7 @@ import {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 const CATEGORY_ORDER = ["Разум", "Привычки", "Спорт", "Время"];
 
-// Utility function to get CSS variable value
+// Updated color utility functions
 const getCssVar = (varName: string) => {
   return getComputedStyle(document.documentElement).getPropertyValue(varName.replace('--', '')).trim();
 };
@@ -84,14 +84,14 @@ export default function Statistics() {
     Спорт: getVarColor(settings.colors.sport),
     Привычки: getVarColor(settings.colors.habits),
     Траты: getVarColor(settings.colors.expenses),
-    Успех: getVarColor(settings.colors.success), // Using time color for success by default
+    Успех: getVarColor(settings.colors.daySuccess) // Use daySuccess color for success indicators
   };
 
   const CATEGORY_HEADER_COLORS = {
     Разум: { bg: `${CATEGORY_COLORS.Разум}20`, text: "#ffffff" },
     Время: { bg: `${CATEGORY_COLORS.Время}20`, text: "#ffffff" },
     Спорт: { bg: `${CATEGORY_COLORS.Спорт}20`, text: "#ffffff" },
-    Привычки: { bg: `${CATEGORY_COLORS.Привычки}20`, text: "#ffffff" },
+    Привычки: { bg: `${CATEGORY_COLORS.Привычки}20`, text: "#ffffff" }
   };
 
   const [timeRange, setTimeRange] = useState<"7" | "14" | "30">(() => {
@@ -593,8 +593,8 @@ export default function Statistics() {
                             colSpan={category.tasks.length}
                             className="py-2 px-4 text-center text-sm font-semibold"
                             style={{
-                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg,
-                              color: CATEGORY_HEADER_COLORS[category.name]?.text,
+                              backgroundColor: `${CATEGORY_COLORS[category.name]}20`,
+                              color: "#ffffff",
                             }}
                           >
                             {category.name}
@@ -613,8 +613,8 @@ export default function Statistics() {
                               key={`${category.name}-${task.name}`}
                               className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
                               style={{
-                                backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg,
-                                color: CATEGORY_HEADER_COLORS[category.name]?.text,
+                                backgroundColor: `${CATEGORY_COLORS[category.name]}20`,
+                                color: "#ffffff",
                                 opacity: 0.8,
                                 minWidth: "80px",
                               }}
@@ -656,7 +656,6 @@ export default function Statistics() {
                                 let bgColor = "transparent";
 
                                 if (task.type === TaskType.CHECKBOX) {
-                                  const value = task.completed ? 100 : 0;
                                   return (
                                     <td
                                       key={`${category.name}-${task.name}`}
@@ -671,10 +670,10 @@ export default function Statistics() {
                                   );
                                 } else if (task.type === TaskType.TIME) {
                                   displayValue = formatTimeTotal(task.value || 0);
-                                  bgColor = "#6B728020";
+                                  bgColor = `${CATEGORY_COLORS[category.name]}20`;
                                 } else if (task.type === TaskType.CALORIE) {
                                   displayValue = `${task.value || 0}`;
-                                  bgColor = "#6B728020";
+                                  bgColor = `${CATEGORY_COLORS[category.name]}20`;
                                 }
 
                                 return (
@@ -691,7 +690,7 @@ export default function Statistics() {
                         </tr>
                       );
                     })}
-                    {/* Add totals row */}
+                    {/* Totals row */}
                     <tr className="border-t-2 border-border font-bold">
                       <td className="py-2 px-4 text-sm font-semibold">Итого</td>
                       <td
@@ -733,7 +732,7 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = formatTimeTotal(totalMinutes);
-                              bgColor = "#6B728020";
+                              bgColor = `${CATEGORY_COLORS[category.name]}20`;
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
@@ -741,7 +740,7 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
-                              bgColor = "#6B728020";
+                              bgColor = `${CATEGORY_COLORS[category.name]}20`;
                             }
 
                             return (
