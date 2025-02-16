@@ -33,6 +33,9 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     onChange(value);
   }, [onChange]);
 
+  // Extract base color for elements from gradient string
+  const baseColor = categoryColor.split(' ')[0].replace('from-', '');
+
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     return (
@@ -40,7 +43,11 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-90 border-gray-700 font-bold text-center ${value > 0 ? 'text-black' : 'text-white'}`}>
+        <SelectTrigger 
+          className={`w-full h-9 ${value > 0 ? `bg-gradient-to-r ${categoryColor}` : 'bg-zinc-800'} 
+            hover:bg-opacity-90 border-0 font-bold text-center 
+            ${value > 0 ? 'text-white' : 'text-white/60'}`}
+        >
           <SelectValue placeholder="Время" />
         </SelectTrigger>
         <SelectContent>
@@ -61,7 +68,11 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger className={`w-full h-9 ${value > 0 ? categoryColor : 'bg-zinc-800'} hover:bg-opacity-90 border-gray-700 font-bold text-center ${value > 0 ? 'text-black' : 'text-white'}`}>
+        <SelectTrigger 
+          className={`w-full h-9 ${value > 0 ? `bg-gradient-to-r ${categoryColor}` : 'bg-zinc-800'} 
+            hover:bg-opacity-90 border-0 font-bold text-center 
+            ${value > 0 ? 'text-white' : 'text-white/60'}`}
+        >
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
@@ -78,12 +89,15 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   if (task.type === TaskType.CHECKBOX) {
     return (
       <Button
-        variant={task.completed ? "default" : "outline"}
+        variant="ghost"
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        className={`w-full h-9 text-base ${
-          task.completed ? categoryColor + ' text-black' : 'bg-zinc-800'
-        } hover:bg-opacity-90 border-gray-700 font-bold`}
+        className={`w-full h-9 text-base
+          ${task.completed 
+            ? `bg-gradient-to-r ${categoryColor} text-white hover:bg-opacity-90` 
+            : 'bg-zinc-800 text-white/60 hover:text-white hover:bg-zinc-700'
+          } 
+          border-0 font-bold transition-colors duration-200`}
       >
         {task.completed ? 'Выполнено' : 'Отметить'}
       </Button>
@@ -98,13 +112,16 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           type="number"
           value={task.value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          className={`w-full h-9 ${hasValue ? 'bg-orange-500 text-black' : 'bg-zinc-800 text-white'} 
+          className={`w-full h-9 
+            ${hasValue ? `bg-gradient-to-r ${categoryColor}` : 'bg-zinc-800'} 
             border-0 text-left pl-8 text-base font-bold transition-colors
-            focus:ring-1 focus:ring-orange-400 hover:bg-opacity-90
+            ${hasValue ? 'text-white' : 'text-white/60'}
+            focus:ring-1 focus:ring-${baseColor} hover:bg-opacity-90
             [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none`}
           placeholder="0"
         />
-        <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold ${hasValue ? 'text-black' : 'text-white'}`}>
+        <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold 
+          ${hasValue ? 'text-white' : 'text-white/60'}`}>
           zł
         </span>
       </div>
@@ -117,7 +134,8 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         type="text"
         value={task.textValue || ''}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full h-9 bg-zinc-800 border-gray-700 text-base text-center font-bold"
+        className={`w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium
+          focus:ring-1 focus:ring-${baseColor}`}
         placeholder="Описание..."
         maxLength={255}
       />

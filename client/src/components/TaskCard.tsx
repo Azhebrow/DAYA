@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Category, CategoryType } from '@shared/schema';
+import { Category, CategoryType, settingsSchema } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 
@@ -17,6 +17,17 @@ export const TaskCard = React.memo(({
   onTaskUpdate, 
   isExpenseCard = false 
 }: TaskCardProps) => {
+  const [settings, setSettings] = useState(() => {
+    try {
+      const stored = localStorage.getItem('day_success_tracker_settings');
+      if (!stored) return settingsSchema.parse({});
+      return settingsSchema.parse(JSON.parse(stored));
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+      return settingsSchema.parse({});
+    }
+  });
+
   const progress = React.useMemo(() => 
     calculateCategoryProgress(category.tasks, category.type),
     [category.tasks, category.type]
@@ -26,7 +37,40 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  const categoryColor = getCategoryColor(category.name, category.type);
+  // Получаем градиент для категории из настроек
+  const getCategoryGradient = () => {
+    switch (category.name) {
+      case 'Разум':
+        return settings.colors?.mind || 'from-purple-500 to-violet-700';
+      case 'Время':
+        return settings.colors?.time || 'from-green-500 to-emerald-700';
+      case 'Спорт':
+        return settings.colors?.sport || 'from-red-500 to-rose-700';
+      case 'Привычки':
+        return settings.colors?.habits || 'from-orange-500 to-amber-700';
+      default:
+        return settings.colors?.expenses || 'from-orange-500 to-amber-700';
+    }
+  };
+
+  // Получаем основной цвет для акцентных элементов
+  const getAccentColor = () => {
+    switch (category.name) {
+      case 'Разум':
+        return 'bg-violet-500';
+      case 'Время':
+        return 'bg-emerald-500';
+      case 'Спорт':
+        return 'bg-red-500';
+      case 'Привычки':
+        return 'bg-amber-500';
+      default:
+        return 'bg-orange-500';
+    }
+  };
+
+  const categoryGradient = getCategoryGradient();
+  const accentColor = getAccentColor();
 
   return (
     <motion.div
@@ -52,7 +96,10 @@ export const TaskCard = React.memo(({
                 <Progress 
                   value={progress} 
                   className="h-2.5"
-                  indicatorColor={categoryColor}
+                  // Используем градиент из настроек для прогресс-бара
+                  style={{
+                    backgroundImage: `linear-gradient(to right, var(--${accentColor}) ${progress}%, transparent ${progress}%)`
+                  }}
                   aria-label={`Progress for ${category.name}`}
                 />
               )}
@@ -72,7 +119,7 @@ export const TaskCard = React.memo(({
                   task={task}
                   onChange={(value) => handleTaskUpdate(task.id, value)}
                   isExpenseCard={isExpenseCard}
-                  categoryColor={categoryColor}
+                  categoryColor={categoryGradient} // Передаём градиент в TaskInput
                 />
               </div>
             </div>
@@ -82,25 +129,6 @@ export const TaskCard = React.memo(({
     </motion.div>
   );
 });
-
-const getCategoryColor = (name: string, type: CategoryType): string => {
-  if (type === CategoryType.EXPENSE) {
-    return 'bg-orange-500';
-  }
-
-  switch (name) {
-    case 'Разум':
-      return 'bg-violet-500';
-    case 'Время':
-      return 'bg-emerald-500';
-    case 'Спорт':
-      return 'bg-red-500';
-    case 'Привычки':
-      return 'bg-amber-500';
-    default:
-      return 'bg-primary';
-  }
-};
 
 TaskCard.displayName = 'TaskCard';
 
