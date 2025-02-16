@@ -344,22 +344,18 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 {/* Успех дня (новая категория) */}
                 <div className="flex items-center gap-4">
-                  <div className="w-full">
-                    <Button
-                      variant="ghost"
-                      className="w-full p-0 h-auto hover:bg-transparent cursor-default"
-                      disabled
-                    >
-                      <div
-                        className="w-full p-6 rounded-xl flex items-center justify-center gap-3"
-                        style={{ backgroundColor: 'var(--green)' }}
-                      >
-                        <span className="text-white">
-                          <CheckCircle2 className="h-6 w-6" />
-                        </span>
-                      </div>
-                    </Button>
-                  </div>
+                  <ColorPicker
+                    value={settings.colors.daySuccess}
+                    onChange={(value) => handleSettingChange('colors', { daySuccess: value })}
+                    usedColors={[
+                      settings.colors.mind,
+                      settings.colors.time,
+                      settings.colors.sport,
+                      settings.colors.habits,
+                      settings.colors.expenses
+                    ]}
+                    categoryName="Успех"
+                  />
                   <div className="flex-grow">
                     <Label>Успех дня</Label>
                   </div>
