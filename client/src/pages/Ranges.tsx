@@ -12,7 +12,7 @@ import { calculateDayScore } from '@/lib/utils';
 import { ActivitySquare, Flame, Clock, LineChart, DollarSign, BarChartIcon, CheckIcon } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-// Обновляем цвета категорий
+// Обновляем константы цветов в начале файла
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#8B5CF6',    // Фиолетовый
   'Время': '#10B981',    // Зеленый
@@ -20,7 +20,7 @@ const CATEGORY_COLORS: { [key: string]: string } = {
   'Привычки': '#F59E0B'  // Оранжевый
 };
 
-// Special colors for table headers
+// Специальные цвета для заголовков таблиц
 const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = {
   'Разум': { bg: '#8B5CF620', text: '#ffffff' },
   'Время': { bg: '#10B98120', text: '#ffffff' },
@@ -76,7 +76,6 @@ export default function Ranges() {
     const normalizedValue = value / maxValue;
     const opacity = 0.1 + (normalizedValue * 0.4);
 
-    // Используем цвет категории "Успех дня" из настроек
     const color = settings.colors.category?.daySuccess;
     if (!color) return 'transparent';
 
@@ -96,7 +95,7 @@ export default function Ranges() {
       return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     }
 
-    return 'transparent'; // fallback if color format is unknown
+    return 'transparent';
   };
 
   const getExpenseColor = (value: number, maxValue: number) => {
@@ -105,7 +104,6 @@ export default function Ranges() {
     const normalizedValue = value / maxValue;
     const opacity = 0.1 + (normalizedValue * 0.4);
 
-    // Используем цвет категории "Траты" из настроек
     const color = settings.colors.category?.expenses;
     if (!color) return 'transparent';
 
@@ -125,7 +123,7 @@ export default function Ranges() {
       return `rgba(${r}, ${g}, ${b}, ${opacity})`;
     }
 
-    return 'transparent'; // fallback if color format is unknown
+    return 'transparent';
   };
 
   const calculateExpenses = () => {
@@ -570,8 +568,8 @@ export default function Ranges() {
                 <Area
                   type="monotone"
                   dataKey="expenses"
-                  stroke="#F59E0B"
-                  fill="#F59E0B"
+                  stroke={storage.getSettings().colors.category?.expenses || 'transparent'}
+                  fill={storage.getSettings().colors.category?.expenses || 'transparent'}
                   name="Расходы"
                 />
               </AreaChart>
