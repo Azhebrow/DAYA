@@ -166,8 +166,43 @@ export const settingsSchema = z.object({
       id: z.string(),
       name: z.string(),
       emoji: z.string()
+    })),
+    expenses: z.array(z.object({
+      id: z.string(),
+      name: z.string(),
+      emoji: z.string()
     }))
-  }).default(defaultSubcategories)
+  }).default({
+    mind: [
+      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+    ],
+    time: [
+      { id: 'work', name: '💼 Работа', emoji: '💼' },
+      { id: 'study', name: '📚 Учёба', emoji: '📚' },
+      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+    ],
+    sport: [
+      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+    ],
+    habits: [
+      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+    ],
+    expenses: [
+      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
+      { id: 'junk', name: '🍕 Дерьмо', emoji: '🍕' },
+      { id: 'city', name: '🌆 Город', emoji: '🌆' },
+      { id: 'sport', name: '⚽ Спорт', emoji: '⚽' },
+      { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
+      { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
+      { id: 'other', name: '📦 Разное', emoji: '📦' }
+    ]
+  })
 });
 
 export const insertTaskSchema = createInsertSchema(tasks);
