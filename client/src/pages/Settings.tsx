@@ -144,7 +144,7 @@ const SubcategoryEditor = ({
   onColorChange,
   usedColors,
 }: {
-  category: 'mind' | 'time' | 'sport' | 'habits';
+  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses';
   subcategories: { id: string; name: string; emoji: string; }[];
   onUpdate: (category: string, subcategories: { id: string; name: string; emoji: string; }[]) => void;
   title: string;
@@ -220,7 +220,13 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
       { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
       { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
       { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-    ]
+    ],
+    expenses: [
+      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
+      { id: 'transport', name: '🚌 Транспорт', emoji: '🚌' },
+      { id: 'entertainment', name: '🎮 Развлечения', emoji: '🎮' }
+    ],
+    
   }
 });
 
@@ -495,6 +501,31 @@ const SettingsPage = () => {
                     settings.colors.time,
                     settings.colors.sport,
                     settings.colors.expenses,
+                    settings.colors.daySuccess
+                  ]}
+                />
+                <SubcategoryEditor
+                  category="expenses"
+                  subcategories={settings.subcategories.expenses || [
+                    { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
+                    { id: 'transport', name: '🚌 Транспорт', emoji: '🚌' },
+                    { id: 'entertainment', name: '🎮 Развлечения', emoji: '🎮' }
+                  ]}
+                  onUpdate={(category, newSubcategories) => {
+                    handleSettingChange('subcategories', {
+                      ...settings.subcategories,
+                      [category]: newSubcategories
+                    });
+                  }}
+                  title="Траты"
+                  icon={DollarSign}
+                  colorValue={settings.colors.expenses}
+                  onColorChange={(value) => handleSettingChange('colors', { expenses: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.habits,
                     settings.colors.daySuccess
                   ]}
                 />
