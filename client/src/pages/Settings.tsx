@@ -229,7 +229,9 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
       { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
       { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
       { id: 'other', name: '📦 Разное', emoji: '📦' }
-    ]
+    ],
+    //Adding default values for other categories
+    daySuccess: []
   }
 });
 
@@ -238,7 +240,7 @@ const SettingsPage = () => {
   const { toast } = useToast();
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
 
-  const { data: settings, isLoading } = useQuery({
+  const { data: settings = DEFAULT_SETTINGS, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings(),
     initialData: DEFAULT_SETTINGS
@@ -425,7 +427,7 @@ const SettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SubcategoryEditor
                   category="mind"
-                  subcategories={settings.subcategories.mind}
+                  subcategories={settings.subcategories.mind || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -446,7 +448,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="time"
-                  subcategories={settings.subcategories.time}
+                  subcategories={settings.subcategories.time || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -467,7 +469,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="sport"
-                  subcategories={settings.subcategories.sport}
+                  subcategories={settings.subcategories.sport || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -488,7 +490,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="habits"
-                  subcategories={settings.subcategories.habits}
+                  subcategories={settings.subcategories.habits || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -509,11 +511,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="expenses"
-                  subcategories={settings.subcategories.expenses || [
-                    { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
-                    { id: 'transport', name: '🚌 Транспорт', emoji: '🚌' },
-                    { id: 'entertainment', name: '🎮 Развлечения', emoji: '🎮' }
-                  ]}
+                  subcategories={settings.subcategories.expenses || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
