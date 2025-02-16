@@ -46,6 +46,13 @@ const TaskNameEditor = ({
   const [error, setError] = React.useState("");
   const inputRef = React.useRef<HTMLInputElement>(null);
 
+  // Reset to original values when editing is cancelled
+  const resetValues = () => {
+    setName(taskName);
+    setEmojiValue(emoji);
+    setError("");
+  };
+
   const validateAndSave = () => {
     if (name.length < 3 || name.length > 7) {
       setError("Название должно быть от 3 до 7 символов");
@@ -67,11 +74,9 @@ const TaskNameEditor = ({
     if (e.key === 'Enter') {
       validateAndSave();
     } else if (e.key === 'Escape') {
-      setName(taskName);
-      setEmojiValue(emoji);
+      resetValues();
       setIsEditing(false);
       setIsEmojiPickerOpen(false);
-      setError("");
     }
   };
 
@@ -148,7 +153,12 @@ const TaskNameEditor = ({
         variant="ghost"
         size="icon"
         className="h-8 w-8 hover:bg-white/20 shrink-0"
-        onClick={() => setIsEditing(!isEditing)}
+        onClick={() => {
+          if (isEditing) {
+            resetValues();
+          }
+          setIsEditing(!isEditing);
+        }}
       >
         <Pencil className="h-4 w-4 text-white" />
       </Button>
@@ -203,68 +213,35 @@ const DEFAULT_TASKS = [
 
 export default function SettingsPage() {
   const { toast } = useToast();
-  const [settings, setSettings] = React.useState<Settings>(() => {
-    try {
-      const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({});
-      return settingsSchema.parse(JSON.parse(stored));
-    } catch (error) {
-      console.error('Error parsing settings:', error);
-      return settingsSchema.parse({});
-    }
-  });
-
+  const [settings, setSettings] = React.useState<Settings>(() => storage.getSettings());
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
 
+  // Subscribe to storage changes
   React.useEffect(() => {
-    const tasks = localStorage.getItem('tasks');
-    if (!tasks) {
-      localStorage.setItem('tasks', JSON.stringify(DEFAULT_TASKS));
-      console.log('Initialized default tasks');
-    }
+    return storage.subscribe(() => {
+      setSettings(storage.getSettings());
+    });
   }, []);
 
   const handleTaskNameChange = React.useCallback((categoryName: string, taskName: string, newName: string, newEmoji: string) => {
     try {
-      console.log('Attempting to update task:', { categoryName, taskName, newName, newEmoji });
+      const tasks = storage.getTasks();
+      const category = tasks.find(c => c.name === categoryName);
 
-      const tasks = localStorage.getItem('tasks');
-      if (!tasks) {
-        localStorage.setItem('tasks', JSON.stringify(DEFAULT_TASKS));
-        console.log('Initialized default tasks during update');
-      }
-
-      let parsedTasks;
-      try {
-        parsedTasks = JSON.parse(tasks || JSON.stringify(DEFAULT_TASKS));
-        console.log('Current tasks:', parsedTasks);
-      } catch (e) {
-        console.error('Failed to parse tasks:', e);
-        throw new Error('Failed to parse tasks');
-      }
-
-      if (!Array.isArray(parsedTasks)) {
-        console.error('Tasks is not an array:', parsedTasks);
-        throw new Error('Invalid tasks format');
-      }
-
-      const category = parsedTasks.find((c: any) => c.name === categoryName);
       if (!category) {
-        console.error('Category not found:', categoryName);
         throw new Error(`Category ${categoryName} not found`);
       }
 
-      const task = category.tasks.find((t: any) => t.name === taskName);
+      const task = category.tasks.find(t => t.name === taskName);
       if (!task) {
-        console.error('Task not found:', taskName);
         throw new Error(`Task ${taskName} not found in ${categoryName}`);
       }
 
-      const updatedTasks = parsedTasks.map((c: any) => {
+      const updatedTasks = tasks.map(c => {
         if (c.name === categoryName) {
           return {
             ...c,
-            tasks: c.tasks.map((t: any) =>
+            tasks: c.tasks.map(t =>
               t.name === taskName
                 ? { ...t, name: newName, emoji: newEmoji }
                 : t
@@ -274,9 +251,7 @@ export default function SettingsPage() {
         return c;
       });
 
-      console.log('Updated tasks:', updatedTasks);
-      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-
+      storage.saveTasks(updatedTasks);
       toast({
         title: "Задача обновлена",
         description: `${newEmoji} ${newName} успешно сохранено`,
@@ -291,7 +266,6 @@ export default function SettingsPage() {
     }
   }, [toast]);
 
-  // Other handler functions...
   const handleSettingChange = (key: keyof Settings, value: any) => {
     let newSettings = {...settings};
 
