@@ -790,22 +790,22 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = formatTimeTotal(totalMinutes);
-                              const opacity = 0.2;
+                              const opacity = Math.min((totalMinutes / (8 * 60 * data.length)) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
                                 const t = cat?.tasks.find((t) => t.name === task.name);
-                                return sum + (t?.value || 0);
+                                returnsum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
-                              const opacity = 0.2;
+                              const opacity = Math.min((totalCalories / (3000 * data.length)) * 0.4 + 0.1, 0.5);
                               bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                             }
 
                             return (
                               <td
-                                key={`total-${category.name}-${task.name}`}
+                                key={`${category.name}-${task.name}`}
                                 className="py-2 px-4 text-center text-sm font-medium min-w-[80px]"
                                 style={{ backgroundColor: bgColor }}
                               >
