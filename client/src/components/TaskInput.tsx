@@ -45,7 +45,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         onClick={() => handleChange(!task.completed)}
         style={getButtonStyle(Boolean(task.completed))}
       >
-        {task.completed ? 'Выполнено' : 'Отметить'}
+        {task.emoji} {task.completed ? 'Выполнено' : task.name}
       </Button>
     );
   }
@@ -53,30 +53,36 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     return (
-      <Input
-        type="number"
-        value={value}
-        onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-        style={getInputStyle(value > 0)}
-        placeholder="Время (мин)"
-        min="0"
-        step="20"
-      />
+      <div className="flex items-center gap-2">
+        <span className="text-white/60">{task.emoji}</span>
+        <Input
+          type="number"
+          value={value}
+          onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+          style={getInputStyle(value > 0)}
+          placeholder={task.name}
+          min="0"
+          step="20"
+        />
+      </div>
     );
   }
 
   if (task.type === TaskType.CALORIE) {
     const value = task.value || 0;
     return (
-      <Input
-        type="number"
-        value={value}
-        onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-        style={getInputStyle(value > 0)}
-        placeholder="Калории"
-        min="0"
-        step="200"
-      />
+      <div className="flex items-center gap-2">
+        <span className="text-white/60">{task.emoji}</span>
+        <Input
+          type="number"
+          value={value}
+          onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+          style={getInputStyle(value > 0)}
+          placeholder={task.name}
+          min="0"
+          step="200"
+        />
+      </div>
     );
   }
 
@@ -84,17 +90,20 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const hasValue = task.value && task.value > 0;
     return (
       <div className="relative w-full">
-        <Input
-          type="number"
-          value={task.value || ''}
-          onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          style={getInputStyle(hasValue)}
-          placeholder="0"
-          min="0"
-        />
+        <div className="flex items-center gap-2">
+          <span className="text-white/60">{task.emoji}</span>
+          <Input
+            type="number"
+            value={task.value || ''}
+            onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+            style={getInputStyle(hasValue)}
+            placeholder={task.name}
+            min="0"
+          />
+        </div>
         <span style={{
           position: 'absolute',
-          left: '0.5rem',
+          right: '0.5rem',
           top: '50%',
           transform: 'translateY(-50%)',
           fontSize: '0.875rem',
@@ -109,14 +118,17 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
 
   if (task.type === TaskType.EXPENSE_NOTE) {
     return (
-      <Input
-        type="text"
-        value={task.textValue || ''}
-        onChange={(e) => handleChange(e.target.value)}
-        className="w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium"
-        placeholder="Описание..."
-        maxLength={255}
-      />
+      <div className="flex items-center gap-2">
+        <span className="text-white/60">{task.emoji}</span>
+        <Input
+          type="text"
+          value={task.textValue || ''}
+          onChange={(e) => handleChange(e.target.value)}
+          className="w-full h-9 bg-zinc-800 border-0 text-base text-white/90 font-medium"
+          placeholder={task.name}
+          maxLength={255}
+        />
+      </div>
     );
   }
 

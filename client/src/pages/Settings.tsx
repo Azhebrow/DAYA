@@ -254,7 +254,6 @@ export default function SettingsPage() {
     }
   };
 
-  // Найдем задачи для каждой категории
   const mindTasks = tasks.find(c => c.name === 'Разум')?.tasks || [];
   const timeTasks = tasks.find(c => c.name === 'Время')?.tasks || [];
   const healthTasks = tasks.find(c => c.name === 'Здоровье')?.tasks || [];
@@ -271,7 +270,6 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Mind tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Разум</Label>
               {mindTasks.map(task => (
@@ -287,8 +285,6 @@ export default function SettingsPage() {
                 />
               ))}
             </div>
-
-            {/* Time tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Время</Label>
               {timeTasks.map(task => (
@@ -304,8 +300,6 @@ export default function SettingsPage() {
                 />
               ))}
             </div>
-
-            {/* Health tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Здоровье</Label>
               {healthTasks.map(task => (
@@ -321,8 +315,6 @@ export default function SettingsPage() {
                 />
               ))}
             </div>
-
-            {/* Habits tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Пороки</Label>
               {habitsTasks.map(task => (
@@ -338,8 +330,6 @@ export default function SettingsPage() {
                 />
               ))}
             </div>
-
-            {/* Expenses tasks */}
             <div className="space-y-3">
               <Label className="text-sm text-muted-foreground">Траты</Label>
               {expensesTasks.map(task => (
@@ -618,7 +608,6 @@ export default function SettingsPage() {
 }
 
 const colorPalette = [
-  // Красные и оранжевые оттенки
   { name: 'red', value: '--red', hex: 'var(--red)' },
   { name: 'red-light', value: '--red-light', hex: 'var(--red-light)' },
   { name: 'red-dark', value: '--red-dark', hex: 'var(--red-dark)' },
@@ -628,8 +617,6 @@ const colorPalette = [
   { name: 'rose', value: '--rose', hex: 'var(--rose)' },
   { name: 'rose-light', value: '--rose-light', hex: 'var(--rose-light)' },
   { name: 'amber', value: '--amber', hex: 'var(--amber)' },
-
-  // Синие оттенки
   { name: 'blue', value: '--blue', hex: 'var(--blue)' },
   { name: 'blue-light', value: '--blue-light', hex: 'var(--blue-light)' },
   { name: 'blue-dark', value: '--blue-dark', hex: 'var(--blue-dark)' },
@@ -637,8 +624,6 @@ const colorPalette = [
   { name: 'cyan-light', value: '--cyan-light', hex: 'var(--cyan-light)' },
   { name: 'sky', value: '--sky', hex: 'var(--sky)' },
   { name: 'indigo', value: '--indigo', hex: 'var(--indigo)' },
-
-  // Зеленые оттенки
   { name: 'green', value: '--green', hex: 'var(--green)' },
   { name: 'green-light', value: '--green-light', hex: 'var(--green-light)' },
   { name: 'green-dark', value: '--green-dark', hex: 'var(--green-dark)' },
@@ -646,8 +631,6 @@ const colorPalette = [
   { name: 'emerald-light', value: '--emerald-light', hex: 'var(--emerald-light)' },
   { name: 'lime', value: '--lime', hex: 'var(--lime)' },
   { name: 'teal', value: '--teal', hex: 'var(--teal)' },
-
-  // Фиолетовые и розовые оттенки
   { name: 'purple', value: '--purple', hex: 'var(--purple)' },
   { name: 'purple-light', value: '--purple-light', hex: 'var(--purple-light)' },
   { name: 'purple-dark', value: '--purple-dark', hex: 'var(--purple-dark)' },
@@ -656,7 +639,6 @@ const colorPalette = [
   { name: 'pink', value: '--pink', hex: 'var(--pink)' },
 ];
 
-// Updated ColorPicker component
 const ColorPicker = ({
   value,
   onChange,
