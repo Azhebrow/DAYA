@@ -238,7 +238,7 @@ function Statistics() {
       const weekNum = Math.ceil(differenceInDays(date, startOfYear(date)) / 7);
       return `${weekNum} нед`;
     } else {
-      return format(date, "LLL", { locale: ru }); 
+      return format(date, "LLL", { locale: ru });
     }
   };
 
@@ -270,7 +270,6 @@ function Statistics() {
 
     return periodData;
   };
-
 
 
   const calculateTotalTime = (day: DayEntry): number => {
@@ -375,14 +374,16 @@ function Statistics() {
     localStorage.setItem("statistics_display_type", value);
   };
 
-  const getSubcategoryName = (categoryType: string, taskId: string): string => {
+  const getTaskNameFromSettings = (settings: Settings | undefined, taskId: string): string => {
     if (!settings?.subcategories) return taskId;
 
-    const subcategories = settings.subcategories[categoryType.toLowerCase()];
-    if (!subcategories) return taskId;
-
-    const subcategory = subcategories.find(sub => sub.id === taskId);
-    return subcategory ? subcategory.name : taskId;
+    for (const categorySubcategories of Object.values(settings.subcategories)) {
+      const subcategory = categorySubcategories.find(sub => sub.id === taskId);
+      if (subcategory) {
+        return subcategory.name;
+      }
+    }
+    return taskId;
   };
 
   const CATEGORY_ICONS: { [key: string]: React.ReactNode } = {
@@ -841,7 +842,7 @@ function Statistics() {
                         .flatMap((category) =>
                           category.tasks.map((task) => (
                             <th
-                              key={`${category.name}-${task.name}`}
+                              key={`${category.name}-${task.id}`}
                               className="py-2 px-4 text-center text-xs sm:text-sm font-medium whitespace-nowrap"
                               style={{
                                 backgroundColor: hexToRGBA(getVarColor(category.name), 0.2),
@@ -850,7 +851,7 @@ function Statistics() {
                                 minWidth: "80px",
                               }}
                             >
-                              {task.name}
+                              {getTaskNameFromSettings(settings, task.id)}
                             </th>
                           ))
                         )}
@@ -894,7 +895,7 @@ function Statistics() {
                                 if (displayType === "days") {
                                   const dayEntry = entry as DayEntry;
                                   const categoryInDay = dayEntry.categories.find(c => c.name === category.name);
-                                  const taskInDay = categoryInDay?.tasks.find(t => t.name === task.name);
+                                  const taskInDay = categoryInDay?.tasks.find(t => t.id === task.id);
 
                                   if (task.type === TaskType.CHECKBOX) {
                                     const isCompleted = taskInDay?.completed || false;
@@ -936,7 +937,7 @@ function Statistics() {
 
                                 return (
                                   <td
-                                    key={`${periodKey}-${category.name}-${task.name}`}
+                                    key={`${periodKey}-${category.name}-${task.id}`}
                                     className="px-4 py-2 text-center whitespace-nowrap"
                                     style={{
                                       backgroundColor: bgColor,
@@ -974,7 +975,7 @@ function Statistics() {
 
                             const taskStats = data.reduce((acc, day) => {
                               const cat = day.categories.find(c => c.name === category.name);
-                              const t = cat?.tasks.find(t => t.name === task.name);
+                              const t = cat?.tasks.find(t => t.id === task.id);
 
                               if (task.type === TaskType.CHECKBOX) {
                                 acc.completed = (acc.completed || 0) + (t?.completed ? 1 : 0);
@@ -1004,7 +1005,7 @@ function Statistics() {
 
                             return (
                               <td
-                                key={`total-${category.name}-${task.name}`}
+                                key={`total-${category.name}-${task.id}`}
                                 className="px-4 py-2 text-center whitespace-nowrap"
                                 style={{ backgroundColor: bgColor }}
                               >
