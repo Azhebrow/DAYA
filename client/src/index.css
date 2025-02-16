@@ -25,7 +25,7 @@
     --ring: 240 4.9% 83.9%;
     --radius: 0.75rem;
 
-    /* Базовые цвета для категорий */
+    /* Базовые цвета */
     --purple: #9333EA;
     --blue: #3B82F6;
     --green: #22C55E;
@@ -43,6 +43,44 @@
     --lime: #84CC16;
     --sky: #0EA5E9;
     --fuchsia: #D946EF;
+
+    /* Дополнительные оттенки */
+    --purple-light: #A855F7;
+    --blue-light: #60A5FA;
+    --green-light: #4ADE80;
+    --red-light: #FF6B6B;
+    --orange-light: #FB923C;
+    --yellow-light: #FACC15;
+    --pink-light: #F472B6;
+    --teal-light: #2DD4BF;
+    --indigo-light: #818CF8;
+    --cyan-light: #22D3EE;
+    --emerald-light: #34D399;
+    --rose-light: #FB7185;
+    --violet-light: #A78BFA;
+    --amber-light: #FCD34D;
+    --lime-light: #A3E635;
+    --sky-light: #38BDF8;
+    --fuchsia-light: #E879F9;
+
+    /* Насыщенные оттенки */
+    --purple-dark: #7E22CE;
+    --blue-dark: #2563EB;
+    --green-dark: #16A34A;
+    --red-dark: #DC2626;
+    --orange-dark: #EA580C;
+    --yellow-dark: #CA8A04;
+    --pink-dark: #DB2777;
+    --teal-dark: #0D9488;
+    --indigo-dark: #4F46E5;
+    --cyan-dark: #0891B2;
+    --emerald-dark: #059669;
+    --rose-dark: #E11D48;
+    --violet-dark: #7C3AED;
+    --amber-dark: #D97706;
+    --lime-dark: #65A30D;
+    --sky-dark: #0284C7;
+    --fuchsia-dark: #C026D3;
   }
 }
 
@@ -99,4 +137,21 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Стили для выбора цвета */
+.color-picker-grid {
+  @apply grid grid-cols-5 gap-2 p-2;
+}
+
+.color-option {
+  @apply w-10 h-10 rounded-lg transition-all duration-200 cursor-pointer hover:scale-110 ring-2 ring-offset-2 ring-offset-background;
+}
+
+.color-option.selected {
+  @apply ring-white scale-110;
+}
+
+.color-option.disabled {
+  @apply opacity-40 cursor-not-allowed hover:scale-100;
 }

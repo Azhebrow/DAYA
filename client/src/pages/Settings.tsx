@@ -29,8 +29,9 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Определяем расширенную палитру цветов
+// Updated colorPalette
 const colorPalette = [
+  // Основные цвета
   { name: 'purple', value: '--purple', hex: 'var(--purple)' },
   { name: 'blue', value: '--blue', hex: 'var(--blue)' },
   { name: 'green', value: '--green', hex: 'var(--green)' },
@@ -41,19 +42,37 @@ const colorPalette = [
   { name: 'teal', value: '--teal', hex: 'var(--teal)' },
   { name: 'indigo', value: '--indigo', hex: 'var(--indigo)' },
   { name: 'cyan', value: '--cyan', hex: 'var(--cyan)' },
+  // Светлые оттенки
+  { name: 'purple-light', value: '--purple-light', hex: 'var(--purple-light)' },
+  { name: 'blue-light', value: '--blue-light', hex: 'var(--blue-light)' },
+  { name: 'green-light', value: '--green-light', hex: 'var(--green-light)' },
+  { name: 'red-light', value: '--red-light', hex: 'var(--red-light)' },
+  { name: 'orange-light', value: '--orange-light', hex: 'var(--orange-light)' },
+  // Темные оттенки
+  { name: 'purple-dark', value: '--purple-dark', hex: 'var(--purple-dark)' },
+  { name: 'blue-dark', value: '--blue-dark', hex: 'var(--blue-dark)' },
+  { name: 'green-dark', value: '--green-dark', hex: 'var(--green-dark)' },
+  { name: 'red-dark', value: '--red-dark', hex: 'var(--red-dark)' },
+  { name: 'orange-dark', value: '--orange-dark', hex: 'var(--orange-dark)' },
+  // Дополнительные цвета
   { name: 'emerald', value: '--emerald', hex: 'var(--emerald)' },
   { name: 'rose', value: '--rose', hex: 'var(--rose)' },
+  { name: 'violet', value: '--violet', hex: 'var(--violet)' },
+  { name: 'amber', value: '--amber', hex: 'var(--amber)' },
+  { name: 'lime', value: '--lime', hex: 'var(--lime)' },
+  { name: 'sky', value: '--sky', hex: 'var(--sky)' },
+  { name: 'fuchsia', value: '--fuchsia', hex: 'var(--fuchsia)' },
 ];
 
-// Компонент выбора цвета через Popover
-const ColorPicker = ({ 
-  value, 
-  onChange, 
-  usedColors, 
-  categoryName 
-}: { 
-  value: string; 
-  onChange: (value: string) => void; 
+// Updated ColorPicker component
+const ColorPicker = ({
+  value,
+  onChange,
+  usedColors,
+  categoryName
+}: {
+  value: string;
+  onChange: (value: string) => void;
   usedColors: string[];
   categoryName: string;
 }) => {
@@ -66,28 +85,29 @@ const ColorPicker = ({
           variant="ghost"
           className="w-full p-0 h-auto hover:bg-transparent"
         >
-          <div 
-            className="p-4 rounded-lg transition-all duration-200 hover:opacity-90"
+          <div
+            className="w-full p-6 rounded-xl transition-all duration-200 hover:opacity-90 flex items-center justify-center gap-3"
             style={{ backgroundColor: `var(${value})` }}
           >
-            {categoryName === 'Разум' && <Brain className="h-5 w-5 text-white" />}
-            {categoryName === 'Время' && <Clock className="h-5 w-5 text-white" />}
-            {categoryName === 'Спорт' && <Dumbbell className="h-5 w-5 text-white" />}
-            {categoryName === 'Привычки' && <Sparkles className="h-5 w-5 text-white" />}
-            {categoryName === 'Траты' && <DollarSign className="h-5 w-5 text-white" />}
+            <span className="text-white">
+              {categoryName === 'Разум' && <Brain className="h-6 w-6" />}
+              {categoryName === 'Время' && <Clock className="h-6 w-6" />}
+              {categoryName === 'Спорт' && <Dumbbell className="h-6 w-6" />}
+              {categoryName === 'Привычки' && <Sparkles className="h-6 w-6" />}
+              {categoryName === 'Траты' && <DollarSign className="h-6 w-6" />}
+            </span>
           </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-3">
-        <div className="grid grid-cols-4 gap-2">
+      <PopoverContent className="w-[320px] p-4">
+        <div className="color-picker-grid">
           {colorPalette.map((color) => (
             <button
               key={color.value}
               onClick={() => !isColorUsed(color.value) && onChange(color.value)}
-              className={`w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-background transition-all
-                ${value === color.value ? 'ring-white scale-110' : 'ring-transparent hover:scale-105'}
-                ${isColorUsed(color.value) ? 'opacity-40 cursor-not-allowed' : ''}
-              `}
+              className={`color-option ${value === color.value ? 'selected' : ''} ${
+                isColorUsed(color.value) ? 'disabled' : ''
+              }`}
               style={{ backgroundColor: color.hex }}
               disabled={isColorUsed(color.value)}
               title={isColorUsed(color.value) ? 'Этот цвет уже используется' : color.name}
@@ -99,7 +119,7 @@ const ColorPicker = ({
   );
 };
 
-// Основной текст клятвы остается без изменений
+//Rest of the code remains the same.
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
 Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
 Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
