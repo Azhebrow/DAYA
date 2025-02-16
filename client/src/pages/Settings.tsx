@@ -159,25 +159,6 @@ const SubcategoryEditor = ({
         <div className="space-y-4">
           {subcategories.map((sub, index) => (
             <div key={sub.id} className="flex items-center gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-12">
-                    {sub.emoji}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <EmojiPicker
-                    onEmojiClick={(emojiData) => {
-                      const newSubcategories = [...subcategories];
-                      newSubcategories[index] = {
-                        ...sub,
-                        emoji: emojiData.emoji
-                      };
-                      onUpdate(category, newSubcategories);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
               <Input
                 value={sub.name}
                 onChange={(e) => {
@@ -198,7 +179,43 @@ const SubcategoryEditor = ({
   );
 };
 
-export default function SettingsPage() {
+const DEFAULT_SETTINGS = settingsSchema.parse({
+  startDate: '2025-02-07',
+  endDate: '2025-09-09',
+  oathText: DEFAULT_OATH_TEXT,
+  colors: {
+    mind: '--purple',
+    time: '--green',
+    sport: '--red',
+    habits: '--orange',
+    expenses: '--orange',
+    daySuccess: '--green'
+  },
+  subcategories: {
+    mind: [
+      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+    ],
+    time: [
+      { id: 'work', name: '💼 Работа', emoji: '💼' },
+      { id: 'study', name: '📚 Учёба', emoji: '📚' },
+      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+    ],
+    sport: [
+      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+    ],
+    habits: [
+      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+    ]
+  }
+});
+
+const SettingsPage = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
@@ -206,41 +223,7 @@ export default function SettingsPage() {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings(),
-    initialData: settingsSchema.parse({
-      startDate: '2025-02-07',
-      endDate: '2025-09-09',
-      oathText: DEFAULT_OATH_TEXT,
-      colors: {
-        mind: '--purple',
-        time: '--green',
-        sport: '--red',
-        habits: '--orange',
-        expenses: '--orange',
-        daySuccess: '--green'
-      },
-      subcategories: {
-        mind: [
-          { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-          { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-          { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-        ],
-        time: [
-          { id: 'work', name: '💼 Работа', emoji: '💼' },
-          { id: 'study', name: '📚 Учёба', emoji: '📚' },
-          { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-        ],
-        sport: [
-          { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-          { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-          { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-        ],
-        habits: [
-          { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-          { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-          { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-        ]
-      }
-    })
+    initialData: DEFAULT_SETTINGS
   });
 
   const handleSettingChange = async (key: keyof Settings, value: any) => {
@@ -616,4 +599,6 @@ export default function SettingsPage() {
       </div>
     </div>
   );
-}
+};
+
+export default SettingsPage;
