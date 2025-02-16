@@ -29,36 +29,75 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Определяем доступные цвета для палитры
+// Определяем расширенную палитру цветов
 const colorPalette = [
-  { name: 'purple', value: 'purple-500', hex: '#A855F7' },
-  { name: 'blue', value: 'blue-500', hex: '#3B82F6' },
-  { name: 'green', value: 'green-500', hex: '#22C55E' },
-  { name: 'red', value: 'red-500', hex: '#EF4444' },
-  { name: 'orange', value: 'orange-500', hex: '#F97316' },
-  { name: 'yellow', value: 'yellow-500', hex: '#EAB308' },
-  { name: 'pink', value: 'pink-500', hex: '#EC4899' },
-  { name: 'teal', value: 'teal-500', hex: '#14B8A6' }
+  { name: 'purple', value: 'purple-500', hex: 'hsl(var(--purple-500))' },
+  { name: 'blue', value: 'blue-500', hex: 'hsl(var(--blue-500))' },
+  { name: 'green', value: 'green-500', hex: 'hsl(var(--green-500))' },
+  { name: 'red', value: 'red-500', hex: 'hsl(var(--red-500))' },
+  { name: 'orange', value: 'orange-500', hex: 'hsl(var(--orange-500))' },
+  { name: 'yellow', value: 'yellow-500', hex: 'hsl(var(--yellow-500))' },
+  { name: 'pink', value: 'pink-500', hex: 'hsl(var(--pink-500))' },
+  { name: 'teal', value: 'teal-500', hex: 'hsl(var(--teal-500))' },
+  { name: 'indigo', value: 'indigo-500', hex: 'hsl(var(--indigo-500))' },
+  { name: 'cyan', value: 'cyan-500', hex: 'hsl(var(--cyan-500))' },
+  { name: 'emerald', value: 'emerald-500', hex: 'hsl(var(--emerald-500))' },
+  { name: 'rose', value: 'rose-500', hex: 'hsl(var(--rose-500))' },
 ];
 
-// Компонент выбора цвета
-const ColorPicker = ({ value, onChange, label }: { value: string; onChange: (value: string) => void; label: string }) => (
-  <div className="space-y-2">
-    <Label>{label}</Label>
-    <div className="grid grid-cols-4 gap-2">
-      {colorPalette.map((color) => (
-        <button
-          key={color.value}
-          onClick={() => onChange(color.value)}
-          className={`w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-background transition-all
-            ${value === color.value ? 'ring-white scale-110' : 'ring-transparent hover:scale-105'}`}
-          style={{ backgroundColor: color.hex }}
-          title={color.name}
-        />
-      ))}
-    </div>
-  </div>
-);
+// Компонент выбора цвета через Popover
+const ColorPicker = ({ 
+  value, 
+  onChange, 
+  usedColors, 
+  categoryName 
+}: { 
+  value: string; 
+  onChange: (value: string) => void; 
+  usedColors: string[];
+  categoryName: string;
+}) => {
+  const isColorUsed = (color: string) => usedColors.includes(color) && color !== value;
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          className="w-full p-0 h-auto hover:bg-transparent"
+        >
+          <div 
+            className="p-4 rounded-lg transition-all duration-200 hover:opacity-90"
+            style={{ backgroundColor: `hsl(var(--${value}))` }}
+          >
+            {categoryName === 'Разум' && <Brain className="h-5 w-5 text-white" />}
+            {categoryName === 'Время' && <Clock className="h-5 w-5 text-white" />}
+            {categoryName === 'Спорт' && <Dumbbell className="h-5 w-5 text-white" />}
+            {categoryName === 'Привычки' && <Sparkles className="h-5 w-5 text-white" />}
+            {categoryName === 'Траты' && <DollarSign className="h-5 w-5 text-white" />}
+          </div>
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-3">
+        <div className="grid grid-cols-4 gap-2">
+          {colorPalette.map((color) => (
+            <button
+              key={color.value}
+              onClick={() => !isColorUsed(color.value) && onChange(color.value)}
+              className={`w-8 h-8 rounded-full ring-2 ring-offset-2 ring-offset-background transition-all
+                ${value === color.value ? 'ring-white scale-110' : 'ring-transparent hover:scale-105'}
+                ${isColorUsed(color.value) ? 'opacity-40 cursor-not-allowed' : ''}
+              `}
+              style={{ backgroundColor: color.hex }}
+              disabled={isColorUsed(color.value)}
+              title={isColorUsed(color.value) ? 'Этот цвет уже используется' : color.name}
+            />
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
 
 // Основной текст клятвы остается без изменений
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
@@ -142,9 +181,6 @@ export default function SettingsPage() {
       });
     }
   };
-
-  // Convert minutes to hours for display - REMOVED REDUNDANT CODE
-  // const timeTargetInHours = settings.timeTarget ? settings.timeTarget / 60 : 0;
 
 
   return (
@@ -276,73 +312,95 @@ export default function SettingsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Разум */}
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-lg bg-${settings.colors.mind} flex items-center justify-center`}>
-                  <Brain className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-grow">
+              <div className="space-y-6">
+                {/* Разум */}
+                <div className="flex items-center gap-4">
                   <ColorPicker
                     value={settings.colors.mind}
                     onChange={(value) => handleSettingChange('colors', { mind: value })}
-                    label="Разум"
+                    usedColors={[
+                      settings.colors.time,
+                      settings.colors.sport,
+                      settings.colors.habits,
+                      settings.colors.expenses
+                    ]}
+                    categoryName="Разум"
                   />
+                  <div className="flex-grow">
+                    <Label>Разум</Label>
+                  </div>
                 </div>
-              </div>
 
-              {/* Время */}
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-lg bg-${settings.colors.time} flex items-center justify-center`}>
-                  <Clock className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-grow">
+                {/* Время */}
+                <div className="flex items-center gap-4">
                   <ColorPicker
                     value={settings.colors.time}
                     onChange={(value) => handleSettingChange('colors', { time: value })}
-                    label="Время"
+                    usedColors={[
+                      settings.colors.mind,
+                      settings.colors.sport,
+                      settings.colors.habits,
+                      settings.colors.expenses
+                    ]}
+                    categoryName="Время"
                   />
+                  <div className="flex-grow">
+                    <Label>Время</Label>
+                  </div>
                 </div>
-              </div>
 
-              {/* Спорт */}
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-lg bg-${settings.colors.sport} flex items-center justify-center`}>
-                  <Dumbbell className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-grow">
+                {/* Спорт */}
+                <div className="flex items-center gap-4">
                   <ColorPicker
                     value={settings.colors.sport}
                     onChange={(value) => handleSettingChange('colors', { sport: value })}
-                    label="Спорт"
+                    usedColors={[
+                      settings.colors.mind,
+                      settings.colors.time,
+                      settings.colors.habits,
+                      settings.colors.expenses
+                    ]}
+                    categoryName="Спорт"
                   />
+                  <div className="flex-grow">
+                    <Label>Спорт</Label>
+                  </div>
                 </div>
-              </div>
 
-              {/* Привычки */}
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-lg bg-${settings.colors.habits} flex items-center justify-center`}>
-                  <Sparkles className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-grow">
+                {/* Привычки */}
+                <div className="flex items-center gap-4">
                   <ColorPicker
                     value={settings.colors.habits}
                     onChange={(value) => handleSettingChange('colors', { habits: value })}
-                    label="Привычки"
+                    usedColors={[
+                      settings.colors.mind,
+                      settings.colors.time,
+                      settings.colors.sport,
+                      settings.colors.expenses
+                    ]}
+                    categoryName="Привычки"
                   />
+                  <div className="flex-grow">
+                    <Label>Привычки</Label>
+                  </div>
                 </div>
-              </div>
 
-              {/* Траты */}
-              <div className="flex items-center gap-4">
-                <div className={`p-4 rounded-lg bg-${settings.colors.expenses} flex items-center justify-center`}>
-                  <DollarSign className="h-5 w-5 text-white" />
-                </div>
-                <div className="flex-grow">
+                {/* Траты */}
+                <div className="flex items-center gap-4">
                   <ColorPicker
                     value={settings.colors.expenses}
                     onChange={(value) => handleSettingChange('colors', { expenses: value })}
-                    label="Траты"
+                    usedColors={[
+                      settings.colors.mind,
+                      settings.colors.time,
+                      settings.colors.sport,
+                      settings.colors.habits
+                    ]}
+                    categoryName="Траты"
                   />
+                  <div className="flex-grow">
+                    <Label>Траты</Label>
+                  </div>
                 </div>
               </div>
             </CardContent>
