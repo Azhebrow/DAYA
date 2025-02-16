@@ -27,12 +27,35 @@ export const TaskCard = React.memo(({
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
+    // Получаем текущие настройки
+    const stored = localStorage.getItem('day_success_tracker_settings');
+    let colors;
+    try {
+      if (stored) {
+        const settings = JSON.parse(stored);
+        colors = settings.colors;
+      }
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+    }
+
+    // Используем значения по умолчанию, если настройки недоступны
+    if (!colors) {
+      colors = {
+        mind: '--purple',
+        time: '--green',
+        sport: '--red',
+        habits: '--orange',
+        expenses: '--orange'
+      };
+    }
+
     switch (category.name) {
-      case 'Разум': return 'var(--purple)';
-      case 'Время': return 'var(--green)';
-      case 'Спорт': return 'var(--red)';
-      case 'Привычки': return 'var(--orange)';
-      default: return 'var(--orange)';
+      case 'Разум': return `var(${colors.mind})`;
+      case 'Время': return `var(${colors.time})`;
+      case 'Спорт': return `var(${colors.sport})`;
+      case 'Привычки': return `var(${colors.habits})`;
+      default: return `var(${colors.expenses})`;
     }
   };
 

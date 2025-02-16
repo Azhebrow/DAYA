@@ -31,18 +31,18 @@ import {
 
 // Определяем расширенную палитру цветов
 const colorPalette = [
-  { name: 'purple', value: 'purple-500', hex: 'hsl(var(--purple-500))' },
-  { name: 'blue', value: 'blue-500', hex: 'hsl(var(--blue-500))' },
-  { name: 'green', value: 'green-500', hex: 'hsl(var(--green-500))' },
-  { name: 'red', value: 'red-500', hex: 'hsl(var(--red-500))' },
-  { name: 'orange', value: 'orange-500', hex: 'hsl(var(--orange-500))' },
-  { name: 'yellow', value: 'yellow-500', hex: 'hsl(var(--yellow-500))' },
-  { name: 'pink', value: 'pink-500', hex: 'hsl(var(--pink-500))' },
-  { name: 'teal', value: 'teal-500', hex: 'hsl(var(--teal-500))' },
-  { name: 'indigo', value: 'indigo-500', hex: 'hsl(var(--indigo-500))' },
-  { name: 'cyan', value: 'cyan-500', hex: 'hsl(var(--cyan-500))' },
-  { name: 'emerald', value: 'emerald-500', hex: 'hsl(var(--emerald-500))' },
-  { name: 'rose', value: 'rose-500', hex: 'hsl(var(--rose-500))' },
+  { name: 'purple', value: '--purple', hex: 'var(--purple)' },
+  { name: 'blue', value: '--blue', hex: 'var(--blue)' },
+  { name: 'green', value: '--green', hex: 'var(--green)' },
+  { name: 'red', value: '--red', hex: 'var(--red)' },
+  { name: 'orange', value: '--orange', hex: 'var(--orange)' },
+  { name: 'yellow', value: '--yellow', hex: 'var(--yellow)' },
+  { name: 'pink', value: '--pink', hex: 'var(--pink)' },
+  { name: 'teal', value: '--teal', hex: 'var(--teal)' },
+  { name: 'indigo', value: '--indigo', hex: 'var(--indigo)' },
+  { name: 'cyan', value: '--cyan', hex: 'var(--cyan)' },
+  { name: 'emerald', value: '--emerald', hex: 'var(--emerald)' },
+  { name: 'rose', value: '--rose', hex: 'var(--rose)' },
 ];
 
 // Компонент выбора цвета через Popover
@@ -68,7 +68,7 @@ const ColorPicker = ({
         >
           <div 
             className="p-4 rounded-lg transition-all duration-200 hover:opacity-90"
-            style={{ backgroundColor: `hsl(var(--${value}))` }}
+            style={{ backgroundColor: `var(${value})` }}
           >
             {categoryName === 'Разум' && <Brain className="h-5 w-5 text-white" />}
             {categoryName === 'Время' && <Clock className="h-5 w-5 text-white" />}
@@ -114,16 +114,24 @@ export default function SettingsPage() {
         startDate: '2025-02-07',
         endDate: '2025-09-09',
         oathText: DEFAULT_OATH_TEXT,
-        colorScheme: 'default',
         colors: {
-          mind: 'purple-500',
-          time: 'green-500',
-          sport: 'red-500',
-          habits: 'orange-500',
-          expenses: 'orange-500',
+          mind: '--purple',
+          time: '--green',
+          sport: '--red',
+          habits: '--orange',
+          expenses: '--orange',
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
+      // Конвертируем старые значения цветов в новый формат
+      if (parsedSettings.colors) {
+        Object.keys(parsedSettings.colors).forEach(key => {
+          const colorValue = parsedSettings.colors[key];
+          if (!colorValue.startsWith('--')) {
+            parsedSettings.colors[key] = `--${colorValue.split('-')[0]}`;
+          }
+        });
+      }
       return parsedSettings;
     } catch (error) {
       console.error('Error parsing settings:', error);
@@ -131,13 +139,12 @@ export default function SettingsPage() {
         startDate: '2025-02-07',
         endDate: '2025-09-09',
         oathText: DEFAULT_OATH_TEXT,
-        colorScheme: 'default',
         colors: {
-          mind: 'purple-500',
-          time: 'green-500',
-          sport: 'red-500',
-          habits: 'orange-500',
-          expenses: 'orange-500',
+          mind: '--purple',
+          time: '--green',
+          sport: '--red',
+          habits: '--orange',
+          expenses: '--orange',
         }
       });
     }

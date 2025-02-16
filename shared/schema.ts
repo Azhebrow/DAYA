@@ -125,17 +125,17 @@ export const settingsSchema = z.object({
   timeRange: z.enum(['7', '14', '30']).default('7'),
   oathText: z.string().optional(),
   colors: z.object({
-    mind: z.string().default('purple-500'),
-    time: z.string().default('green-500'),
-    sport: z.string().default('red-500'),
-    habits: z.string().default('orange-500'),
-    expenses: z.string().default('orange-500'),
+    mind: z.string().default('--purple'),
+    time: z.string().default('--green'),
+    sport: z.string().default('--red'),
+    habits: z.string().default('--orange'),
+    expenses: z.string().default('--orange'),
   }).default({
-    mind: 'purple-500',
-    time: 'green-500',
-    sport: 'red-500',
-    habits: 'orange-500',
-    expenses: 'orange-500',
+    mind: '--purple',
+    time: '--green',
+    sport: '--red',
+    habits: '--orange',
+    expenses: '--orange',
   }),
   pomodoroSettings: pomodoroSettingsSchema.optional()
 });
