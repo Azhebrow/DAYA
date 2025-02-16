@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
-import { Brain, Clock, Dumbbell, Sparkles, DollarSign } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
 
 interface TaskCardProps {
   category: Category;
@@ -27,7 +27,6 @@ export const TaskCard = React.memo(({
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
-    // Получаем текущие настройки
     const stored = localStorage.getItem('day_success_tracker_settings');
     let colors;
     try {
@@ -39,7 +38,6 @@ export const TaskCard = React.memo(({
       console.error('Error parsing settings:', error);
     }
 
-    // Используем значения по умолчанию, если настройки недоступны
     if (!colors) {
       colors = {
         mind: '--purple',
@@ -64,7 +62,7 @@ export const TaskCard = React.memo(({
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
-      case 'Привычки': return <Sparkles className="h-5 w-5" />;
+      case 'Привычки': return <Ban className="h-5 w-5" />;
       default: return <DollarSign className="h-5 w-5" />;
     }
   };

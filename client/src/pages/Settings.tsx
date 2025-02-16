@@ -9,7 +9,7 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, ChevronDown, ChevronUp, Brain, Clock, Dumbbell, Sparkles, DollarSign } from 'lucide-react';
+import { CalendarIcon, ChevronDown, ChevronUp, Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -29,39 +29,44 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-// Updated colorPalette
+// Updated colorPalette - organized by color groups
 const colorPalette = [
-  // Основные цвета
-  { name: 'purple', value: '--purple', hex: 'var(--purple)' },
-  { name: 'blue', value: '--blue', hex: 'var(--blue)' },
-  { name: 'green', value: '--green', hex: 'var(--green)' },
+  // Красные и оранжевые оттенки
   { name: 'red', value: '--red', hex: 'var(--red)' },
-  { name: 'orange', value: '--orange', hex: 'var(--orange)' },
-  { name: 'yellow', value: '--yellow', hex: 'var(--yellow)' },
-  { name: 'pink', value: '--pink', hex: 'var(--pink)' },
-  { name: 'teal', value: '--teal', hex: 'var(--teal)' },
-  { name: 'indigo', value: '--indigo', hex: 'var(--indigo)' },
-  { name: 'cyan', value: '--cyan', hex: 'var(--cyan)' },
-  // Светлые оттенки
-  { name: 'purple-light', value: '--purple-light', hex: 'var(--purple-light)' },
-  { name: 'blue-light', value: '--blue-light', hex: 'var(--blue-light)' },
-  { name: 'green-light', value: '--green-light', hex: 'var(--green-light)' },
   { name: 'red-light', value: '--red-light', hex: 'var(--red-light)' },
-  { name: 'orange-light', value: '--orange-light', hex: 'var(--orange-light)' },
-  // Темные оттенки
-  { name: 'purple-dark', value: '--purple-dark', hex: 'var(--purple-dark)' },
-  { name: 'blue-dark', value: '--blue-dark', hex: 'var(--blue-dark)' },
-  { name: 'green-dark', value: '--green-dark', hex: 'var(--green-dark)' },
   { name: 'red-dark', value: '--red-dark', hex: 'var(--red-dark)' },
+  { name: 'orange', value: '--orange', hex: 'var(--orange)' },
+  { name: 'orange-light', value: '--orange-light', hex: 'var(--orange-light)' },
   { name: 'orange-dark', value: '--orange-dark', hex: 'var(--orange-dark)' },
-  // Дополнительные цвета
-  { name: 'emerald', value: '--emerald', hex: 'var(--emerald)' },
   { name: 'rose', value: '--rose', hex: 'var(--rose)' },
-  { name: 'violet', value: '--violet', hex: 'var(--violet)' },
+  { name: 'rose-light', value: '--rose-light', hex: 'var(--rose-light)' },
   { name: 'amber', value: '--amber', hex: 'var(--amber)' },
-  { name: 'lime', value: '--lime', hex: 'var(--lime)' },
+
+  // Синие оттенки
+  { name: 'blue', value: '--blue', hex: 'var(--blue)' },
+  { name: 'blue-light', value: '--blue-light', hex: 'var(--blue-light)' },
+  { name: 'blue-dark', value: '--blue-dark', hex: 'var(--blue-dark)' },
+  { name: 'cyan', value: '--cyan', hex: 'var(--cyan)' },
+  { name: 'cyan-light', value: '--cyan-light', hex: 'var(--cyan-light)' },
   { name: 'sky', value: '--sky', hex: 'var(--sky)' },
+  { name: 'indigo', value: '--indigo', hex: 'var(--indigo)' },
+
+  // Зеленые оттенки
+  { name: 'green', value: '--green', hex: 'var(--green)' },
+  { name: 'green-light', value: '--green-light', hex: 'var(--green-light)' },
+  { name: 'green-dark', value: '--green-dark', hex: 'var(--green-dark)' },
+  { name: 'emerald', value: '--emerald', hex: 'var(--emerald)' },
+  { name: 'emerald-light', value: '--emerald-light', hex: 'var(--emerald-light)' },
+  { name: 'lime', value: '--lime', hex: 'var(--lime)' },
+  { name: 'teal', value: '--teal', hex: 'var(--teal)' },
+
+  // Фиолетовые и розовые оттенки
+  { name: 'purple', value: '--purple', hex: 'var(--purple)' },
+  { name: 'purple-light', value: '--purple-light', hex: 'var(--purple-light)' },
+  { name: 'purple-dark', value: '--purple-dark', hex: 'var(--purple-dark)' },
+  { name: 'violet', value: '--violet', hex: 'var(--violet)' },
   { name: 'fuchsia', value: '--fuchsia', hex: 'var(--fuchsia)' },
+  { name: 'pink', value: '--pink', hex: 'var(--pink)' },
 ];
 
 // Updated ColorPicker component
@@ -93,7 +98,7 @@ const ColorPicker = ({
               {categoryName === 'Разум' && <Brain className="h-6 w-6" />}
               {categoryName === 'Время' && <Clock className="h-6 w-6" />}
               {categoryName === 'Спорт' && <Dumbbell className="h-6 w-6" />}
-              {categoryName === 'Привычки' && <Sparkles className="h-6 w-6" />}
+              {categoryName === 'Привычки' && <Ban className="h-6 w-6" />}
               {categoryName === 'Траты' && <DollarSign className="h-6 w-6" />}
             </span>
           </div>
@@ -119,7 +124,6 @@ const ColorPicker = ({
   );
 };
 
-//Rest of the code remains the same.
 const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
 Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
 Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
