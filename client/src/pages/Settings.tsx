@@ -409,10 +409,10 @@ export default function SettingsPage() {
                       settings.colors.sport,
                       settings.colors.expenses
                     ]}
-                    categoryName="Привычки"
+                    categoryName="Пороки"
                   />
                   <div className="flex-grow">
-                    <Label>Привычки</Label>
+                    <Label>Пороки</Label>
                   </div>
                 </div>
 
