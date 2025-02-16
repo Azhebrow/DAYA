@@ -653,9 +653,9 @@ export default function Statistics() {
                           0
                         );
 
-                        const maxDayTotal = Math.max(
-                          ...data.map((day) =>
-                            day.categories
+                        const maxExpense = Math.max(
+                          ...data.map((d) =>
+                            d.categories
                               .filter((c) => c.type === CategoryType.EXPENSE)
                               .reduce(
                                 (sum, c) =>
@@ -676,7 +676,7 @@ export default function Statistics() {
                             style={{
                               backgroundColor: hexToRGBA(
                                 getCssVar(settings.colors.expenses),
-                                Math.min((grandTotal / (maxDayTotal * data.length)) * 0.4 + 0.3, 0.8)
+                                Math.min((grandTotal / maxExpense) * 0.4 + 0.1, 0.5)
                               ),
                             }}
                           >
@@ -699,7 +699,7 @@ export default function Statistics() {
                             );
                           }, 0);
 
-                          const maxCategoryDayTotal = Math.max(
+                          const maxExpenseInCategory = Math.max(
                             ...data.map((d) => {
                               const cat = d.categories.find((c) => c.name === category.name);
                               return (
@@ -719,7 +719,7 @@ export default function Statistics() {
                               style={{
                                 backgroundColor: hexToRGBA(
                                   getCssVar(settings.colors.expenses),
-                                  Math.min((categoryTotal / (maxCategoryDayTotal * data.length)) * 0.4 + 0.3, 0.8)
+                                  Math.min((categoryTotal / maxExpenseInCategory) * 0.4 + 0.1, 0.5)
                                 ),
                               }}
                             >
@@ -830,14 +830,8 @@ export default function Statistics() {
                                   : "transparent";
                               } else if (task.type === TaskType.TIME) {
                                 displayValue = formatTimeTotal(task.value || 0);
-                                const maxValue = 8 * 60;
-                                const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                               } else if (task.type === TaskType.CALORIE) {
                                 displayValue = `${task.value || 0}`;
-                                const maxValue = 3000;
-                                const opacity = Math.min(((task.value || 0) / maxValue) * 0.4 + 0.1, 0.5);
-                                bgColor = hexToRGBA(getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]), opacity);
                               }
 
                               return (
@@ -895,11 +889,6 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = formatTimeTotal(totalMinutes);
-                              const maxValue = 8 * 60 * data.length;
-                              bgColor = hexToRGBA(
-                                getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]),
-                                Math.min((totalMinutes / maxValue) * 0.4 + 0.3, 0.8)
-                              );
                             } else if (task.type === TaskType.CALORIE) {
                               const totalCalories = data.reduce((sum, day) => {
                                 const cat = day.categories.find((c) => c.name === category.name);
@@ -907,11 +896,6 @@ export default function Statistics() {
                                 return sum + (t?.value || 0);
                               }, 0);
                               totalValue = `${totalCalories}`;
-                              const maxValue = 3000 * data.length;
-                              bgColor = hexToRGBA(
-                                getCssVar(settings.colors[category.name.toLowerCase() as keyof typeof settings.colors]),
-                                Math.min((totalCalories / maxValue) * 0.4 + 0.3, 0.8)
-                              );
                             }
 
                             return (
@@ -928,90 +912,6 @@ export default function Statistics() {
                           })
                         )}
                     </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="space-y-1 pb-2">
-          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <FileText className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: CATEGORY_COLORS.Успех }} />
-            Ежедневный отчет
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <div className="min-w-full inline-block align-middle">
-              <div className="overflow-hidden">
-                <table className="min-w-full divide-y divide-border">
-                  <thead>
-                    <tr className="bg-muted/50">
-                      <th scope="col" className="px-4 py-2 text-left text-sm font-semibold">Дата</th>
-                      <th scope="col" className="px-4 py-2 text-left text-sm font-semibold">Отчет</th>
-                      <th scope="col" className="px-4 py-2 text-right text-sm font-semibold">Разное (zł)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data
-                      .map((day) => {
-                        const reportCategory = day.categories.find(
-                          (c) => c.name === "Отчет",
-                        );
-                        const reportTask = reportCategory?.tasks.find(
-                          (t) => t.type === TaskType.EXPENSE_NOTE,
-                        );
-                        const miscExpenses = day.categories
-                          .filter((c) => c.type === CategoryType.EXPENSE)
-                          .reduce((sum, category) => {
-                            return (
-                              sum +
-                              category.tasks
-                                .filter((t) => t.type === TaskType.EXPENSE)
-                                .reduce(
-                                  (taskSum, task) =>
-                                    taskSum + (task.value || 0),
-                                  0,
-                                )
-                            );
-                          }, 0);
-
-                        if (!reportTask?.textValue) return null;
-
-                        return (
-                          <tr key={day.date} className="border-b border-border/10">
-                            <td className="py-2 px-4 font-medium">
-                              {format(new Date(day.date), "dd.MM.yyyy")}
-                            </td>
-                            <td className="py-2 px-4 whitespace-pre-wrap">
-                              {reportTask.textValue}
-                            </td>
-                            <td
-                              className="py-2 px-4 text-right font-medium"
-                              style={{
-                                backgroundColor: hexToRGBA(
-                                  getCssVar(settings.colors.expenses),
-                                  Math.min((miscExpenses / Math.max(...data.map(d =>
-                                    d.categories
-                                      .filter(c => c.type === CategoryType.EXPENSE)
-                                      .reduce((sum, category) =>
-                                        sum + category.tasks
-                                          .filter(t => t.type === TaskType.EXPENSE)
-                                          .reduce((taskSum, task) => taskSum + (task.value || 0), 0)
-                                      , 0)
-                                  ))) * 0.4 + 0.1, 0.5)
-                                )
-                              }}
-                            >
-                              {miscExpenses} zł
-                            </td>
-                          </tr>
-                        );
-                      })
-                      .filter(Boolean)}
                   </tbody>
                 </table>
               </div>
