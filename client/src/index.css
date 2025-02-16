@@ -25,31 +25,27 @@
     --ring: 240 4.9% 83.9%;
     --radius: 0.75rem;
 
-    /* Расширенная палитра цветов с высоким контрастом */
-    --purple-500: 265 89% 62%;
-    --blue-500: 217 91% 60%;
-    --green-500: 142 76% 45%;
-    --red-500: 0 84% 60%;
-    --orange-500: 24 94% 53%;
-    --yellow-500: 45 93% 47%;
-    --pink-500: 336 88% 56%;
-    --teal-500: 172 70% 40%;
-    --indigo-500: 231 88% 56%;
-    --cyan-500: 190 90% 42%;
-    --emerald-500: 160 84% 39%;
-    --rose-500: 350 89% 60%;
-    --violet-500: 258 90% 66%;
-    --amber-500: 38 92% 50%;
-    --lime-500: 84 81% 44%;
-    --sky-500: 199 89% 48%;
-    --fuchsia-500: 289 85% 58%;
-    --slate-500: 215 25% 27%;
-    --stone-500: 25 5% 45%;
-    --neutral-500: 0 0% 45%;
-    --zinc-500: 240 5% 45%;
-    --coolGray-500: 229 29% 45%;
-    --blueGray-500: 215 20% 45%;
-    --warmGray-500: 25 5% 45%;
+    /* Основные цвета категорий */
+    --category-mind: 265 89% 62%;      /* Фиолетовый */
+    --category-time: 142 76% 45%;      /* Зеленый */
+    --category-sport: 0 84% 60%;       /* Красный */
+    --category-habits: 24 94% 53%;     /* Оранжевый */
+    --category-expenses: 24 94% 53%;   /* Оранжевый */
+
+    /* Дополнительные цвета для выбора */
+    --color-blue: 217 91% 60%;
+    --color-yellow: 45 93% 47%;
+    --color-pink: 336 88% 56%;
+    --color-teal: 172 70% 40%;
+    --color-indigo: 231 88% 56%;
+    --color-cyan: 190 90% 42%;
+    --color-emerald: 160 84% 39%;
+    --color-rose: 350 89% 60%;
+    --color-violet: 258 90% 66%;
+    --color-amber: 38 92% 50%;
+    --color-lime: 84 81% 44%;
+    --color-sky: 199 89% 48%;
+    --color-fuchsia: 289 85% 58%;
   }
 }
 
@@ -62,40 +58,53 @@
   }
 }
 
-/* Custom scrollbar styles */
 @layer utilities {
-  /* For Webkit browsers (Chrome, Safari) */
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
+  /* Цвета категорий */
+  .text-category-mind { color: hsl(var(--category-mind)); }
+  .text-category-time { color: hsl(var(--category-time)); }
+  .text-category-sport { color: hsl(var(--category-sport)); }
+  .text-category-habits { color: hsl(var(--category-habits)); }
+  .text-category-expenses { color: hsl(var(--category-expenses)); }
 
-  ::-webkit-scrollbar-track {
-    @apply bg-muted/30 rounded-full;
-  }
+  .bg-category-mind { background-color: hsl(var(--category-mind)); }
+  .bg-category-time { background-color: hsl(var(--category-time)); }
+  .bg-category-sport { background-color: hsl(var(--category-sport)); }
+  .bg-category-habits { background-color: hsl(var(--category-habits)); }
+  .bg-category-expenses { background-color: hsl(var(--category-expenses)); }
+}
 
-  ::-webkit-scrollbar-thumb {
-    @apply bg-muted hover:bg-muted/80 rounded-full transition-colors duration-200;
-  }
+/* Простые анимации */
+.animate-in {
+  animation: fadeIn 0.3s ease-out;
+}
 
-  /* For Firefox */
-  * {
-    scrollbar-width: thin;
-    scrollbar-color: var(--secondary) var(--muted);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Category color utilities */
-.bg-category {
-  background-color: var(--category-color);
+/* Скроллбар */
+::-webkit-scrollbar {
+  width: 10px;
 }
 
-.text-category {
-  color: var(--category-color);
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
 }
 
-.ring-category {
-  --tw-ring-color: var(--category-color);
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--accent));
 }
 
 .task-card {
@@ -108,19 +117,4 @@
 
 .progress-bar-value {
   @apply h-full transition-all duration-500 ease-out;
-}
-
-.animate-in {
-  animation: fadeIn 0.5s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

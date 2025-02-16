@@ -1,8 +1,7 @@
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Category, CategoryType, settingsSchema } from '@shared/schema';
+import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
 import { Brain, Clock, Dumbbell, Sparkles, DollarSign } from 'lucide-react';
@@ -18,17 +17,6 @@ export const TaskCard = React.memo(({
   onTaskUpdate, 
   isExpenseCard = false 
 }: TaskCardProps) => {
-  const [settings] = React.useState(() => {
-    try {
-      const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({});
-      return settingsSchema.parse(JSON.parse(stored));
-    } catch (error) {
-      console.error('Error parsing settings:', error);
-      return settingsSchema.parse({});
-    }
-  });
-
   const progress = React.useMemo(() => 
     calculateCategoryProgress(category.tasks, category.type),
     [category.tasks, category.type]
@@ -38,91 +26,62 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  const getCategoryColor = () => {
-    switch (category.name) {
-      case 'Разум':
-        return settings.colors?.mind || 'purple-500';
-      case 'Время':
-        return settings.colors?.time || 'green-500';
-      case 'Спорт':
-        return settings.colors?.sport || 'red-500';
-      case 'Привычки':
-        return settings.colors?.habits || 'orange-500';
-      default:
-        return settings.colors?.expenses || 'orange-500';
-    }
-  };
-
   const getCategoryIcon = () => {
     switch (category.name) {
-      case 'Разум':
-        return <Brain className="h-5 w-5" />;
-      case 'Время':
-        return <Clock className="h-5 w-5" />;
-      case 'Спорт':
-        return <Dumbbell className="h-5 w-5" />;
-      case 'Привычки':
-        return <Sparkles className="h-5 w-5" />;
-      default:
-        return <DollarSign className="h-5 w-5" />;
+      case 'Разум': return <Brain className="h-5 w-5" />;
+      case 'Время': return <Clock className="h-5 w-5" />;
+      case 'Спорт': return <Dumbbell className="h-5 w-5" />;
+      case 'Привычки': return <Sparkles className="h-5 w-5" />;
+      default: return <DollarSign className="h-5 w-5" />;
     }
   };
-
-  const categoryColor = getCategoryColor();
-  const colorVar = `var(--${categoryColor})`;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      layout
     >
-      <Card className="bg-zinc-900/50 border-gray-800">
-        <div className="divide-y divide-zinc-800">
-          <div className="flex items-center h-[3.5rem]">
-            <div className="w-1/2 px-4 flex items-center gap-2">
-              <div style={{ color: colorVar }}>
-                {getCategoryIcon()}
-              </div>
-              <span className="text-base font-medium text-gray-200">
-                {category.name}
-              </span>
-            </div>
-            <div className="w-1/2 px-4">
-              {!isExpenseCard && (
-                <div className="relative w-full h-2.5 bg-zinc-800 rounded-full overflow-hidden">
-                  <div 
-                    className="absolute top-0 left-0 h-full transition-all duration-300 rounded-full"
-                    style={{ 
-                      width: `${progress}%`,
-                      background: colorVar
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+      <Card className="bg-zinc-900/50">
+        {/* Заголовок карточки */}
+        <div className="flex items-center h-14 px-4 border-b border-zinc-800">
+          <div className="flex items-center gap-2">
+            <span className="text-primary">{getCategoryIcon()}</span>
+            <span className="text-base font-medium text-gray-200">{category.name}</span>
           </div>
 
-          <div className="divide-y divide-zinc-800">
-            {category.tasks.map((task) => (
-              <div key={task.id} className="flex items-center h-[3.5rem]">
-                {!isExpenseCard && (
-                  <div className="w-1/2 px-4">
-                    <span className="text-base text-gray-400">{task.name}</span>
-                  </div>
-                )}
-                <div className={isExpenseCard ? "w-full px-4" : "w-1/2 px-4"}>
-                  <TaskInput
-                    task={task}
-                    onChange={(value) => handleTaskUpdate(task.id, value)}
-                    isExpenseCard={isExpenseCard}
-                    categoryColor={categoryColor}
-                  />
-                </div>
+          {/* Прогресс бар */}
+          {!isExpenseCard && (
+            <div className="ml-auto w-1/3">
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
-            ))}
-          </div>
+            </div>
+          )}
+        </div>
+
+        {/* Список задач */}
+        <div>
+          {category.tasks.map((task) => (
+            <div 
+              key={task.id} 
+              className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
+            >
+              {!isExpenseCard && (
+                <span className="w-1/2 text-gray-400">{task.name}</span>
+              )}
+              <div className={isExpenseCard ? "w-full" : "w-1/2"}>
+                <TaskInput
+                  task={task}
+                  onChange={(value) => handleTaskUpdate(task.id, value)}
+                  isExpenseCard={isExpenseCard}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
     </motion.div>
