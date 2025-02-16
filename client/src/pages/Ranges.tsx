@@ -28,6 +28,40 @@ const CATEGORY_HEADER_COLORS: { [key: string]: { bg: string; text: string } } = 
   'Привычки': { bg: '#F59E0B20', text: '#ffffff' }
 };
 
+// Обновляем функцию getExpenseColor для использования цвета из настроек
+const getExpenseColor = (expense: number, maxExpense: number) => {
+  const settings = storage.getSettings();
+  if (maxExpense === 0) return 'bg-transparent';
+  const ratio = expense / maxExpense;
+
+  const baseColor = settings.colors.category?.expenses || '#f97316'; // Оранжевый как запасной вариант
+  let opacity = '0.1';
+
+  if (ratio === 0) opacity = '0.1';
+  else if (ratio <= 0.3) opacity = '0.3';
+  else if (ratio <= 0.6) opacity = '0.5';
+  else if (ratio <= 0.8) opacity = '0.7';
+  else opacity = '0.9';
+
+  if (baseColor.startsWith('rgb')) {
+    const match = baseColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (match) {
+      const [_, r, g, b] = match;
+      return `bg-[rgba(${r},${g},${b},${opacity})]`;
+    }
+  }
+
+  if (baseColor.startsWith('#')) {
+    const hex = baseColor.slice(1);
+    const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16);
+    const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16);
+    const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16);
+    return `bg-[rgba(${r},${g},${b},${opacity})]`;
+  }
+
+  return 'bg-transparent';
+};
+
 export default function Ranges() {
   const [data, setData] = useState<DayEntry[]>([]);
   const [dateRangeText, setDateRangeText] = useState('');
@@ -98,33 +132,6 @@ export default function Ranges() {
     return 'transparent';
   };
 
-  const getExpenseColor = (value: number, maxValue: number) => {
-    const settings = storage.getSettings();
-    if (maxValue === 0) return 'transparent';
-    const normalizedValue = value / maxValue;
-    const opacity = 0.1 + (normalizedValue * 0.4);
-
-    const color = settings.colors.category?.expenses;
-    if (!color) return 'transparent';
-
-    if (color.startsWith('rgb')) {
-      const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-      if (match) {
-        const [_, r, g, b] = match;
-        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-      }
-    }
-
-    if (color.startsWith('#')) {
-      const hex = color.slice(1);
-      const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16);
-      const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16);
-      const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16);
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-    }
-
-    return 'transparent';
-  };
 
   const calculateExpenses = () => {
     if (!data.length) return { periods: [], categories: [] };
@@ -406,7 +413,6 @@ export default function Ranges() {
       periodScores
     };
   };
-
 
   const expenseData = calculateExpenses();
   const periodData = aggregateData();
@@ -698,11 +704,14 @@ export default function Ranges() {
                             : sum;
                         }, 0) / (Object.keys(taskSuccess.periodScores || {}).length || 1)
                       );
-                      const maxScore = 100;
+                      const maxScore = Math.max(
+                        ...Object.values(taskSuccess.periodScores || {}).map(period =>
+                          period.count > 0 ? Math.round(period.total / period.count) : 0
+                        )
+                      );
                       return (
                         <div
-                          style={{ backgroundColor: getSuccessColor(totalScore, maxScore) }}
-                          className="px-2 py-1 rounded"
+                          className={`px-2 py-1 rounded ${getSuccessColor(totalScore, maxScore)}`}
                         >
                           {totalScore}%
                         </div>
@@ -818,10 +827,7 @@ export default function Ranges() {
                         return (
                           <td
                             key={`${category.categoryName}-${period}`}
-                            className="py-2 px-4 text-center min-w-[90px]"
-                            style={{
-                              backgroundColor: getExpenseColor(value, maxExpense)
-                            }}
+                            className={`py-2 px-4 text-center min-w-[90px] ${getExpenseColor(value, maxExpense)}`}
                           >
                             {value} zł
                           </td>
