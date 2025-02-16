@@ -359,7 +359,7 @@ export default function Statistics() {
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
@@ -414,7 +414,7 @@ export default function Statistics() {
                   date: format(new Date(day.date), "dd.MM"),
                   totalTime: day.categories
                     .filter(category => category.type === CategoryType.TIME)
-                    .reduce((sum, category) => 
+                    .reduce((sum, category) =>
                       sum + category.tasks.reduce((taskSum, task) =>
                         taskSum + (task.type === TaskType.TIME ? task.value || 0 : 0), 0
                       ), 0
@@ -962,6 +962,9 @@ export default function Statistics() {
                                     style={{ backgroundColor: bgColor }}
                                   >
                                     {displayValue}
+                                    {task.type === TaskType.TIME ? 'ч' : ''}
+                                    {task.type === TaskType.CALORIE ? 'ккал' : ''}
+                                    {task.type === TaskType.CHECKBOX ? '%' : ''}
                                   </td>
                                 );
                               }),
