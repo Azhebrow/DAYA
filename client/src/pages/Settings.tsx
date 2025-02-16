@@ -158,6 +158,49 @@ const TaskNameEditor = ({
 
 const DEFAULT_OATH_TEXT = `[Your oath text here]`;
 
+const DEFAULT_TASKS = [
+  {
+    name: 'Разум',
+    type: 'mind',
+    tasks: [
+      { id: '1', name: 'Дыхание', emoji: '🫁', type: 'checkbox', completed: false },
+      { id: '2', name: 'Чай', emoji: '🍵', type: 'checkbox', completed: false },
+    ]
+  },
+  {
+    name: 'Время',
+    type: 'time',
+    tasks: [
+      { id: '3', name: 'Уборка', emoji: '🧹', type: 'time', value: 0 },
+      { id: '4', name: 'Работа', emoji: '💼', type: 'time', value: 0 },
+      { id: '5', name: 'Учёба', emoji: '📚', type: 'time', value: 0 },
+      { id: '6', name: 'Проект', emoji: '🎯', type: 'time', value: 0 },
+    ]
+  },
+  {
+    name: 'Здоровье',
+    type: 'health',
+    tasks: [
+      { id: '7', name: 'Таблетки', emoji: '💊', type: 'checkbox', completed: false },
+    ]
+  },
+  {
+    name: 'Пороки',
+    type: 'habits',
+    tasks: [
+      { id: '8', name: 'Дерьмо', emoji: '🍔', type: 'checkbox', completed: false },
+      { id: '9', name: 'Порно', emoji: '🔞', type: 'checkbox', completed: false },
+    ]
+  },
+  {
+    name: 'Траты',
+    type: 'expenses',
+    tasks: [
+      { id: '10', name: 'Траты', emoji: '💸', type: 'expense', value: 0 },
+    ]
+  }
+];
+
 export default function SettingsPage() {
   const { toast } = useToast();
   const [settings, setSettings] = React.useState<Settings>(() => {
@@ -173,19 +216,27 @@ export default function SettingsPage() {
 
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
 
+  React.useEffect(() => {
+    const tasks = localStorage.getItem('tasks');
+    if (!tasks) {
+      localStorage.setItem('tasks', JSON.stringify(DEFAULT_TASKS));
+      console.log('Initialized default tasks');
+    }
+  }, []);
+
   const handleTaskNameChange = React.useCallback((categoryName: string, taskName: string, newName: string, newEmoji: string) => {
     try {
       console.log('Attempting to update task:', { categoryName, taskName, newName, newEmoji });
 
       const tasks = localStorage.getItem('tasks');
       if (!tasks) {
-        console.error('No tasks found in storage');
-        throw new Error('No tasks found in storage');
+        localStorage.setItem('tasks', JSON.stringify(DEFAULT_TASKS));
+        console.log('Initialized default tasks during update');
       }
 
       let parsedTasks;
       try {
-        parsedTasks = JSON.parse(tasks);
+        parsedTasks = JSON.parse(tasks || JSON.stringify(DEFAULT_TASKS));
         console.log('Current tasks:', parsedTasks);
       } catch (e) {
         console.error('Failed to parse tasks:', e);
