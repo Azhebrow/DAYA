@@ -222,11 +222,14 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
       { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
     ],
     expenses: [
-      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
+      { id: 'food', name: '🍽️ Продукты', emoji: '🍽️' },
+      { id: 'cafe', name: '☕ Кафе', emoji: '☕' },
       { id: 'transport', name: '🚌 Транспорт', emoji: '🚌' },
-      { id: 'entertainment', name: '🎮 Развлечения', emoji: '🎮' }
-    ],
-    
+      { id: 'entertainment', name: '🎮 Развлечения', emoji: '🎮' },
+      { id: 'shopping', name: '🛍️ Покупки', emoji: '🛍️' },
+      { id: 'health', name: '💊 Здоровье', emoji: '💊' },
+      { id: 'other', name: '📦 Прочее', emoji: '📦' }
+    ]
   }
 });
 
@@ -526,7 +529,13 @@ const SettingsPage = () => {
                     settings.colors.time,
                     settings.colors.sport,
                     settings.colors.habits,
-                    settings.colors.daySuccess
+                    settings.colors.daySuccess,
+                    //Adding new colors here
+                    '--red',
+                    '--orange',
+                    '--green',
+                    '--blue',
+                    '--purple'
                   ]}
                 />
               </div>
