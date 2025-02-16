@@ -2,6 +2,24 @@ import React, { useCallback } from 'react';
 import { Task, TaskType } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Constants
+const TIME_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
+  value: (i + 1) * 20,
+  label: `${Math.floor((i + 1) * 20 / 60) > 0 ? Math.floor((i + 1) * 20 / 60) + ' ч ' : ''}${(i + 1) * 20 % 60 > 0 ? (i + 1) * 20 % 60 + ' мин' : ''}`
+}));
+
+const CALORIE_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
+  value: (i + 1) * 200,
+  label: `${(i + 1) * 200} ккал`
+}));
 
 // Checkbox Task Component
 const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: boolean) => void }) => (
@@ -22,15 +40,21 @@ const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (va
 const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
-    <Input
-      type="number"
-      value={task.value || 0}
-      onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-      className="w-[180px] h-8 bg-zinc-800 hover:bg-zinc-700 border-gray-700"
-      placeholder="Время (мин)"
-      min="0"
-      step="20"
-    />
+    <Select
+      defaultValue={String(task.value || 0)}
+      onValueChange={(value) => onChange(parseInt(value))}
+    >
+      <SelectTrigger className="w-[180px] h-8 bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+        <SelectValue placeholder="Время" />
+      </SelectTrigger>
+      <SelectContent>
+        {TIME_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={String(option.value)}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   </div>
 ));
 
@@ -38,15 +62,21 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
 const CalorieTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
-    <Input
-      type="number"
-      value={task.value || 0}
-      onChange={(e) => onChange(parseInt(e.target.value) || 0)}
-      className="w-[180px] h-8 bg-zinc-800 hover:bg-zinc-700 border-gray-700"
-      placeholder="Калории"
-      min="0"
-      step="200"
-    />
+    <Select
+      defaultValue={String(task.value || 0)}
+      onValueChange={(value) => onChange(parseInt(value))}
+    >
+      <SelectTrigger className="w-[180px] h-8 bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+        <SelectValue placeholder="Калории" />
+      </SelectTrigger>
+      <SelectContent>
+        {CALORIE_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={String(option.value)}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   </div>
 ));
 

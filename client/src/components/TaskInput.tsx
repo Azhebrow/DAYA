@@ -2,6 +2,24 @@ import React, { useCallback } from 'react';
 import { Task, TaskType } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+// Constants
+const TIME_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
+  value: (i + 1) * 20,
+  label: `${Math.floor((i + 1) * 20 / 60) > 0 ? Math.floor((i + 1) * 20 / 60) + ' ч ' : ''}${(i + 1) * 20 % 60 > 0 ? (i + 1) * 20 % 60 + ' мин' : ''}`
+}));
+
+const CALORIE_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
+  value: (i + 1) * 200,
+  label: `${(i + 1) * 200} ккал`
+}));
 
 interface TaskInputProps {
   task: Task;
@@ -21,6 +39,16 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     fontSize: '1rem',
     backgroundColor: completed ? categoryColor : 'rgb(39 39 42)',
     color: completed ? 'white' : 'rgba(255, 255, 255, 0.6)',
+    border: 'none',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+  });
+
+  const getSelectStyle = (value: number) => ({
+    width: '100%',
+    height: '2.25rem',
+    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+    color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
     fontWeight: 'bold',
     transition: 'all 0.2s',
@@ -53,30 +81,42 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     return (
-      <Input
-        type="number"
-        value={value}
-        onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-        style={getInputStyle(value > 0)}
-        placeholder="Время (в минутах)"
-        min="0"
-        step="20"
-      />
+      <Select
+        defaultValue={String(value)}
+        onValueChange={(val) => handleChange(parseInt(val))}
+      >
+        <SelectTrigger style={getSelectStyle(value)}>
+          <SelectValue placeholder="Время" />
+        </SelectTrigger>
+        <SelectContent>
+          {TIME_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={String(option.value)}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
   }
 
   if (task.type === TaskType.CALORIE) {
     const value = task.value || 0;
     return (
-      <Input
-        type="number"
-        value={value}
-        onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-        style={getInputStyle(value > 0)}
-        placeholder="Калории"
-        min="0"
-        step="200"
-      />
+      <Select
+        defaultValue={String(value)}
+        onValueChange={(val) => handleChange(parseInt(val))}
+      >
+        <SelectTrigger style={getSelectStyle(value)}>
+          <SelectValue placeholder="Калории" />
+        </SelectTrigger>
+        <SelectContent>
+          {CALORIE_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={String(option.value)}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     );
   }
 
