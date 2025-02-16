@@ -33,52 +33,53 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     onChange(value);
   }, [onChange]);
 
-  const getButtonStyle = (completed: boolean) => ({
-    width: '100%',
-    height: '2.25rem',
-    fontSize: '1rem',
-    backgroundColor: completed ? categoryColor : 'rgb(39 39 42)',
-    color: completed ? 'white' : 'rgba(255, 255, 255, 0.6)',
-    border: 'none',
-    fontWeight: 'bold',
-    transition: 'all 0.2s',
-  });
-
-  const getSelectStyle = (value: number) => ({
-    width: '100%',
-    height: '2.25rem',
-    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-    color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-    border: 'none',
-    fontWeight: 'bold',
-  });
-
+  // Checkbox component
   if (task.type === TaskType.CHECKBOX) {
     return (
       <Button
         variant="ghost"
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        style={getButtonStyle(Boolean(task.completed))}
+        className={`w-full h-9 font-bold transition-all ${
+          task.completed 
+            ? 'text-white' 
+            : 'text-white/60 hover:text-white/80'
+        }`}
+        style={{
+          backgroundColor: task.completed ? categoryColor : 'rgb(39 39 42)',
+        }}
       >
         {task.completed ? 'Выполнено' : 'Отметить'}
       </Button>
     );
   }
 
+  // Time select component
   if (task.type === TaskType.TIME) {
-    const value = task.value || 0;
     return (
       <Select
-        value={value > 0 ? String(value) : undefined}
-        onValueChange={(newValue) => handleChange(parseInt(newValue) || 0)}
+        defaultValue={task.value ? String(task.value) : undefined}
+        onValueChange={(val) => handleChange(Number(val))}
       >
-        <SelectTrigger style={getSelectStyle(value)}>
+        <SelectTrigger 
+          className={`w-full h-9 font-bold border-0 transition-all ${
+            task.value 
+              ? 'text-white' 
+              : 'text-white/60 hover:text-white/80'
+          }`}
+          style={{
+            backgroundColor: task.value ? categoryColor : 'rgb(39 39 42)',
+          }}
+        >
           <SelectValue placeholder="Время" />
         </SelectTrigger>
         <SelectContent>
           {TIME_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
+            <SelectItem 
+              key={option.value} 
+              value={String(option.value)}
+              className="cursor-pointer"
+            >
               {option.label}
             </SelectItem>
           ))}
@@ -87,19 +88,32 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     );
   }
 
+  // Calorie select component
   if (task.type === TaskType.CALORIE) {
-    const value = task.value || 0;
     return (
       <Select
-        value={value > 0 ? String(value) : undefined}
-        onValueChange={(newValue) => handleChange(parseInt(newValue) || 0)}
+        defaultValue={task.value ? String(task.value) : undefined}
+        onValueChange={(val) => handleChange(Number(val))}
       >
-        <SelectTrigger style={getSelectStyle(value)}>
+        <SelectTrigger 
+          className={`w-full h-9 font-bold border-0 transition-all ${
+            task.value 
+              ? 'text-white' 
+              : 'text-white/60 hover:text-white/80'
+          }`}
+          style={{
+            backgroundColor: task.value ? categoryColor : 'rgb(39 39 42)',
+          }}
+        >
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
           {CALORIE_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
+            <SelectItem 
+              key={option.value} 
+              value={String(option.value)}
+              className="cursor-pointer"
+            >
               {option.label}
             </SelectItem>
           ))}
@@ -108,42 +122,36 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     );
   }
 
+  // Expense input component
   if (task.type === TaskType.EXPENSE) {
-    const value = task.value || 0;
     return (
       <div className="relative w-full">
         <Input
           type="number"
-          value={value || ''}
-          onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
+          value={task.value || ''}
+          onChange={(e) => handleChange(Number(e.target.value) || 0)}
+          className={`w-full h-9 pl-8 font-bold border-0 transition-all ${
+            task.value 
+              ? 'text-white' 
+              : 'text-white/60'
+          }`}
           style={{
-            width: '100%',
-            height: '2.25rem',
-            backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-            color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-            border: 'none',
-            paddingLeft: '2rem',
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            transition: 'all 0.2s',
+            backgroundColor: task.value ? categoryColor : 'rgb(39 39 42)',
           }}
           placeholder="0"
         />
-        <span style={{
-          position: 'absolute',
-          left: '0.5rem',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: '0.875rem',
-          fontWeight: 'bold',
-          color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)'
-        }}>
+        <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-sm font-bold ${
+          task.value 
+            ? 'text-white' 
+            : 'text-white/60'
+        }`}>
           zł
         </span>
       </div>
     );
   }
 
+  // Expense note input component
   if (task.type === TaskType.EXPENSE_NOTE) {
     return (
       <Input
