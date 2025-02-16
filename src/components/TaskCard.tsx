@@ -68,15 +68,6 @@ export const TaskCard = React.memo(({
               {category.name}
             </span>
           </div>
-          {!isExpenseCard && (
-            <div className="ml-4 flex-grow">
-              <Progress 
-                value={progress} 
-                className="h-2 bg-gray-800"
-                aria-label={`Progress for ${category.name}`}
-              />
-            </div>
-          )}
         </div>
         <CardContent className="space-y-3 p-4 pt-2">
           {category.tasks.map((task) => (
