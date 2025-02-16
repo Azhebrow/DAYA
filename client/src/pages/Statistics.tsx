@@ -29,7 +29,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { format, subDays, startOfDay, eachDayOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, isSameWeek, isSameMonth } from "date-fns";
+import { format, subDays, startOfDay, eachDayOfInterval, startOfWeek, startOfMonth, endOfWeek, endOfMonth, isSameWeek, isSameMonth, differenceInDays, startOfYear } from "date-fns";
 import { ru } from "date-fns/locale/ru";
 import { calculateDayScore } from "@/lib/utils";
 import {
@@ -254,11 +254,10 @@ function Statistics() {
     if (displayType === "days") {
       return format(date, "dd.MM");
     } else if (displayType === "weeks") {
-      const weekStart = format(startOfWeek(date, { locale: ru }), "dd.MM");
-      const weekEnd = format(endOfWeek(date, { locale: ru }), "dd.MM");
-      return `${weekStart}-${weekEnd}`;
+      const weekNum = Math.ceil(differenceInDays(date, startOfYear(date)) / 7);
+      return `${weekNum} нед`;
     } else {
-      return format(date, "MMMM yyyy", { locale: ru });
+      return format(date, "LLL", { locale: ru }); // Возвращает сокращенное название месяца
     }
   };
 
@@ -464,7 +463,7 @@ function Statistics() {
 
 
     for (const periodKey in periodData) {
-        periodData[periodKey].avgScore /= data.filter(day => getDateRangeKey(new Date(day.date), displayType) === periodKey).length;
+      periodData[periodKey].avgScore /= data.filter(day => getDateRangeKey(new Date(day.date), displayType) === periodKey).length;
     }
 
     return periodData;
@@ -739,6 +738,40 @@ function Statistics() {
                         </tr>
                       );
                     })}
+                    <tr className="border-t-2 border-border font-bold">
+                      <td className="px-4 py-2 text-sm font-semibold">Итого</td>
+                      <td
+                        className="px-4 py-2 text-center text-sm font-semibold"
+                        style={{
+                          backgroundColor: hexToRGBA(
+                            getCssVar(settings.colors.expenses),
+                            Math.min((Object.values(expensesByPeriod).reduce((sum, categoryTotals) => 
+                              sum + Object.values(categoryTotals).reduce((a, b) => a + b, 0), 0) / maxExpense) * 0.4 + 0.1, 0.5)
+                          ),
+                        }}
+                      >
+                        {Object.values(expensesByPeriod).reduce((sum, categoryTotals) => 
+                          sum + Object.values(categoryTotals).reduce((a, b) => a + b, 0), 0)} zł
+                      </td>
+                      {uniqueCategories.map(categoryName => {
+                        const categoryTotal = Object.values(expensesByPeriod).reduce((sum, period) => 
+                          sum + (period[categoryName] || 0), 0);
+                        return (
+                          <td
+                            key={`total-${categoryName}`}
+                            className="py-2 px-4 text-center text-sm font-semibold min-w-[90px]"
+                            style={{
+                              backgroundColor: hexToRGBA(
+                                getCssVar(settings.colors.expenses),
+                                Math.min((categoryTotal / maxExpense) * 0.4 + 0.1, 0.5)
+                              ),
+                            }}
+                          >
+                            {categoryTotal} zł
+                          </td>
+                        );
+                      })}
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -773,8 +806,7 @@ function Statistics() {
                             colSpan={category.tasks.length}
                             className="py-2 px-4 text-center text-sm font-semibold"
                             style={{
-                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',
-                              color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
+                              backgroundColor: CATEGORY_HEADER_COLORS[category.name]?.bg || 'transparent',                              color: CATEGORY_HEADER_COLORS[category.name]?.text || '#ffffff'
                             }}
                           >
                             {CATEGORY_ICONS[category.name]}
@@ -807,81 +839,163 @@ function Statistics() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border bg-background">
-                    {Object.entries(aggregateTasksData).map(([periodKey, taskData]) => (
-                      <tr key={periodKey} className="border-b border-border/10">
-                        <td className="bg-background px-4 py-2 font-medium">
-                          {periodKey}
-                        </td>
-                        <td
-                          className="px-4 py-2 text-center text-sm font-medium"
-                          style={{
-                            backgroundColor: hexToRGBA(
-                              getCssVar(settings.colors.daySuccess),
-                              Math.min((taskData.avgScore / 100) * 0.4 + 0.1, 0.5)
-                            )
-                          }}
-                        >
-                          {Math.round(taskData.avgScore)}%
-                        </td>
-                        {data[0]?.categories
-                          .filter((category) => category.type !== CategoryType.EXPENSE)
-                          .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
-                          .flatMap((category) =>
-                    category.tasks.map((task) => {
-                              const key = `${category.name}-${task.name}`;
-                              const taskStats = taskData.tasks[key] || {
-                                completedCount: 0,
-                                totalCount: 0,
-                                totalTime: 0,
-                                totalCalories: 0
-                              };
+                    {(displayType === "days" ? data : Object.entries(aggregateTasksData)).map((entry) => {
+                      const [periodKey, taskData] = displayType === "days"
+                        ? [format(new Date(entry.date), "dd.MM"), entry]
+                        : entry;
 
-                              let displayValue = "";
-                              let bgColor = "transparent";
-                              let textColor = "inherit";
+                      return (
+                        <tr key={periodKey} className="border-b border-border/10">
+                          <td className="bg-background px-4 py-2 font-medium">
+                            {periodKey}
+                          </td>
+                          <td
+                            className="px-4 py-2 text-center text-sm font-medium"
+                            style={{
+                              backgroundColor: hexToRGBA(
+                                getCssVar(settings.colors.daySuccess),
+                                Math.min((displayType === "days"
+                                  ? calculateDayScore(entry as DayEntry)
+                                  : (taskData as any).avgScore) / 100 * 0.4 + 0.1, 0.5)
+                              )
+                            }}
+                          >
+                            {displayType === "days"
+                              ? calculateDayScore(entry as DayEntry)
+                              : Math.round((taskData as any).avgScore)}%
+                          </td>
+                          {data[0]?.categories
+                            .filter((category) => category.type !== CategoryType.EXPENSE)
+                            .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                            .flatMap((category) =>
+                              category.tasks.map((task) => {
+                                let displayValue = "";
+                                let bgColor = "transparent";
+                                let textColor = "inherit";
 
-                              if (task.type === TaskType.CHECKBOX) {
                                 if (displayType === "days") {
-                                  // В режиме "по дням" показываем галочки и крестики
-                                  const isCompleted = task.completed;
-                                  displayValue = isCompleted ? "✓" : "×";
-                                  if (isCompleted) {
-                                    textColor = getCssVar(settings.colors.daySuccess);
+                                  const dayEntry = entry as DayEntry;
+                                  const categoryInDay = dayEntry.categories.find(c => c.name === category.name);
+                                  const taskInDay = categoryInDay?.tasks.find(t => t.name === task.name);
+
+                                  if (task.type === TaskType.CHECKBOX) {
+                                    const isCompleted = taskInDay?.completed || false;
+                                    displayValue = isCompleted ? "✓" : "×";
+                                    if (isCompleted) {
+                                      textColor = getCssVar(settings.colors.daySuccess);
+                                    }
+                                  } else if (task.type === TaskType.TIME) {
+                                    const hours = Math.floor((taskInDay?.value || 0) / 60);
+                                    displayValue = `${hours}ч`;
+                                  } else if (task.type === TaskType.CALORIE) {
+                                    displayValue = `${taskInDay?.value || 0}ккал`;
                                   }
                                 } else {
-                                  // В режимах "по неделям" и "по месяцам" показываем проценты
-                                  const completionRate = taskStats.totalCount > 0 
-                                    ? Math.round((taskStats.completedCount / taskStats.totalCount) * 100)
-                                    : 0;
-                                  displayValue = `${completionRate}%`;
-                                  bgColor = hexToRGBA(
-                                    getCssVar(settings.colors.daySuccess),
-                                    Math.min((completionRate / 100) * 0.4 + 0.1, 0.5)
-                                  );
+                                  const key = `${category.name}-${task.name}`;
+                                  const taskStats = (taskData as any).tasks[key] || {
+                                    completedCount: 0,
+                                    totalCount: 0,
+                                    totalTime: 0,
+                                    totalCalories: 0
+                                  };
+
+                                  if (task.type === TaskType.CHECKBOX) {
+                                    const completionRate = taskStats.totalCount > 0
+                                      ? Math.round((taskStats.completedCount / taskStats.totalCount) * 100)
+                                      : 0;
+                                    displayValue = `${completionRate}%`;
+                                    bgColor = hexToRGBA(
+                                      getCssVar(settings.colors.daySuccess),
+                                      Math.min((completionRate / 100) * 0.4 + 0.1, 0.5)
+                                    );
+                                  } else if (task.type === TaskType.TIME) {
+                                    const totalHours = Math.floor(taskStats.totalTime / 60);
+                                    displayValue = `${totalHours}ч`;
+                                  } else if (task.type === TaskType.CALORIE) {
+                                    displayValue = `${taskStats.totalCalories}ккал`;
+                                  }
                                 }
+
+                                return (
+                                  <td
+                                    key={`${periodKey}-${category.name}-${task.name}`}
+                                    className="px-4 py-2 text-center whitespace-nowrap"
+                                    style={{
+                                      backgroundColor: bgColor,
+                                      color: textColor
+                                    }}
+                                  >
+                                    {displayValue}
+                                  </td>
+                                );
+                              })
+                            )}
+                        </tr>
+                      );
+                    })}
+                    <tr className="border-t-2 border-border font-bold">
+                      <td className="px-4 py-2 text-sm font-semibold">Итого</td>
+                      <td
+                        className="px-4 py-2 text-center text-sm font-semibold"
+                        style={{
+                          backgroundColor: hexToRGBA(
+                            getCssVar(settings.colors.daySuccess),
+                            Math.min((avgDayScore / 100) * 0.4 + 0.1, 0.5)
+                          ),
+                        }}
+                      >
+                        {avgDayScore}%
+                      </td>
+                      {data[0]?.categories
+                        .filter((category) => category.type !== CategoryType.EXPENSE)
+                        .sort((a, b) => CATEGORY_ORDER.indexOf(a.name) - CATEGORY_ORDER.indexOf(b.name))
+                        .flatMap((category) =>
+                          category.tasks.map((task) => {
+                            let totalValue = "";
+                            let bgColor = "transparent";
+
+                            const taskStats = data.reduce((acc, day) => {
+                              const cat = day.categories.find(c => c.name === category.name);
+                              const t = cat?.tasks.find(t => t.name === task.name);
+
+                              if (task.type === TaskType.CHECKBOX) {
+                                acc.completed = (acc.completed || 0) + (t?.completed ? 1 : 0);
+                                acc.total = (acc.total || 0) + 1;
                               } else if (task.type === TaskType.TIME) {
-                                const hours = Math.floor((task.value || 0) / 60);
-                                displayValue = `${hours}ч`;
+                                acc.totalTime = (acc.totalTime || 0) + (t?.value || 0);
                               } else if (task.type === TaskType.CALORIE) {
-                                displayValue = `${task.value || 0}ккал`;
+                                acc.totalCalories = (acc.totalCalories || 0) + (t?.value || 0);
                               }
 
-                              return (
-                                <td
-                                  key={`${periodKey}-${category.name}-${task.name}`}
-                                  className="px-4 py-2 text-center whitespace-nowrap"
-                                  style={{
-                                    backgroundColor: bgColor,
-                                    color: textColor
-                                  }}
-                                >
-                                  {displayValue}
-                                </td>
+                              return acc;
+                            }, {} as any);
+
+                            if (task.type === TaskType.CHECKBOX) {
+                              const percentage = Math.round((taskStats.completed / taskStats.total) * 100);
+                              totalValue = `${percentage}%`;
+                              bgColor = hexToRGBA(
+                                getCssVar(settings.colors.daySuccess),
+                                Math.min((percentage / 100) * 0.4 + 0.1, 0.5)
                               );
-                            })
-                          )}
-                      </tr>
-                    ))}
+                            } else if (task.type === TaskType.TIME) {
+                              const hours = Math.floor(taskStats.totalTime / 60);
+                              totalValue = `${hours}ч`;
+                            } else if (task.type === TaskType.CALORIE) {
+                              totalValue = `${taskStats.totalCalories}ккал`;
+                            }
+
+                            return (
+                              <td
+                                key={`total-${category.name}-${task.name}`}
+                                className="px-4 py-2 text-center whitespace-nowrap"
+                                style={{ backgroundColor: bgColor }}
+                              >
+                                {totalValue}
+                              </td>
+                            );
+                          })
+                        )}
+                    </tr>
                   </tbody>
                 </table>
               </div>
