@@ -144,7 +144,7 @@ export default function SettingsPage() {
           sport: '--red',
           habits: '--orange',
           expenses: '--orange',
-          daySuccess: '--green' // Added daySuccess color
+          daySuccess: '--green'
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
@@ -170,7 +170,7 @@ export default function SettingsPage() {
           sport: '--red',
           habits: '--orange',
           expenses: '--orange',
-          daySuccess: '--green' // Added daySuccess color
+          daySuccess: '--green'
         }
       });
     }

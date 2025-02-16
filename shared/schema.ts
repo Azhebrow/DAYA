@@ -130,12 +130,14 @@ export const settingsSchema = z.object({
     sport: z.string().default('--red'),
     habits: z.string().default('--orange'),
     expenses: z.string().default('--orange'),
+    daySuccess: z.string().default('--green'),
   }).default({
     mind: '--purple',
     time: '--green',
     sport: '--red',
     habits: '--orange',
     expenses: '--orange',
+    daySuccess: '--green',
   }),
   pomodoroSettings: pomodoroSettingsSchema.optional()
 });
