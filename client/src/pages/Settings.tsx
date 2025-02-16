@@ -9,25 +9,10 @@ import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon, CheckCircle2 } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+
 
 // Updated colorPalette - organized by color groups
 const colorPalette = [
@@ -144,6 +129,7 @@ export default function SettingsPage() {
           sport: '--red',
           habits: '--orange',
           expenses: '--orange',
+          daySuccess: '--green' // Added daySuccess color
         }
       });
       const parsedSettings = settingsSchema.parse(JSON.parse(stored));
@@ -169,6 +155,7 @@ export default function SettingsPage() {
           sport: '--red',
           habits: '--orange',
           expenses: '--orange',
+          daySuccess: '--green' // Added daySuccess color
         }
       });
     }
@@ -222,7 +209,6 @@ export default function SettingsPage() {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {/* Карточка с текстом клятвы - всегда на всю ширину */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <Collapsible open={isOathExpanded} onOpenChange={setIsOathExpanded}>
               <CollapsibleTrigger className="w-full">
@@ -249,7 +235,6 @@ export default function SettingsPage() {
             </Collapsible>
           </Card>
 
-          {/* Карточка диапазона дат */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
@@ -301,7 +286,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Карточка целевых показателей */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
@@ -335,7 +319,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Карточка с категориями и цветами */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
@@ -344,6 +327,29 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-6">
+                {/* Успех дня (новая категория) */}
+                <div className="flex items-center gap-4">
+                  <div className="w-full">
+                    <Button
+                      variant="ghost"
+                      className="w-full p-0 h-auto hover:bg-transparent cursor-default"
+                      disabled
+                    >
+                      <div
+                        className="w-full p-6 rounded-xl flex items-center justify-center gap-3"
+                        style={{ backgroundColor: 'var(--green)' }}
+                      >
+                        <span className="text-white">
+                          <CheckCircle2 className="h-6 w-6" />
+                        </span>
+                      </div>
+                    </Button>
+                  </div>
+                  <div className="flex-grow">
+                    <Label>Успех дня</Label>
+                  </div>
+                </div>
+
                 {/* Разум */}
                 <div className="flex items-center gap-4">
                   <ColorPicker
@@ -353,7 +359,8 @@ export default function SettingsPage() {
                       settings.colors.time,
                       settings.colors.sport,
                       settings.colors.habits,
-                      settings.colors.expenses
+                      settings.colors.expenses,
+                      settings.colors.daySuccess
                     ]}
                     categoryName="Разум"
                   />
@@ -371,7 +378,8 @@ export default function SettingsPage() {
                       settings.colors.mind,
                       settings.colors.sport,
                       settings.colors.habits,
-                      settings.colors.expenses
+                      settings.colors.expenses,
+                      settings.colors.daySuccess
                     ]}
                     categoryName="Время"
                   />
@@ -389,7 +397,8 @@ export default function SettingsPage() {
                       settings.colors.mind,
                       settings.colors.time,
                       settings.colors.habits,
-                      settings.colors.expenses
+                      settings.colors.expenses,
+                      settings.colors.daySuccess
                     ]}
                     categoryName="Спорт"
                   />
@@ -407,7 +416,8 @@ export default function SettingsPage() {
                       settings.colors.mind,
                       settings.colors.time,
                       settings.colors.sport,
-                      settings.colors.expenses
+                      settings.colors.expenses,
+                      settings.colors.daySuccess
                     ]}
                     categoryName="Пороки"
                   />
@@ -425,7 +435,8 @@ export default function SettingsPage() {
                       settings.colors.mind,
                       settings.colors.time,
                       settings.colors.sport,
-                      settings.colors.habits
+                      settings.colors.habits,
+                      settings.colors.daySuccess
                     ]}
                     categoryName="Траты"
                   />
@@ -437,7 +448,6 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
-          {/* Карточка управления данными - всегда в конце и на всю ширину */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
