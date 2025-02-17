@@ -7,6 +7,7 @@ import {
   AreaChart, Area
 } from 'recharts';
 import { format, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
 
 const CATEGORY_COLORS: { [key: string]: string } = {
   'Разум': '#6B7280',    // Серый
@@ -27,6 +28,11 @@ export default function TenDayStats() {
     totalExpenses: number;
   }>>([]);
 
+  const { data: settings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => storage.getSettings()
+  });
+
   useEffect(() => {
     let startDate: Date;
     let endDate: Date = new Date();
@@ -41,7 +47,29 @@ export default function TenDayStats() {
       const dateStr = format(currentDate, 'yyyy-MM-dd');
       const entry = storage.getDayEntry(dateStr);
       if (entry) {
-        days.push(entry);
+        const updatedEntry = {
+          ...entry,
+          categories: entry.categories.map(category => {
+            if (category.type === CategoryType.EXPENSE && settings?.subcategories?.expenses) {
+              const matchingCategory = settings.subcategories.expenses.find(
+                expCategory => category.tasks[0]?.id === `${expCategory.id}_expense`
+              );
+              if (matchingCategory) {
+                return {
+                  ...category,
+                  name: matchingCategory.name,
+                  emoji: matchingCategory.emoji,
+                  tasks: category.tasks.map(task => ({
+                    ...task,
+                    name: matchingCategory.name
+                  }))
+                };
+              }
+            }
+            return category;
+          })
+        };
+        days.push(updatedEntry);
       }
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -89,7 +117,7 @@ export default function TenDayStats() {
     });
 
     setPeriodData(periodStats);
-  }, [timeRange]);
+  }, [timeRange, settings]);
 
   const calculateExpensesByPeriod = () => {
     if (!data.length) return { periods: [], categories: [] };
@@ -276,7 +304,6 @@ export default function TenDayStats() {
                     </tr>
                   );
                 })}
-                {/* Итоговая строка */}
                 <tr className="border-t-2 border-border font-bold">
                   <td className="py-2 px-4">Итого</td>
                   {monthlyExpenses.categories.map(category => {

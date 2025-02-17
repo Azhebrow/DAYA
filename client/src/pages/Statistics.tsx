@@ -145,7 +145,29 @@ function Statistics() {
       dateRange.forEach((date) => {
         const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
         if (entry) {
-          days.push(entry);
+          const updatedEntry = {
+            ...entry,
+            categories: entry.categories.map(category => {
+              if (category.type === CategoryType.EXPENSE && settings?.subcategories?.expenses) {
+                const matchingCategory = settings.subcategories.expenses.find(
+                  expCategory => category.tasks[0]?.id === `${expCategory.id}_expense`
+                );
+                if (matchingCategory) {
+                  return {
+                    ...category,
+                    name: matchingCategory.name,
+                    emoji: matchingCategory.emoji,
+                    tasks: category.tasks.map(task => ({
+                      ...task,
+                      name: matchingCategory.name
+                    }))
+                  };
+                }
+              }
+              return category;
+            })
+          };
+          days.push(updatedEntry);
         }
       });
 
@@ -164,7 +186,29 @@ function Statistics() {
       dateRange.forEach((date) => {
         const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
         if (entry) {
-          days.push(entry);
+          const updatedEntry = {
+            ...entry,
+            categories: entry.categories.map(category => {
+              if (category.type === CategoryType.EXPENSE && settings?.subcategories?.expenses) {
+                const matchingCategory = settings.subcategories.expenses.find(
+                  expCategory => category.tasks[0]?.id === `${expCategory.id}_expense`
+                );
+                if (matchingCategory) {
+                  return {
+                    ...category,
+                    name: matchingCategory.name,
+                    emoji: matchingCategory.emoji,
+                    tasks: category.tasks.map(task => ({
+                      ...task,
+                      name: matchingCategory.name
+                    }))
+                  };
+                }
+              }
+              return category;
+            })
+          };
+          days.push(updatedEntry);
         }
       });
 
@@ -183,7 +227,29 @@ function Statistics() {
       dateRange.forEach((date) => {
         const entry = storage.getDayEntry(format(date, "yyyy-MM-dd"));
         if (entry) {
-          days.push(entry);
+          const updatedEntry = {
+            ...entry,
+            categories: entry.categories.map(category => {
+              if (category.type === CategoryType.EXPENSE && settings?.subcategories?.expenses) {
+                const matchingCategory = settings.subcategories.expenses.find(
+                  expCategory => category.tasks[0]?.id === `${expCategory.id}_expense`
+                );
+                if (matchingCategory) {
+                  return {
+                    ...category,
+                    name: matchingCategory.name,
+                    emoji: matchingCategory.emoji,
+                    tasks: category.tasks.map(task => ({
+                      ...task,
+                      name: matchingCategory.name
+                    }))
+                  };
+                }
+              }
+              return category;
+            })
+          };
+          days.push(updatedEntry);
         }
       });
 
