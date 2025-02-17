@@ -33,13 +33,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     transition: 'all 0.2s',
   });
 
-  if (task.type === TaskType.TIME) {
+if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     const hours = Math.floor(value / 60);
     const minutes = value % 60;
     const hasAnyValue = value > 0;
 
-    const getTimeFieldStyle = () => ({
+    const timeFieldStyle = {
       width: '100%',
       height: '2.25rem',
       backgroundColor: hasAnyValue ? categoryColor : 'rgb(39 39 42)',
@@ -49,7 +49,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
       fontSize: '1rem',
       fontWeight: 'bold',
       transition: 'all 0.2s',
-    });
+    };
 
     const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const numValue = Math.min(9, Math.max(0, parseInt(e.target.value) || 0));
@@ -77,7 +77,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0ч"
-            style={getTimeFieldStyle()}
+            style={timeFieldStyle}
           />
         </div>
         <div className="flex-1">
@@ -92,7 +92,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0м"
-            style={getTimeFieldStyle()}
+            style={timeFieldStyle}
           />
         </div>
       </div>
