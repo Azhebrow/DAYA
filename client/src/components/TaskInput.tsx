@@ -43,6 +43,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     fontSize: '1rem',
     fontWeight: 'bold',
     transition: 'all 0.2s',
+    // Remove spinner buttons
+    WebkitAppearance: 'none',
+    MozAppearance: 'textfield',
+    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
+      WebkitAppearance: 'none',
+      margin: 0
+    }
   });
 
   if (task.type === TaskType.CHECKBOX) {
@@ -78,33 +85,39 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     return (
       <div className="flex items-center justify-center gap-1" style={{ width: '100%' }}>
         <div className="relative" style={{ width: '45%' }}>
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm" 
+                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
+            ч
+          </span>
           <Input
             type="number"
             min="0"
             value={hours || ''}
             onChange={handleHoursChange}
-            style={getInputStyle(value > 0)}
+            style={{
+              ...getInputStyle(value > 0),
+              paddingLeft: '1.5rem' // Add space for the label
+            }}
             placeholder="0"
           />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm" 
-                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
-            ч
-          </span>
         </div>
         <div className="relative" style={{ width: '45%' }}>
+          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-sm"
+                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
+            мин
+          </span>
           <Input
             type="number"
             min="0"
             max="59"
             value={minutes || ''}
             onChange={handleMinutesChange}
-            style={getInputStyle(value > 0)}
+            style={{
+              ...getInputStyle(value > 0),
+              paddingLeft: '2.5rem' // Add more space for "мин" label
+            }}
             placeholder="0"
           />
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm"
-                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
-            мин
-          </span>
         </div>
       </div>
     );
