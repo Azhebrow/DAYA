@@ -18,11 +18,20 @@ export enum TaskType {
   EXPENSE_NOTE = 'expense_note'
 }
 
-export enum PomodoroSessionType {
-  WORK = 'work',
-  BREAK = 'break'
-}
+// Unified category structure
+export type CategoryConfig = {
+  id: string;
+  name: string;
+  emoji: string;
+  color: string;
+  subcategories: {
+    id: string;
+    name: string;
+    emoji: string;
+  }[];
+};
 
+// Base database tables
 export const tasks = pgTable('tasks', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
@@ -58,45 +67,79 @@ export const settings = pgTable('settings', {
   viewMode: text('view_mode').default('normal'),
   timeRange: text('time_range').default('7'),
   oathText: text('oath_text'),
-  colors: jsonb('colors').$type<{
-    mind: string;
-    time: string;
-    sport: string;
-    habits: string;
-    expenses: string;
-    daySuccess: string;
-  }>(),
-  subcategories: jsonb('subcategories').$type<{
-    mind: { id: string; name: string; emoji: string; }[];
-    time: { id: string; name: string; emoji: string; }[];
-    sport: { id: string; name: string; emoji: string; }[];
-    habits: { id: string; name: string; emoji: string; }[];
+  categories: jsonb('categories').$type<{
+    mind: CategoryConfig;
+    time: CategoryConfig;
+    sport: CategoryConfig;
+    habits: CategoryConfig;
+    expenses: CategoryConfig;
   }>()
 });
 
-const defaultSubcategories = {
-  mind: [
-    { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-    { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-    { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-  ],
-  time: [
-    { id: 'work', name: '💼 Работа', emoji: '💼' },
-    { id: 'study', name: '📚 Учёба', emoji: '📚' },
-    { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-  ],
-  sport: [
-    { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-    { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-    { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-  ],
-  habits: [
-    { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-    { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-    { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-  ]
+// Default category configurations
+const defaultCategories = {
+  mind: {
+    id: 'mind',
+    name: 'Разум',
+    emoji: '🧠',
+    color: '--purple',
+    subcategories: [
+      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+    ]
+  },
+  time: {
+    id: 'time',
+    name: 'Время',
+    emoji: '⏰',
+    color: '--green',
+    subcategories: [
+      { id: 'work', name: '💼 Работа', emoji: '💼' },
+      { id: 'study', name: '📚 Учёба', emoji: '📚' },
+      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+    ]
+  },
+  sport: {
+    id: 'sport',
+    name: 'Спорт',
+    emoji: '🏃',
+    color: '--red',
+    subcategories: [
+      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+    ]
+  },
+  habits: {
+    id: 'habits',
+    name: 'Привычки',
+    emoji: '🎯',
+    color: '--orange',
+    subcategories: [
+      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+    ]
+  },
+  expenses: {
+    id: 'expenses',
+    name: 'Траты',
+    emoji: '💰',
+    color: '--orange',
+    subcategories: [
+      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
+      { id: 'junk', name: '🍕 Дерьмо', emoji: '🍕' },
+      { id: 'city', name: '🌆 Город', emoji: '🌆' },
+      { id: 'sport', name: '⚽ Спорт', emoji: '⚽' },
+      { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
+      { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
+      { id: 'other', name: '📦 Разное', emoji: '📦' }
+    ]
+  }
 };
 
+// Zod schemas
 export const taskSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "Task name is required"),
@@ -131,85 +174,26 @@ export const settingsSchema = z.object({
   viewMode: z.enum(['normal', 'weekly', 'monthly']).default('normal'),
   timeRange: z.enum(['7', '14', '30']).default('7'),
   oathText: z.string().optional(),
-  colors: z.object({
-    mind: z.string(),
-    time: z.string(),
-    sport: z.string(),
-    habits: z.string(),
-    expenses: z.string(),
-    daySuccess: z.string()
-  }).default({
-    mind: '--purple',
-    time: '--green',
-    sport: '--red',
-    habits: '--orange',
-    expenses: '--orange',
-    daySuccess: '--green'
-  }),
-  subcategories: z.object({
-    mind: z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      emoji: z.string()
-    })),
-    time: z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      emoji: z.string()
-    })),
-    sport: z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      emoji: z.string()
-    })),
-    habits: z.array(z.object({
-      id: z.string(),
-      name: z.string(),
-      emoji: z.string()
-    })),
-    expenses: z.array(z.object({
+  categories: z.record(z.string(), z.object({
+    id: z.string(),
+    name: z.string(),
+    emoji: z.string(),
+    color: z.string(),
+    subcategories: z.array(z.object({
       id: z.string(),
       name: z.string(),
       emoji: z.string()
     }))
-  }).default({
-    mind: [
-      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-    ],
-    time: [
-      { id: 'work', name: '💼 Работа', emoji: '💼' },
-      { id: 'study', name: '📚 Учёба', emoji: '📚' },
-      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-    ],
-    sport: [
-      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-    ],
-    habits: [
-      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-    ],
-    expenses: [
-      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
-      { id: 'junk', name: '🍕 Дерьмо', emoji: '🍕' },
-      { id: 'city', name: '🌆 Город', emoji: '🌆' },
-      { id: 'sport', name: '⚽ Спорт', emoji: '⚽' },
-      { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
-      { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
-      { id: 'other', name: '📦 Разное', emoji: '📦' }
-    ]
-  })
+  })).default(defaultCategories)
 });
 
+// Schema for database operations
 export const insertTaskSchema = createInsertSchema(tasks);
 export const insertCategorySchema = createInsertSchema(categories);
 export const insertDayEntrySchema = createInsertSchema(dayEntries);
 export const insertSettingsSchema = createInsertSchema(settings);
 
+// Type exports
 export type Task = z.infer<typeof taskSchema>;
 export type Category = z.infer<typeof categorySchema>;
 export type DayEntry = z.infer<typeof dayEntrySchema>;
