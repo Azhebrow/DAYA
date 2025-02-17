@@ -62,11 +62,10 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const value = task.value || 0;
     const hours = Math.floor(value / 60);
     const minutes = value % 60;
-    const hasValue = value > 0; 
 
     const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const numValue = Math.min(9, Math.max(0, parseInt(e.target.value) || 0));
-      const totalMinutes = numValue * 60 + minutes;
+      const newHours = Math.max(0, parseInt(e.target.value) || 0);
+      const totalMinutes = newHours * 60 + minutes;
       handleChange(totalMinutes);
     };
 
@@ -74,14 +73,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
       const newMinutes = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
       const totalMinutes = hours * 60 + newMinutes;
       handleChange(totalMinutes);
-    };
-
-    const inputStyle = {
-      backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
-      color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
-      fontSize: '1rem',
-      fontWeight: 'bold',
-      transition: 'all 0.2s',
     };
 
     return (
@@ -98,7 +89,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0ч"
-            style={inputStyle}
+            style={{
+              backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+              color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              transition: 'all 0.2s',
+            }}
           />
         </div>
         <div className="flex-1">
@@ -113,7 +110,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0м"
-            style={inputStyle}
+            style={{
+              backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+              color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              transition: 'all 0.2s',
+            }}
           />
         </div>
       </div>
