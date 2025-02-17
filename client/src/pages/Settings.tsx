@@ -136,7 +136,7 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 
 const SubcategoryEditor = ({
   category,
-  subcategories,
+  subcategories = [], // Add default empty array
   onUpdate,
   title,
   icon: Icon,
@@ -166,7 +166,7 @@ const SubcategoryEditor = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {subcategories.map((sub, index) => (
+          {(subcategories || []).map((sub, index) => (
             <div key={sub.id} className="flex items-center gap-2">
               <Input
                 value={sub.name}
@@ -230,7 +230,7 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
       { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
       { id: 'other', name: '📦 Разное', emoji: '📦' }
     ],
-    daySuccess: []
+    daySuccess: [] // Initialize with empty array
   }
 });
 
