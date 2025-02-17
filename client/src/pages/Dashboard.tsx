@@ -70,7 +70,30 @@ export default function Dashboard() {
     const entry = storage.getDayEntry(dateStr);
 
     if (entry) {
-      setDayEntry(entry);
+      // Обновляем названия категорий расходов из настроек
+      const updatedEntry = {
+        ...entry,
+        categories: entry.categories.map(category => {
+          if (category.type === CategoryType.EXPENSE && settings?.subcategories?.expenses) {
+            const matchingCategory = settings.subcategories.expenses.find(
+              expCategory => category.tasks[0]?.id === `${expCategory.id}_expense`
+            );
+            if (matchingCategory) {
+              return {
+                ...category,
+                name: matchingCategory.name,
+                emoji: matchingCategory.emoji,
+                tasks: category.tasks.map(task => ({
+                  ...task,
+                  name: matchingCategory.name
+                }))
+              };
+            }
+          }
+          return category;
+        })
+      };
+      setDayEntry(updatedEntry);
       return;
     }
 
@@ -203,13 +226,13 @@ export default function Dashboard() {
         // Generate expense categories from settings
         ...expenseCategories.map((category, index) => ({
           id: `exp${index + 1}`,
-          name: category.name, // Используем полное имя с эмодзи
+          name: category.name,
           emoji: category.emoji,
           type: CategoryType.EXPENSE,
           tasks: [
             {
               id: `${category.id}_expense`,
-              name: category.name, // Используем полное имя с эмодзи
+              name: category.name,
               type: TaskType.EXPENSE,
               value: 0,
               completed: false,
@@ -217,7 +240,6 @@ export default function Dashboard() {
             }
           ]
         })),
-
         // Add expense note category at the end
         {
           id: 'exp8',
