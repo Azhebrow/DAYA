@@ -1,4 +1,4 @@
-import { Menu, LayoutDashboard, LineChart, CalendarDays, Settings2, BarChart, Target, Scroll } from "lucide-react"
+import { Menu, LayoutDashboard, LineChart, Settings2, Scroll } from "lucide-react"
 import { Link, useLocation } from "wouter"
 
 import {
@@ -12,8 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 const routes = [
   { href: "/", label: "Главная", icon: LayoutDashboard },
   { href: "/oath", label: "Клятва", icon: Scroll },
-  { href: "/goals", label: "Цели", icon: Target },
-  { href: "/ranges", label: "Диапазоны", icon: BarChart },
   { href: "/statistics", label: "Статистика", icon: LineChart },
   { href: "/settings", label: "Настройки", icon: Settings2 },
 ]

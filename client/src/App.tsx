@@ -10,12 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LayoutDashboard, LineChart, CalendarDays, Settings2, Target, Scroll } from "lucide-react";
+import { LayoutDashboard, LineChart, Settings2, Scroll } from "lucide-react";
 import Dashboard from "@/pages/Dashboard";
 import Statistics from "@/pages/Statistics";
 import Settings from "@/pages/Settings";
 import Oath from "@/pages/Oath";
-import Goals from "@/pages/Goals";
 
 function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
   const [location] = useLocation();
@@ -38,7 +37,6 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 const routes = [
   { href: "/", label: "Главная", icon: LayoutDashboard },
   { href: "/oath", label: "Клятва", icon: Scroll },
-  { href: "/goals", label: "Цели", icon: Target },
   { href: "/statistics", label: "Статистика", icon: LineChart },
   { href: "/settings", label: "Настройки", icon: Settings2 },
 ];
@@ -97,7 +95,6 @@ function App() {
           <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="/oath" component={Oath} />
-            <Route path="/goals" component={Goals} />
             <Route path="/statistics" component={Statistics} />
             <Route path="/settings" component={Settings} />
           </Switch>
