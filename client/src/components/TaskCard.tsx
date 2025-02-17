@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
 import { calculateCategoryProgress } from '@/lib/utils';
-import { Brain, Clock, Dumbbell, Ban, DollarSign } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { storage } from '@/lib/storage';
 
@@ -53,7 +53,7 @@ export const TaskCard = React.memo(({
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
       case 'Привычки': 
       case 'Пороки': return <Ban className="h-5 w-5" />;
-      default: return <DollarSign className="h-5 w-5" />;
+      default: return category.emoji ? <span>{category.emoji}</span> : null;
     }
   };
 
