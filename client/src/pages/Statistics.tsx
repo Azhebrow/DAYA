@@ -97,6 +97,7 @@ function Statistics() {
       case 'Спорт': return `var(${settings.colors.sport})`;
       case 'Привычки': return `var(${settings.colors.habits})`;
       case 'Траты': return `var(${settings.colors.expenses})`;
+      case 'daySuccess': return `var(${settings.colors.daySuccess})`; // Added case for daySuccess
       default: return '#000000';
     }
   };
@@ -616,7 +617,7 @@ function Statistics() {
         <Card className="w-full">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('Успех') }} />
+              <LineChart className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: getVarColor('daySuccess') }} />
               Показатель успеха
             </CardTitle>
           </CardHeader>
@@ -637,11 +638,11 @@ function Statistics() {
                 <Area
                   type="monotone"
                   dataKey="score"
-                  stroke={getVarColor('Успех')}
-                  fill={getVarColor('Успех')}
+                  stroke={getVarColor('daySuccess')}
+                  fill={getVarColor('daySuccess')}
                   name="Успех"
                   dot={{ r: 4 }}
-                  label={{ position: "top", fill: getVarColor('Успех') }}
+                  label={{ position: "top", fill: getVarColor('daySuccess') }}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -868,7 +869,7 @@ function Statistics() {
       <Card>
         <CardHeader className="space-y-1 pb-2">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w5" style={{ color: getVarColor('Успех') }} />
+            <BarChartIcon className="h-4 w-4 sm:h-5 sm:w5" style={{ color: getVarColor('daySuccess') }} />
             Успешность задач по {displayType === "days" ? "дням" : displayType === "weeks" ? "неделям" : "месяцам"}
           </CardTitle>
         </CardHeader>
@@ -938,7 +939,7 @@ function Statistics() {
                             className="px-4 py-2 text-center text-sm font-medium"
                             style={{
                               backgroundColor: hexToRGBA(
-                                getVarColor('Успех'),
+                                getVarColor('daySuccess'),
                                 Math.min((displayType === "days"
                                   ? calculateDayScore(entry as DayEntry)
                                   : (taskData as any).avgScore) / 100 * 0.4 + 0.1, 0.5)
@@ -967,7 +968,7 @@ function Statistics() {
                                     const isCompleted = taskInDay?.completed || false;
                                     displayValue = isCompleted ? "✓" : "×";
                                     if (isCompleted) {
-                                      textColor = getVarColor('Успех');
+                                      textColor = getVarColor('daySuccess');
                                     }
                                   } else if (task.type === TaskType.TIME) {
                                     const hours = Math.floor((taskInDay?.value || 0) / 60);
@@ -990,7 +991,7 @@ function Statistics() {
                                       : 0;
                                     displayValue = `${completionRate}%`;
                                     bgColor = hexToRGBA(
-                                      getVarColor('Успех'),
+                                      getVarColor('daySuccess'),
                                       Math.min((completionRate / 100) * 0.4 + 0.1, 0.5)
                                     );
                                   } else if (task.type === TaskType.TIME) {
@@ -1024,7 +1025,7 @@ function Statistics() {
                         className="px-4 py-2 text-center text-sm font-semibold"
                         style={{
                           backgroundColor: hexToRGBA(
-                            getVarColor('Успех'),
+                            getVarColor('daySuccess'),
                             Math.min((avgDayScore / 100) * 0.4 + 0.1, 0.5)
                           ),
                         }}
@@ -1059,7 +1060,7 @@ function Statistics() {
                               const percentage = Math.round((taskStats.completed / taskStats.total) * 100);
                               totalValue = `${percentage}%`;
                               bgColor = hexToRGBA(
-                                getVarColor('Успех'),
+                                getVarColor('daySuccess'),
                                 Math.min((percentage / 100) * 0.4 + 0.1, 0.5)
                               );
                             } else if (task.type === TaskType.TIME) {

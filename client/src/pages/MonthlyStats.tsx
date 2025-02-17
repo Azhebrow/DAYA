@@ -18,7 +18,7 @@ import { calculateDayScore } from '@/lib/utils';
 // Используем цвета из настроек пользователя
 const getSuccessColor = (opacity = 1) => {
   const settings = storage.getSettings();
-  const color = settings.colors?.daySuccess;
+  const color = settings.colors?.daySuccess; // Изменено с daySuccess на правильный параметр
   if (!color) return `rgba(16, 185, 129, ${opacity})`;
   return `${color.replace('--', 'var(--')}`;
 };
