@@ -43,13 +43,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     fontSize: '1rem',
     fontWeight: 'bold',
     transition: 'all 0.2s',
-    // Remove spinner buttons
-    WebkitAppearance: 'none',
-    MozAppearance: 'textfield',
-    '&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-      WebkitAppearance: 'none',
-      margin: 0
-    }
   });
 
   if (task.type === TaskType.CHECKBOX) {
@@ -84,60 +77,47 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
 
     return (
       <div className="flex gap-2 w-full">
-        <div className="flex-1 relative">
-          <div className="relative flex items-center justify-center w-full">
-            <Input
-              type="number"
-              min="0"
-              value={hours || ''}
-              onChange={handleHoursChange}
-              className="w-full h-9 pr-6 text-center bg-zinc-800 border-0"
-              placeholder="0"
-              style={{
-                backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                transition: 'all 0.2s',
-              }}
-            />
-            <div 
-              className="absolute inset-y-0 right-2 flex items-center pointer-events-none"
-              style={{ 
-                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-              }}
-            >
-              <span className="text-sm">ч</span>
-            </div>
-          </div>
+        <div className="flex-1">
+          <Input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={hours > 0 ? `${hours}ч` : ''}
+            onChange={(e) => {
+              const numValue = parseInt(e.target.value.replace(/\D/g, ''));
+              handleHoursChange({ target: { value: String(numValue) } } as React.ChangeEvent<HTMLInputElement>);
+            }}
+            className="w-full h-9 text-center bg-zinc-800 border-0"
+            placeholder="0ч"
+            style={{
+              backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+              color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              transition: 'all 0.2s',
+            }}
+          />
         </div>
-        <div className="flex-1 relative">
-          <div className="relative flex items-center justify-center w-full">
-            <Input
-              type="number"
-              min="0"
-              max="59"
-              value={minutes || ''}
-              onChange={handleMinutesChange}
-              className="w-full h-9 pr-8 text-center bg-zinc-800 border-0"
-              placeholder="0"
-              style={{
-                backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                transition: 'all 0.2s',
-              }}
-            />
-            <div 
-              className="absolute inset-y-0 right-2 flex items-center pointer-events-none"
-              style={{ 
-                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-              }}
-            >
-              <span className="text-sm">мин</span>
-            </div>
-          </div>
+        <div className="flex-1">
+          <Input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={minutes > 0 ? `${minutes}м` : ''}
+            onChange={(e) => {
+              const numValue = parseInt(e.target.value.replace(/\D/g, ''));
+              handleMinutesChange({ target: { value: String(numValue) } } as React.ChangeEvent<HTMLInputElement>);
+            }}
+            className="w-full h-9 text-center bg-zinc-800 border-0"
+            placeholder="0м"
+            style={{
+              backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+              color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              transition: 'all 0.2s',
+            }}
+          />
         </div>
       </div>
     );
@@ -168,27 +148,21 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   }
 
   if (task.type === TaskType.EXPENSE) {
-    const hasValue = task.value && task.value > 0;
+    const value = task.value || 0;
     return (
-      <div className="relative w-full">
-        <Input
-          type="number"
-          value={task.value || ''}
-          onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          style={getInputStyle(hasValue)}
-          placeholder="0"
-        />
-        <span style={{
-          position: 'absolute',
-          right: '0.5rem',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          fontSize: '0.875rem',
-          color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)'
-        }}>
-          zł
-        </span>
-      </div>
+      <Input
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        value={value > 0 ? `${value}zł` : ''}
+        onChange={(e) => {
+          const numValue = parseInt(e.target.value.replace(/\D/g, ''));
+          handleChange(numValue || 0);
+        }}
+        style={getInputStyle(value > 0)}
+        placeholder="0zł"
+        className="text-center"
+      />
     );
   }
 
