@@ -26,19 +26,18 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const value = task.value || 0;
     const hours = Math.floor(value / 60);
     const minutes = value % 60;
-    const hasAnyValue = value > 0;
 
     // Определяем базовые стили для полей ввода
     const baseInputStyles = {
       width: '100%',
       height: '36px',
-      backgroundColor: hasAnyValue ? categoryColor : 'rgb(39 39 42)',
+      backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
       border: 'none',
       textAlign: 'center' as const,
       fontSize: '16px',
       fontWeight: '600',
       transition: 'all 0.2s ease',
-      color: hasAnyValue ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
+      color: value > 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
       borderRadius: '6px',
       padding: '0 12px',
       outline: 'none',
