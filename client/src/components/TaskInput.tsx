@@ -39,7 +39,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
     color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
-    textAlign: 'center',
+    textAlign: 'center' as const,
     fontSize: '1rem',
     fontWeight: 'bold',
     transition: 'all 0.2s',
@@ -63,37 +63,50 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const hours = Math.floor(value / 60);
     const minutes = value % 60;
 
-    // Создаем строку формата для отображения (например, "2ч 30мин")
-    const displayValue = `${hours ? hours + 'ч ' : ''}${minutes ? minutes + 'мин' : (hours ? '' : '0мин')}`;
-
-    const handleTimeClick = (e: React.MouseEvent<HTMLInputElement>) => {
-      const input = e.currentTarget;
-      input.select();
+    const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newHours = Math.max(0, parseInt(e.target.value) || 0);
+      const totalMinutes = newHours * 60 + minutes;
+      handleChange(totalMinutes);
     };
 
-    const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const input = e.target.value;
-      // Улучшенное регулярное выражение для парсинга часов и минут
-      const matches = input.match(/(\d+)\s*ч?\s*(\d{0,2})\s*м?и?н?/);
-      if (matches) {
-        const hours = parseInt(matches[1]) || 0;
-        const minutes = parseInt(matches[2] || '0');
-        // Проверяем, что минуты не превышают 59
-        const validMinutes = Math.min(minutes, 59);
-        const totalMinutes = hours * 60 + validMinutes;
-        handleChange(totalMinutes);
-      }
+    const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newMinutes = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
+      const totalMinutes = hours * 60 + newMinutes;
+      handleChange(totalMinutes);
     };
 
     return (
-      <Input
-        type="text"
-        value={displayValue}
-        onChange={handleTimeChange}
-        onClick={handleTimeClick}
-        style={getInputStyle(value > 0)}
-        placeholder="0мин"
-      />
+      <div className="flex items-center justify-center gap-1" style={{ width: '100%' }}>
+        <div className="relative" style={{ width: '45%' }}>
+          <Input
+            type="number"
+            min="0"
+            value={hours || ''}
+            onChange={handleHoursChange}
+            style={getInputStyle(value > 0)}
+            placeholder="0"
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm" 
+                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
+            ч
+          </span>
+        </div>
+        <div className="relative" style={{ width: '45%' }}>
+          <Input
+            type="number"
+            min="0"
+            max="59"
+            value={minutes || ''}
+            onChange={handleMinutesChange}
+            style={getInputStyle(value > 0)}
+            placeholder="0"
+          />
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-sm"
+                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
+            мин
+          </span>
+        </div>
+      </div>
     );
   }
 
