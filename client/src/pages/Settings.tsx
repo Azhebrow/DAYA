@@ -7,11 +7,9 @@ import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
 import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
-//import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'; // Removed Popover components
 import { format } from 'date-fns';
-import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign, CalendarIcon } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
-import { Textarea } from "@/components/ui/textarea";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,11 +21,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Базовые настройки
@@ -76,6 +69,15 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
   }
 });
 
+// Доступные цвета
+const COLORS = [
+  { name: 'Фиолетовый', value: '--purple' },
+  { name: 'Зелёный', value: '--green' },
+  { name: 'Красный', value: '--red' },
+  { name: 'Оранжевый', value: '--orange' },
+  { name: 'Синий', value: '--blue' }
+];
+
 // Компонент выбора цвета
 const ColorPicker = ({
   category,
@@ -91,28 +93,30 @@ const ColorPicker = ({
   title: string;
 }) => {
   return (
-    <Button
-      variant="ghost"
-      className="w-full p-4 h-auto hover:bg-transparent hover:opacity-90"
-      style={{ backgroundColor: `var(${colorValue})` }}
-      onClick={() => {
-        // Простое переключение между предустановленными цветами
-        const colors = ['--purple', '--green', '--red', '--orange', '--blue'];
-        const currentIndex = colors.indexOf(colorValue);
-        const nextColor = colors[(currentIndex + 1) % colors.length];
-        onChange(nextColor);
-      }}
-    >
-      <div className="flex items-center justify-between w-full">
+    <div className="w-full rounded-lg overflow-hidden">
+      <div 
+        className="p-4 flex items-center justify-between transition-colors duration-200"
+        style={{ backgroundColor: `var(${colorValue})` }}
+      >
         <div className="flex items-center gap-2 text-white">
           <Icon className="h-5 w-5" />
           <span className="font-medium">{title}</span>
         </div>
-        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
-          <ChevronDown className="h-4 w-4 text-white" />
-        </div>
       </div>
-    </Button>
+      <div className="p-2 bg-card/50 flex gap-2 justify-center border-t border-white/10">
+        {COLORS.map((color) => (
+          <button
+            key={color.value}
+            onClick={() => onChange(color.value)}
+            className={`w-6 h-6 rounded-full transition-transform duration-200 hover:scale-110 ${
+              colorValue === color.value ? 'ring-2 ring-white ring-offset-2 ring-offset-background' : ''
+            }`}
+            style={{ backgroundColor: `var(${color.value})` }}
+            title={color.name}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -169,7 +173,6 @@ const CategoryEditor = ({
 const SettingsPage = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isOathExpanded, setIsOathExpanded] = React.useState(false);
 
   // Загрузка настроек
   const { data: settings = DEFAULT_SETTINGS, isLoading } = useQuery({
@@ -221,25 +224,6 @@ const SettingsPage = () => {
     }
   };
 
-  const handleClearData = async () => {
-    try {
-      await storage.clearData();
-      queryClient.invalidateQueries();
-      window.location.reload();
-      toast({
-        title: "Данные удалены",
-        description: "Все данные успешно удалены",
-      });
-    } catch (error) {
-      console.error('Clear data error:', error);
-      toast({
-        title: "Ошибка",
-        description: "Произошла ошибка при удалении данных",
-        variant: "destructive"
-      });
-    }
-  };
-
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Загрузка...</div>;
   }
@@ -250,56 +234,6 @@ const SettingsPage = () => {
         <header className="backdrop-blur-sm bg-card/30 rounded-lg p-4">
           <h1 className="text-2xl font-bold text-primary">Настройки</h1>
         </header>
-
-        {/* Настройки дат */}
-        <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
-          <CardHeader>
-            <CardTitle className="text-xl text-primary">Диапазон дат</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4">
-              <div className="space-y-2">
-                <Label>Начальная дата</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {settings.startDate ? format(new Date(settings.startDate), 'PP') : 'Выберите дату'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={settings.startDate ? new Date(settings.startDate) : undefined}
-                      onSelect={(date) => date && handleSettingChange('startDate', format(date, 'yyyy-MM-dd'))}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Конечная дата</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="w-full justify-start text-left font-normal">
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {settings.endDate ? format(new Date(settings.endDate), 'PP') : 'Выберите дату'}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={settings.endDate ? new Date(settings.endDate) : undefined}
-                      onSelect={(date) => date && handleSettingChange('endDate', format(date, 'yyyy-MM-dd'))}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Настройки категорий */}
         <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
@@ -380,7 +314,7 @@ const SettingsPage = () => {
                   id="timeTarget"
                   type="number"
                   value={settings.timeTarget / 60}
-                  onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value))}
+                  onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value) * 60)}
                   className="transition-shadow hover:shadow-md focus:shadow-lg"
                   step="0.5"
                 />
@@ -388,7 +322,6 @@ const SettingsPage = () => {
             </div>
           </CardContent>
         </Card>
-
 
         {/* Экспорт/Импорт */}
         <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
@@ -416,7 +349,7 @@ const SettingsPage = () => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Отмена</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleClearData}>
+                    <AlertDialogAction onClick={() => storage.clearData()}>
                       Удалить
                     </AlertDialogAction>
                   </AlertDialogFooter>
