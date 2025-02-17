@@ -2,13 +2,6 @@ import React, { useCallback } from 'react';
 import { Task, TaskType } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 // Constants
 const TIME_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
@@ -47,16 +40,24 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   const getSelectStyle = (value: number) => ({
     width: '100%',
     height: '2.25rem',
-    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+    backgroundColor: value > 0 ? `var(${categoryColor})` : 'rgb(39 39 42)',
     color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
     fontWeight: 'bold',
+    padding: '0 1rem',
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.5rem center',
+    backgroundSize: '1.2em',
+    borderRadius: '0.375rem',
+    cursor: 'pointer',
   });
 
   const getInputStyle = (hasValue: boolean) => ({
     width: '100%',
     height: '2.25rem',
-    backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
+    backgroundColor: hasValue ? `var(${categoryColor})` : 'rgb(39 39 42)',
     color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
     paddingLeft: '2rem',
@@ -81,42 +82,38 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     return (
-      <Select
-        value={String(value)}
-        onValueChange={(value) => handleChange(parseInt(value))}
+      <select
+        value={value}
+        onChange={(e) => handleChange(parseInt(e.target.value))}
+        style={getSelectStyle(value)}
+        className="focus:outline-none focus:ring-2 focus:ring-white/20"
       >
-        <SelectTrigger style={getSelectStyle(value)}>
-          <SelectValue placeholder="Время" />
-        </SelectTrigger>
-        <SelectContent>
-          {TIME_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <option value="0">Время</option>
+        {TIME_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     );
   }
 
   if (task.type === TaskType.CALORIE) {
     const value = task.value || 0;
     return (
-      <Select
-        value={String(value)}
-        onValueChange={(value) => handleChange(parseInt(value))}
+      <select
+        value={value}
+        onChange={(e) => handleChange(parseInt(e.target.value))}
+        style={getSelectStyle(value)}
+        className="focus:outline-none focus:ring-2 focus:ring-white/20"
       >
-        <SelectTrigger style={getSelectStyle(value)}>
-          <SelectValue placeholder="Калории" />
-        </SelectTrigger>
-        <SelectContent>
-          {CALORIE_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <option value="0">Калории</option>
+        {CALORIE_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     );
   }
 
