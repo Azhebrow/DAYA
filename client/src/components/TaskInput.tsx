@@ -10,17 +10,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Constants
-const TIME_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
-  value: (i + 1) * 20,
-  label: `${Math.floor((i + 1) * 20 / 60) > 0 ? Math.floor((i + 1) * 20 / 60) + ' ч ' : ''}${(i + 1) * 20 % 60 > 0 ? (i + 1) * 20 % 60 + ' мин' : ''}`
-}));
-
-const CALORIE_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
-  value: (i + 1) * 200,
-  label: `${(i + 1) * 200} ккал`
-}));
-
 interface TaskInputProps {
   task: Task;
   onChange: (value: number | boolean | string) => void;
@@ -44,22 +33,13 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     transition: 'all 0.2s',
   });
 
-  const getSelectStyle = (value: number) => ({
-    width: '100%',
-    height: '2.25rem',
-    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-    color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
-    border: 'none',
-    fontWeight: 'bold',
-  });
-
   const getInputStyle = (hasValue: boolean) => ({
     width: '100%',
     height: '2.25rem',
     backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
     color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
-    paddingLeft: '2rem',
+    paddingLeft: '0.5rem',
     fontSize: '1rem',
     fontWeight: 'bold',
     transition: 'all 0.2s',
@@ -80,22 +60,23 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
 
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
+    const hours = Math.floor(value / 60);
+    const minutes = value % 60;
+
+    const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const [hours, minutes] = e.target.value.split(':').map(Number);
+      const totalMinutes = (hours || 0) * 60 + (minutes || 0);
+      handleChange(totalMinutes);
+    };
+
     return (
-      <Select
-        value={String(value)}
-        onValueChange={(value) => handleChange(parseInt(value))}
-      >
-        <SelectTrigger style={getSelectStyle(value)}>
-          <SelectValue placeholder="Время" />
-        </SelectTrigger>
-        <SelectContent>
-          {TIME_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Input
+        type="time"
+        value={`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`}
+        onChange={handleTimeChange}
+        style={getInputStyle(value > 0)}
+        step="1"
+      />
     );
   }
 
@@ -106,11 +87,14 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger style={getSelectStyle(value)}>
+        <SelectTrigger style={getInputStyle(value > 0)}>
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
-          {CALORIE_OPTIONS.map((option) => (
+          {Array.from({ length: 19 }, (_, i) => ({
+            value: (i + 1) * 200,
+            label: `${(i + 1) * 200} ккал`
+          })).map((option) => (
             <SelectItem key={option.value} value={String(option.value)}>
               {option.label}
             </SelectItem>
