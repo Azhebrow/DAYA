@@ -249,11 +249,18 @@ const SettingsPage = () => {
     let newSettings = { ...settings };
 
     if (key === 'colors') {
-      newSettings = { ...settings, colors: { ...settings.colors, ...value } };
+      newSettings = { ...settings, colors: { ...DEFAULT_SETTINGS.colors, ...settings.colors, ...value } };
     } else if (key === 'timeTarget') {
       newSettings = { ...settings, timeTarget: value * 60 };
     } else if (key === 'subcategories') {
-      newSettings = { ...settings, subcategories: { ...settings.subcategories, ...value } };
+      newSettings = { 
+        ...settings, 
+        subcategories: { 
+          ...DEFAULT_SETTINGS.subcategories,
+          ...settings.subcategories,
+          ...value 
+        } 
+      };
     } else {
       newSettings = { ...settings, [key]: value };
     }
