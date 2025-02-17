@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Category } from '@shared/schema';
@@ -32,19 +32,18 @@ export const TaskCard = React.memo(({
   const getIconColor = () => {
     if (!settings?.colors) return '--purple';
 
-    switch (category.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()) {
+    switch (category.name) {
       case 'Разум': return `var(${settings.colors.mind})`;
       case 'Время': return `var(${settings.colors.time})`;
       case 'Спорт': return `var(${settings.colors.sport})`;
-      case 'Привычки': return `var(${settings.colors.habits})`; 
-      case 'Пороки': return `var(${settings.colors.habits})`; 
+      case 'Привычки': 
+      case 'Пороки': return `var(${settings.colors.habits})`;
       default: return `var(${settings.colors.expenses})`;
     }
   };
 
   const getCategoryIcon = () => {
-    const baseName = category.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
-    switch (baseName) {
+    switch (category.name) {
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
@@ -57,11 +56,10 @@ export const TaskCard = React.memo(({
   const getTaskName = (taskId: string) => {
     if (!settings?.subcategories) return '';
 
-    // Find the task name in the appropriate subcategory
     for (const [categoryKey, subcategories] of Object.entries(settings.subcategories)) {
       const subcategory = subcategories.find(sub => sub.id === taskId);
       if (subcategory) {
-        return subcategory.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+        return subcategory.name;
       }
     }
     return taskId;
@@ -80,7 +78,7 @@ export const TaskCard = React.memo(({
           <div className="flex items-center gap-2">
             <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
             <span className="text-base font-medium text-gray-200">
-              {category.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()}
+              {category.name}
             </span>
           </div>
 
