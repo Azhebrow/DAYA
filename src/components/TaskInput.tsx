@@ -21,7 +21,61 @@ const CALORIE_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
   label: `${(i + 1) * 200} ккал`
 }));
 
-// Checkbox Task Component
+// Time Task Component
+const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => {
+  const hours = Math.floor((task.value || 0) / 60);
+  const minutes = (task.value || 0) % 60;
+
+  return (
+    <div className="flex items-center justify-between px-4">
+      <span className="text-sm text-gray-300">{task.name}</span>
+      <div className="flex gap-2">
+        <Select
+          value={String(hours)}
+          onValueChange={(value) => {
+            const newHours = parseInt(value);
+            onChange(newHours * 60 + minutes);
+          }}
+        >
+          <SelectTrigger 
+            className={`w-[90px] h-8 ${hours > 0 ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
+          >
+            <SelectValue placeholder="Часы" />
+          </SelectTrigger>
+          <SelectContent>
+            {Array.from({ length: 13 }, (_, i) => (
+              <SelectItem key={i} value={String(i)}>
+                {i} ч
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={String(minutes)}
+          onValueChange={(value) => {
+            const newMinutes = parseInt(value);
+            onChange(hours * 60 + newMinutes);
+          }}
+        >
+          <SelectTrigger 
+            className={`w-[90px] h-8 ${minutes > 0 ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
+          >
+            <SelectValue placeholder="Минуты" />
+          </SelectTrigger>
+          <SelectContent>
+            {[0, 20, 40].map((min) => (
+              <SelectItem key={min} value={String(min)}>
+                {min} мин
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+});
+
+// Other components remain unchanged
 const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: boolean) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
@@ -33,28 +87,6 @@ const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (va
     >
       <span className="text-sm text-gray-300">Выполнено</span>
     </Button>
-  </div>
-));
-
-// Time Task Component
-const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => (
-  <div className="flex items-center justify-between px-4">
-    <span className="text-sm text-gray-300">{task.name}</span>
-    <Select
-      value={String(task.value || 0)}
-      onValueChange={(value) => onChange(parseInt(value))}
-    >
-      <SelectTrigger className="w-[180px] h-8 bg-zinc-800 hover:bg-zinc-700 border-gray-700">
-        <SelectValue placeholder="Выберите время" />
-      </SelectTrigger>
-      <SelectContent>
-        {TIME_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={String(option.value)}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
   </div>
 ));
 
