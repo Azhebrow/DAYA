@@ -37,7 +37,6 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     width: '100%',
     height: '2.25rem',
     backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
-    color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
     textAlign: 'center' as const,
     fontSize: '1rem',
@@ -45,18 +44,10 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     transition: 'all 0.2s',
   });
 
-  if (task.type === TaskType.CHECKBOX) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => handleChange(!task.completed)}
-        style={getButtonStyle(Boolean(task.completed))}
-      >
-        {task.completed ? 'Выполнено' : 'Отметить'}
-      </Button>
-    );
-  }
+  const getTimeInputStyle = (hasValue: boolean) => ({
+    ...getInputStyle(hasValue),
+    color: 'white',
+  });
 
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
@@ -76,7 +67,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     };
 
     const hasValue = hours > 0 || minutes > 0;
-    const commonInputStyle = getInputStyle(hasValue);
+    const timeInputStyle = getTimeInputStyle(hasValue);
 
     return (
       <div className="flex gap-2 w-full">
@@ -92,7 +83,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0ч"
-            style={commonInputStyle}
+            style={timeInputStyle}
           />
         </div>
         <div className="flex-1">
@@ -107,10 +98,23 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0м"
-            style={commonInputStyle}
+            style={timeInputStyle}
           />
         </div>
       </div>
+    );
+  }
+
+  if (task.type === TaskType.CHECKBOX) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleChange(!task.completed)}
+        style={getButtonStyle(Boolean(task.completed))}
+      >
+        {task.completed ? 'Выполнено' : 'Отметить'}
+      </Button>
     );
   }
 
