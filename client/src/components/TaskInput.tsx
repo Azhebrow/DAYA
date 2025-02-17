@@ -40,7 +40,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   const getSelectStyle = (value: number) => ({
     width: '100%',
     height: '2.25rem',
-    backgroundColor: value > 0 ? `var(${categoryColor})` : 'rgb(39 39 42)',
+    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
     color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
     fontWeight: 'bold',
@@ -52,13 +52,14 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     backgroundSize: '1.2em',
     borderRadius: '0.375rem',
     cursor: 'pointer',
+    transition: 'all 0.2s',
   });
 
-  const getInputStyle = (hasValue: boolean) => ({
+  const getInputStyle = (value: number) => ({
     width: '100%',
     height: '2.25rem',
-    backgroundColor: hasValue ? `var(${categoryColor})` : 'rgb(39 39 42)',
-    color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
+    backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+    color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
     paddingLeft: '2rem',
     fontSize: '1rem',
@@ -118,14 +119,14 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
   }
 
   if (task.type === TaskType.EXPENSE) {
-    const hasValue = task.value && task.value > 0;
+    const value = task.value || 0;
     return (
       <div className="relative w-full">
         <Input
           type="number"
-          value={task.value || ''}
+          value={value || ''}
           onChange={(e) => handleChange(parseInt(e.target.value) || 0)}
-          style={getInputStyle(hasValue)}
+          style={getInputStyle(value)}
           placeholder="0"
         />
         <span style={{
@@ -135,7 +136,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           transform: 'translateY(-50%)',
           fontSize: '0.875rem',
           fontWeight: 'bold',
-          color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)'
+          color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)'
         }}>
           zł
         </span>
