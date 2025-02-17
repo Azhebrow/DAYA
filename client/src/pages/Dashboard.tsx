@@ -18,37 +18,41 @@ import { Progress } from "@/components/ui/progress";
 import { Link } from 'wouter';
 import { ExportImport } from '@/components/ExportImport';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dayEntry, setDayEntry] = useState<DayEntry | null>(null);
   const [historyDays, setHistoryDays] = useState<DayEntry[]>([]);
-  const [version, setVersion] = useState<number>(Date.now());
-  const queryClient = useQueryClient();
-
-  const { data: settings, isLoading: isSettingsLoading } = useQuery({
-    queryKey: ['settings'],
-    queryFn: () => storage.getSettings(),
-  });
-
-  const [groupingMode, setGroupingMode] = useState<'normal' | 'weekly' | 'monthly'>('normal');
-
-  useEffect(() => {
-    if (settings?.viewMode) {
-      setGroupingMode(settings.viewMode);
+  const [groupingMode, setGroupingMode] = useState<'normal' | 'weekly' | 'monthly'>(() => {
+    try {
+      const stored = localStorage.getItem('day_success_tracker_settings');
+      if (!stored) return 'normal';
+      const settings = settingsSchema.parse(JSON.parse(stored));
+      return settings.viewMode;
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+      return 'normal';
     }
-  }, [settings?.viewMode]);
-
+  });
   const { toast } = useToast();
-
+  const [settings, setSettings] = useState<SettingsType>(() => {
+    try {
+      const stored = localStorage.getItem('day_success_tracker_settings');
+      if (!stored) return settingsSchema.parse({});
+      return settingsSchema.parse(JSON.parse(stored));
+    } catch (error) {
+      console.error('Error parsing settings:', error);
+      return settingsSchema.parse({});
+    }
+  });
+  const [version, setVersion] = useState<number>(Date.now());
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'day_success_tracker_settings') {
         try {
           const newSettings = e.newValue ? JSON.parse(e.newValue) : {};
-          queryClient.setQueryData(['settings'], settingsSchema.parse(newSettings));
+          setSettings(settingsSchema.parse(newSettings));
           setVersion(Date.now());
         } catch (error) {
           console.error('Error parsing settings from storage:', error);
@@ -261,8 +265,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const days: DayEntry[] = [];
-    let currentDate = new Date(settings?.startDate);
-    const endDate = new Date(settings?.endDate);
+    let currentDate = new Date(settings.startDate);
+    const endDate = new Date(settings.endDate);
 
     while (currentDate <= endDate) {
       const dateStr = format(currentDate, 'yyyy-MM-dd');
@@ -275,11 +279,11 @@ export default function Dashboard() {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     setHistoryDays(days);
-  }, [settings?.startDate, settings?.endDate, version]);
+  }, [settings.startDate, settings.endDate, version]);
 
   const calculateDaysProgress = () => {
-    const startDate = new Date(settings?.startDate);
-    const endDate = new Date(settings?.endDate);
+    const startDate = new Date(settings.startDate);
+    const endDate = new Date(settings.endDate);
     const currentDate = new Date();
     const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -325,7 +329,7 @@ export default function Dashboard() {
     setSelectedDate(new Date(date));
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (dayEntry) {
       const updatedEntry = {
         ...dayEntry,
@@ -343,7 +347,7 @@ export default function Dashboard() {
         }))
       };
 
-      await storage.saveDayEntry(updatedEntry);
+      storage.saveDayEntry(updatedEntry);
       setVersion(Date.now());
       toast({
         title: "Сохранено",
@@ -362,24 +366,14 @@ export default function Dashboard() {
     });
   };
 
-  const handleGroupingModeChange = async (value: 'normal' | 'weekly' | 'monthly') => {
+  const handleGroupingModeChange = (value: 'normal' | 'weekly' | 'monthly') => {
     setGroupingMode(value);
     const updatedSettings = { ...settings, viewMode: value };
-    await storage.saveSettings(updatedSettings);
-    setVersion(Date.now());
+    setSettings(updatedSettings);
+    localStorage.setItem('day_success_tracker_settings', JSON.stringify(updatedSettings));
   };
 
-  if (isSettingsLoading || !settings || !dayEntry) {
-    return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="container mx-auto px-2">
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-lg">Загрузка...</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (!dayEntry) return null;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -517,8 +511,8 @@ export default function Dashboard() {
               </div>
               <span className="text-xs sm:text-sm text-gray-400 sm:ml-auto">
                 {(() => {
-                  const startDate = new Date(settings?.startDate);
-                  const endDate = new Date(settings?.endDate);
+                  const startDate = new Date(settings.startDate);
+                  const endDate = new Date(settings.endDate);
                   const currentDate = new Date();
 
                   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -542,8 +536,8 @@ export default function Dashboard() {
         <HistoryGrid
           days={historyDays}
           onDayClick={handleDayClick}
-          startDate={settings?.startDate}
-          endDate={settings?.endDate}
+          startDate={settings.startDate}
+          endDate={settings.endDate}
           selectedDate={selectedDate}
           groupingMode={groupingMode}
         />

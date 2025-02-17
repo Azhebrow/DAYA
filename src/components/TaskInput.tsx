@@ -10,50 +10,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Generate combined time options (0-12 hours with 20min intervals)
-const TIME_OPTIONS = (() => {
-  const options = [];
-  for (let h = 0; h <= 12; h++) {
-    for (let m of [0, 20, 40]) {
-      if (h === 0 && m === 0) continue; // Skip 0:00
-      const value = h * 60 + m;
-      const label = `${h > 0 ? h + ' ч ' : ''}${m > 0 ? m + ' мин' : h > 0 ? '' : '0 мин'}`;
-      options.push({ value, label });
-    }
-  }
-  return options;
-})();
+// Constants
+const TIME_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
+  value: (i + 1) * 20,
+  label: `${Math.floor((i + 1) * 20 / 60) > 0 ? Math.floor((i + 1) * 20 / 60) + ' ч ' : ''}${(i + 1) * 20 % 60 > 0 ? (i + 1) * 20 % 60 + ' мин' : ''}`
+}));
 
 const CALORIE_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
   value: (i + 1) * 200,
   label: `${(i + 1) * 200} ккал`
 }));
 
-// Time Task Component with combined hours and minutes
-const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => {
-  return (
-    <div className="flex items-center justify-between px-4">
-      <span className="text-sm text-gray-300">{task.name}</span>
-      <Select
-        value={String(task.value || 0)}
-        onValueChange={(value) => onChange(parseInt(value))}
-      >
-        <SelectTrigger className="w-[180px] h-8">
-          <SelectValue placeholder="Выберите время" />
-        </SelectTrigger>
-        <SelectContent>
-          {TIME_OPTIONS.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
-  );
-});
-
-// Rest of the components remain unchanged
+// Checkbox Task Component
 const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: boolean) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
@@ -68,6 +36,29 @@ const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (va
   </div>
 ));
 
+// Time Task Component
+const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => (
+  <div className="flex items-center justify-between px-4">
+    <span className="text-sm text-gray-300">{task.name}</span>
+    <Select
+      value={String(task.value || 0)}
+      onValueChange={(value) => onChange(parseInt(value))}
+    >
+      <SelectTrigger className="w-[180px] h-8 bg-zinc-800 hover:bg-zinc-700 border-gray-700">
+        <SelectValue placeholder="Выберите время" />
+      </SelectTrigger>
+      <SelectContent>
+        {TIME_OPTIONS.map((option) => (
+          <SelectItem key={option.value} value={String(option.value)}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+));
+
+// Calorie Task Component
 const CalorieTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
@@ -89,8 +80,9 @@ const CalorieTask = React.memo(({ task, onChange }: { task: Task; onChange: (val
   </div>
 ));
 
-const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: {
-  task: Task;
+// Expense Task Component
+const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: { 
+  task: Task; 
   onChange: (value: number) => void;
   isExpenseCard?: boolean;
 }) => (
@@ -110,6 +102,7 @@ const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: {
   </div>
 ));
 
+// Expense Note Task Component
 const ExpenseNoteTask = React.memo(({ task, onChange, isExpenseCard = false }: {
   task: Task;
   onChange: (value: string) => void;

@@ -139,54 +139,7 @@ export class DatabaseStorage implements IStorage {
   async getSettings(): Promise<Settings> {
     const [dbSettings] = await db.select().from(settings);
     if (!dbSettings) {
-      // Создаем настройки по умолчанию с помощью схемы
-      const defaultSettings = settingsSchema.parse({
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--blue',
-          habits: '--red',
-          expenses: '--orange',
-          daySuccess: '--emerald'
-        },
-        subcategories: {
-          mind: [
-            { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-            { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-            { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-          ],
-          time: [
-            { id: 'work', name: '💼 Работа', emoji: '💼' },
-            { id: 'study', name: '📚 Учёба', emoji: '📚' },
-            { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-          ],
-          sport: [
-            { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-            { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-            { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-          ],
-          habits: [
-            { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-            { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-            { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-          ],
-          expenses: [
-            { id: 'food', name: 'Еда', emoji: '🍽️' },
-            { id: 'transport', name: 'Транспорт', emoji: '🚌' },
-            { id: 'entertainment', name: 'Развлечения', emoji: '🎮' }
-          ],
-          daySuccess: [
-            { id: 'achievement', name: 'Достижение', emoji: '🏆' }
-          ]
-        },
-        startDate: new Date().toISOString().split('T')[0],
-        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
-        calorieTarget: 2000,
-        timeTarget: 480,
-        viewMode: 'normal',
-        timeRange: '7',
-        darkMode: true
-      });
+      const defaultSettings = settingsSchema.parse({});
       const [newSettings] = await db.insert(settings).values(defaultSettings).returning();
       return settingsSchema.parse(newSettings);
     }
