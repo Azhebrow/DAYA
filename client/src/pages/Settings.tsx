@@ -8,7 +8,7 @@ import { storage } from '@/lib/storage';
 import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { Brain, Clock, Dumbbell, Ban, DollarSign, CalendarIcon } from 'lucide-react';
+import { Brain, Clock, Dumbbell, Ban, DollarSign, CalendarIcon, BarChartIcon } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
 import {
   AlertDialog,
@@ -94,7 +94,7 @@ const ColorPicker = ({
 }) => {
   return (
     <div className="w-full rounded-lg overflow-hidden">
-      <div 
+      <div
         className="p-4 flex items-center justify-between transition-colors duration-200"
         style={{ backgroundColor: `var(${colorValue})` }}
       >
@@ -286,6 +286,15 @@ const SettingsPage = () => {
                 icon={DollarSign}
                 colorValue={settings.colors.expenses}
                 onColorChange={(color) => handleSettingChange('colors', { expenses: color })}
+              />
+              <CategoryEditor
+                category="daySuccess"
+                subcategories={settings.subcategories.daySuccess}
+                onUpdate={(category, items) => handleSettingChange('subcategories', { [category]: items })}
+                title="Показатель успеха"
+                icon={BarChartIcon}
+                colorValue={settings.colors.daySuccess}
+                onColorChange={(color) => handleSettingChange('colors', { daySuccess: color })}
               />
             </div>
           </CardContent>
