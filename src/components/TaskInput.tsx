@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Constants
+// Constants for time and calorie options remain unchanged
 const TIME_OPTIONS = Array.from({ length: 19 }, (_, i) => ({
   value: (i + 1) * 20,
   label: `${Math.floor((i + 1) * 20 / 60) > 0 ? Math.floor((i + 1) * 20 / 60) + ' ч ' : ''}${(i + 1) * 20 % 60 > 0 ? (i + 1) * 20 % 60 + ' мин' : ''}`
@@ -37,7 +37,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
             onChange(newHours * 60 + minutes);
           }}
         >
-          <SelectTrigger className="w-[90px] h-8">
+          <SelectTrigger className="w-[90px] h-8 border-gray-700">
             <SelectValue placeholder="Часы" />
           </SelectTrigger>
           <SelectContent>
@@ -55,7 +55,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
             onChange(hours * 60 + newMinutes);
           }}
         >
-          <SelectTrigger className="w-[90px] h-8">
+          <SelectTrigger className="w-[90px] h-8 border-gray-700">
             <SelectValue placeholder="Минуты" />
           </SelectTrigger>
           <SelectContent>
@@ -71,7 +71,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
   );
 });
 
-// Other components remain unchanged
+// Rest of the components remain unchanged
 const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: boolean) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
@@ -86,7 +86,6 @@ const CheckboxTask = React.memo(({ task, onChange }: { task: Task; onChange: (va
   </div>
 ));
 
-// Calorie Task Component
 const CalorieTask = React.memo(({ task, onChange }: { task: Task; onChange: (value: number) => void }) => (
   <div className="flex items-center justify-between px-4">
     <span className="text-sm text-gray-300">{task.name}</span>
@@ -108,7 +107,6 @@ const CalorieTask = React.memo(({ task, onChange }: { task: Task; onChange: (val
   </div>
 ));
 
-// Expense Task Component
 const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: { 
   task: Task; 
   onChange: (value: number) => void;
@@ -130,7 +128,6 @@ const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: {
   </div>
 ));
 
-// Expense Note Task Component
 const ExpenseNoteTask = React.memo(({ task, onChange, isExpenseCard = false }: {
   task: Task;
   onChange: (value: string) => void;
