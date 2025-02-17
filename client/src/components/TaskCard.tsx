@@ -34,13 +34,13 @@ export const TaskCard = React.memo(({
   }, [onTaskUpdate]);
 
   const getIconColor = () => {
-    if (!settings?.colors) return '--purple';
+    if (!settings?.colors) return 'var(--purple)';
 
     switch (category.name) {
       case 'Разум': return `var(${settings.colors.mind})`;
       case 'Время': return `var(${settings.colors.time})`;
       case 'Спорт': return `var(${settings.colors.sport})`;
-      case 'Привычки': return `var(${settings.colors.habits})`; 
+      case 'Привычки': 
       case 'Пороки': return `var(${settings.colors.habits})`; 
       default: return `var(${settings.colors.expenses})`;
     }
@@ -57,6 +57,23 @@ export const TaskCard = React.memo(({
     }
   };
 
+  // Обновляем название и эмодзи категории из настроек если это карточка расходов
+  React.useEffect(() => {
+    if (isExpenseCard && settings?.subcategories?.expenses) {
+      const expenseCategory = settings.subcategories.expenses.find(
+        cat => category.tasks[0]?.id === `${cat.id}_expense`
+      );
+      if (expenseCategory) {
+        category.name = expenseCategory.name;
+        category.emoji = expenseCategory.emoji;
+        // Также обновляем имя задачи
+        if (category.tasks[0]) {
+          category.tasks[0].name = expenseCategory.name;
+        }
+      }
+    }
+  }, [settings, category, isExpenseCard]);
+
   const iconColor = getIconColor();
 
   return (
@@ -68,11 +85,15 @@ export const TaskCard = React.memo(({
       <Card className="bg-zinc-900/50 task-card">
         <div className="flex items-center h-14 px-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
-            {!isExpenseCard && (
+            {!isExpenseCard ? (
               <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
+            ) : (
+              <span className="text-xl" role="img" aria-label={category.name}>
+                {category.emoji}
+              </span>
             )}
             <span className="text-base font-medium text-gray-200">
-              {category.name === 'Привычки' ? 'Пороки' : category.name}
+              {category.name}
             </span>
           </div>
 
