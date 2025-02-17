@@ -18,22 +18,28 @@ import { Progress } from "@/components/ui/progress";
 import { Link } from 'wouter';
 import { ExportImport } from '@/components/ExportImport';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [dayEntry, setDayEntry] = useState<DayEntry | null>(null);
   const [historyDays, setHistoryDays] = useState<DayEntry[]>([]);
   const [version, setVersion] = useState<number>(Date.now());
+  const queryClient = useQueryClient();
 
-  const { data: settings = settingsSchema.parse({}), isLoading: isSettingsLoading } = useQuery({
+  const { data: settings, isLoading: isSettingsLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings(),
   });
 
-  const [groupingMode, setGroupingMode] = useState<'normal' | 'weekly' | 'monthly'>(
-    settings?.viewMode || 'normal'
-  );
+  const [groupingMode, setGroupingMode] = useState<'normal' | 'weekly' | 'monthly'>('normal');
+
+  useEffect(() => {
+    if (settings?.viewMode) {
+      setGroupingMode(settings.viewMode);
+    }
+  }, [settings?.viewMode]);
+
   const { toast } = useToast();
 
 
@@ -42,7 +48,7 @@ export default function Dashboard() {
       if (e.key === 'day_success_tracker_settings') {
         try {
           const newSettings = e.newValue ? JSON.parse(e.newValue) : {};
-          setSettings(settingsSchema.parse(newSettings));
+          queryClient.setQueryData(['settings'], settingsSchema.parse(newSettings));
           setVersion(Date.now());
         } catch (error) {
           console.error('Error parsing settings from storage:', error);
@@ -255,8 +261,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const days: DayEntry[] = [];
-    let currentDate = new Date(settings.startDate);
-    const endDate = new Date(settings.endDate);
+    let currentDate = new Date(settings?.startDate);
+    const endDate = new Date(settings?.endDate);
 
     while (currentDate <= endDate) {
       const dateStr = format(currentDate, 'yyyy-MM-dd');
@@ -269,11 +275,11 @@ export default function Dashboard() {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     setHistoryDays(days);
-  }, [settings.startDate, settings.endDate, version]);
+  }, [settings?.startDate, settings?.endDate, version]);
 
   const calculateDaysProgress = () => {
-    const startDate = new Date(settings.startDate);
-    const endDate = new Date(settings.endDate);
+    const startDate = new Date(settings?.startDate);
+    const endDate = new Date(settings?.endDate);
     const currentDate = new Date();
     const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const daysPassed = Math.ceil((currentDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -363,7 +369,17 @@ export default function Dashboard() {
     setVersion(Date.now());
   };
 
-  if (isSettingsLoading || !dayEntry) return null;
+  if (isSettingsLoading || !settings || !dayEntry) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="container mx-auto px-2">
+          <div className="flex items-center justify-center h-screen">
+            <div className="text-lg">Загрузка...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -501,8 +517,8 @@ export default function Dashboard() {
               </div>
               <span className="text-xs sm:text-sm text-gray-400 sm:ml-auto">
                 {(() => {
-                  const startDate = new Date(settings.startDate);
-                  const endDate = new Date(settings.endDate);
+                  const startDate = new Date(settings?.startDate);
+                  const endDate = new Date(settings?.endDate);
                   const currentDate = new Date();
 
                   const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -526,8 +542,8 @@ export default function Dashboard() {
         <HistoryGrid
           days={historyDays}
           onDayClick={handleDayClick}
-          startDate={settings.startDate}
-          endDate={settings.endDate}
+          startDate={settings?.startDate}
+          endDate={settings?.endDate}
           selectedDate={selectedDate}
           groupingMode={groupingMode}
         />

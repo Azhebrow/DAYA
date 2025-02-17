@@ -204,6 +204,8 @@ const SettingsPage = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings(),
+    staleTime: 0, // Всегда получаем свежие данные
+    cacheTime: 0, // Не кэшируем результат
   });
 
   const handleSettingChange = async (key: keyof Settings, value: any) => {
@@ -229,7 +231,7 @@ const SettingsPage = () => {
 
     try {
       await storage.saveSettings(newSettings);
-      queryClient.invalidateQueries({ queryKey: ['settings'] });
+      await queryClient.invalidateQueries({ queryKey: ['settings'] });
       toast({
         title: "Настройки сохранены",
         description: "Ваши изменения успешно применены",
