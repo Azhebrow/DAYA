@@ -83,35 +83,51 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     };
 
     return (
-      <div className="flex items-center justify-center gap-1" style={{ width: '100%' }}>
-        <div className="relative" style={{ width: '45%' }}>
-          <Input
-            type="number"
-            min="0"
-            value={hours || ''}
-            onChange={handleHoursChange}
-            style={getInputStyle(value > 0)}
-            placeholder="0"
-          />
-          <span className="absolute right-0 top-1/2 -translate-y-1/2 text-sm pr-1" 
-                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
-            ч
-          </span>
+      <div className="flex items-center justify-center gap-2" style={{ width: '100%' }}>
+        <div className="flex items-center justify-center" style={{ width: '45%' }}>
+          <div className="relative flex items-center justify-center" style={{ width: '100%' }}>
+            <Input
+              type="number"
+              min="0"
+              value={hours || ''}
+              onChange={handleHoursChange}
+              style={{
+                ...getInputStyle(value > 0),
+                paddingRight: '1.5rem',
+                width: '100%'
+              }}
+              placeholder="0"
+            />
+            <span 
+              className="absolute right-1 text-sm pointer-events-none"
+              style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}
+            >
+              ч
+            </span>
+          </div>
         </div>
-        <div className="relative" style={{ width: '45%' }}>
-          <Input
-            type="number"
-            min="0"
-            max="59"
-            value={minutes || ''}
-            onChange={handleMinutesChange}
-            style={getInputStyle(value > 0)}
-            placeholder="0"
-          />
-          <span className="absolute right-0 top-1/2 -translate-y-1/2 text-sm pr-1"
-                style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}>
-            мин
-          </span>
+        <div className="flex items-center justify-center" style={{ width: '45%' }}>
+          <div className="relative flex items-center justify-center" style={{ width: '100%' }}>
+            <Input
+              type="number"
+              min="0"
+              max="59"
+              value={minutes || ''}
+              onChange={handleMinutesChange}
+              style={{
+                ...getInputStyle(value > 0),
+                paddingRight: '2rem',
+                width: '100%'
+              }}
+              placeholder="0"
+            />
+            <span 
+              className="absolute right-1 text-sm pointer-events-none"
+              style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}
+            >
+              мин
+            </span>
+          </div>
         </div>
       </div>
     );
