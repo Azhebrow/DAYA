@@ -45,10 +45,10 @@ export class DatabaseStorage implements IStorage {
             id: t.id.toString(),
             name: t.name,
             type: t.type,
-            value: t.value ?? undefined,
-            textValue: t.textValue ?? undefined,
-            completed: t.completed ?? false,
-            createdAt: t.createdAt?.toISOString() ?? new Date().toISOString()
+            value: t.value || 0,
+            textValue: t.textValue || '',
+            completed: t.completed,
+            createdAt: t.createdAt?.toISOString() || new Date().toISOString()
           }))
         };
       })
@@ -107,8 +107,8 @@ export class DatabaseStorage implements IStorage {
           .values({
             name: task.name,
             type: task.type,
-            value: task.value ?? null,
-            textValue: task.textValue ?? null,
+            value: task.value || 0,
+            textValue: task.textValue || '',
             completed: task.completed,
             categoryId: category.id
           });
@@ -158,6 +158,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async clearData(): Promise<void> {
+    // Delete all data in reverse order of dependencies
     await db.delete(tasks);
     await db.delete(categories);
     await db.delete(dayEntries);
