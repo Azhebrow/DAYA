@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
-import { Settings, settingsSchema } from '@shared/schema';
+import { Settings, settingsSchema, type CategoryConfig } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
@@ -28,10 +28,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import EmojiPicker from 'emoji-picker-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-// Updated colorPalette - organized by color groups
+const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
+Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
+Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
+Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
+Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
+
 const colorPalette = [
   // Красные и оранжевые оттенки
   { name: 'red', value: '--red', hex: 'var(--red)' },
@@ -71,7 +75,6 @@ const colorPalette = [
   { name: 'pink', value: '--pink', hex: 'var(--pink)' },
 ];
 
-// Updated ColorPicker component
 const ColorPicker = ({
   value,
   onChange,
@@ -128,55 +131,44 @@ const ColorPicker = ({
   );
 };
 
-const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не раб своих желаний, я их хозяин. Я выбираю дисциплину вместо минутных удовольствий. Я не позволяю порнографии разрушать мой разум и лишать меня энергии — я сильнее этого. Я не растрачиваю своё время на пустые развлечения, которые ведут в никуда. Каждое мгновение — это возможность стать лучше, и я не позволю себе её упустить.
-Я контролирую свои финансы, потому что понимаю: деньги — это инструмент для роста, а не для удовлетворения капризов. Я не покупаю бесполезные вещи, потому что инвестирую в себя и своё будущее. Я строю жизнь, где каждый шаг ведёт к успеху.
-Моё тело — мой храм. Я питаю его едой, которая даёт силу, а не слабость. Я не позволю сахару и пустым калориям лишить меня энергии и решимости. Я тренирую своё тело, потому что хочу быть сильным, выносливым, непоколебимым. Я уважаю себя слишком сильно, чтобы быть слабым.
-Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
-Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
-
 const SubcategoryEditor = ({
   category,
-  subcategories,
+  config,
   onUpdate,
-  title,
   icon: Icon,
-  colorValue,
-  onColorChange,
   usedColors,
 }: {
-  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses';
-  subcategories: { id: string; name: string; emoji: string; }[];
-  onUpdate: (category: string, subcategories: { id: string; name: string; emoji: string; }[]) => void;
-  title: string;
+  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses' | 'daySuccess';
+  config: CategoryConfig;
+  onUpdate: (category: string, config: CategoryConfig) => void;
   icon: React.ElementType;
-  colorValue: string;
-  onColorChange: (value: string) => void;
   usedColors: string[];
 }) => {
   return (
     <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
       <CardHeader className="pb-2">
         <ColorPicker
-          value={colorValue}
-          onChange={onColorChange}
+          value={config.color}
+          onChange={(value) => onUpdate(category, { ...config, color: value })}
           usedColors={usedColors}
-          categoryName={title}
+          categoryName={config.name}
           icon={Icon}
         />
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {subcategories.map((sub, index) => (
+          {config.subcategories.map((sub, index) => (
             <div key={sub.id} className="flex items-center gap-2">
               <Input
                 value={sub.name}
                 onChange={(e) => {
-                  const newSubcategories = [...subcategories];
+                  const newSubcategories = [...config.subcategories];
                   newSubcategories[index] = {
                     ...sub,
-                    name: e.target.value
+                    name: e.target.value,
+                    emoji: sub.emoji // Preserve emoji
                   };
-                  onUpdate(category, newSubcategories);
+                  onUpdate(category, { ...config, subcategories: newSubcategories });
                 }}
                 className="flex-1"
               />
@@ -188,52 +180,108 @@ const SubcategoryEditor = ({
   );
 };
 
-const DEFAULT_SETTINGS = settingsSchema.parse({
+const DEFAULT_SETTINGS: Settings = settingsSchema.parse({
   startDate: '2025-02-07',
   endDate: '2025-09-09',
   oathText: DEFAULT_OATH_TEXT,
-  colors: {
-    mind: '--purple',
-    time: '--green',
-    sport: '--red',
-    habits: '--orange',
-    expenses: '--orange',
-    daySuccess: '--green'
+  categories: {
+    mind: {
+      id: 'mind',
+      name: "Разум",
+      emoji: '🧠',
+      color: '--purple',
+      subcategories: [
+        { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
+        { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
+        { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
+      ]
+    },
+    time: {
+      id: 'time',
+      name: "Время",
+      emoji: '⏰',
+      color: '--green',
+      subcategories: [
+        { id: 'work', name: '💼 Работа', emoji: '💼' },
+        { id: 'study', name: '📚 Учёба', emoji: '📚' },
+        { id: 'project', name: '🎯 Проект', emoji: '🎯' }
+      ]
+    },
+    sport: {
+      id: 'sport',
+      name: "Спорт",
+      emoji: '🏃',
+      color: '--red',
+      subcategories: [
+        { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
+        { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
+        { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
+      ]
+    },
+    habits: {
+      id: 'habits',
+      name: "Пороки",
+      emoji: '🎯',
+      color: '--orange',
+      subcategories: [
+        { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
+        { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
+        { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
+      ]
+    },
+    expenses: {
+      id: 'expenses',
+      name: "Траты",
+      emoji: '💰',
+      color: '--orange',
+      subcategories: [
+        { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
+        { id: 'junk', name: '🍕 Дерьмо', emoji: '🍕' },
+        { id: 'city', name: '🌆 Город', emoji: '🌆' },
+        { id: 'sport', name: '⚽ Спорт', emoji: '⚽' },
+        { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
+        { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
+        { id: 'other', name: '📦 Разное', emoji: '📦' }
+      ]
+    },
+    daySuccess: {
+      id: 'daySuccess',
+      name: "Успех дня",
+      emoji: '✅',
+      color: '--green',
+      subcategories: []
+    }
   },
-  subcategories: {
-    mind: [
-      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-    ],
-    time: [
-      { id: 'work', name: '💼 Работа', emoji: '💼' },
-      { id: 'study', name: '📚 Учёба', emoji: '📚' },
-      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-    ],
-    sport: [
-      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-    ],
-    habits: [
-      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-    ],
-    expenses: [
-      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
-      { id: 'junk', name: '🍕 Дерьмо', emoji: '🍕' },
-      { id: 'city', name: '🌆 Город', emoji: '🌆' },
-      { id: 'sport', name: '⚽ Спорт', emoji: '⚽' },
-      { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
-      { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
-      { id: 'other', name: '📦 Разное', emoji: '📦' }
-    ],
-    //Adding default values for other categories
-    daySuccess: []
-  }
+  calorieTarget: 2000,
+  timeTarget: 60 * 8 // 8 hours in minutes
 });
+
+const migrateOldSettings = (oldSettings: any): Settings => {
+  if (!oldSettings) return DEFAULT_SETTINGS;
+  if (oldSettings.categories) return oldSettings;
+
+  const { colors = {}, subcategories = {} } = oldSettings;
+  const defaultCategories = DEFAULT_SETTINGS.categories;
+
+  const categories = Object.keys(defaultCategories).reduce((acc, key) => {
+    const defaultCategory = defaultCategories[key as keyof typeof defaultCategories];
+    return {
+      ...acc,
+      [key]: {
+        id: key,
+        name: defaultCategory.name,
+        emoji: defaultCategory.emoji,
+        color: colors[key] || defaultCategory.color,
+        subcategories: subcategories[key] || defaultCategory.subcategories
+      }
+    };
+  }, {});
+
+  return settingsSchema.parse({
+    ...oldSettings,
+    categories,
+  });
+};
 
 const SettingsPage = () => {
   const queryClient = useQueryClient();
@@ -242,22 +290,15 @@ const SettingsPage = () => {
 
   const { data: settings = DEFAULT_SETTINGS, isLoading } = useQuery({
     queryKey: ['settings'],
-    queryFn: () => storage.getSettings(),
+    queryFn: async () => {
+      const settings = await storage.getSettings();
+      return migrateOldSettings(settings);
+    },
     initialData: DEFAULT_SETTINGS
   });
 
   const handleSettingChange = async (key: keyof Settings, value: any) => {
-    let newSettings = { ...settings };
-
-    if (key === 'colors') {
-      newSettings = { ...settings, colors: { ...settings.colors, ...value } };
-    } else if (key === 'timeTarget') {
-      newSettings = { ...settings, timeTarget: value * 60 };
-    } else if (key === 'subcategories') {
-      newSettings = { ...settings, subcategories: { ...settings.subcategories, ...value } };
-    } else {
-      newSettings = { ...settings, [key]: value };
-    }
+    const newSettings = { ...settings, [key]: value };
 
     try {
       await storage.saveSettings(newSettings);
@@ -274,6 +315,19 @@ const SettingsPage = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleCategoryUpdate = (category: string, config: CategoryConfig) => {
+    handleSettingChange('categories', {
+      ...settings.categories,
+      [category]: config
+    });
+  };
+
+  const getUsedColors = (exceptCategory: string) => {
+    return Object.entries(settings.categories)
+      .filter(([key]) => key !== exceptCategory)
+      .map(([_, config]) => config.color);
   };
 
   const handleClearData = async () => {
@@ -307,6 +361,7 @@ const SettingsPage = () => {
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {/* Oath Text Section */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <Collapsible open={isOathExpanded} onOpenChange={setIsOathExpanded}>
               <CollapsibleTrigger className="w-full">
@@ -333,6 +388,7 @@ const SettingsPage = () => {
             </Collapsible>
           </Card>
 
+          {/* Date Range Section */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
@@ -384,6 +440,7 @@ const SettingsPage = () => {
             </CardContent>
           </Card>
 
+          {/* Target Values Section */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
@@ -408,7 +465,7 @@ const SettingsPage = () => {
                     id="timeTarget"
                     type="number"
                     value={settings.timeTarget / 60}
-                    onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value))}
+                    onChange={(e) => handleSettingChange('timeTarget', parseFloat(e.target.value) * 60)}
                     className="transition-shadow hover:shadow-md focus:shadow-lg"
                     step="0.5"
                   />
@@ -417,6 +474,7 @@ const SettingsPage = () => {
             </CardContent>
           </Card>
 
+          {/* Categories Section */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <CardHeader>
               <CardTitle className="text-xl text-primary">
@@ -425,121 +483,28 @@ const SettingsPage = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SubcategoryEditor
-                  category="mind"
-                  subcategories={settings.subcategories.mind || []}
-                  onUpdate={(category, newSubcategories) => {
-                    handleSettingChange('subcategories', {
-                      ...settings.subcategories,
-                      [category]: newSubcategories
-                    });
-                  }}
-                  title="Разум"
-                  icon={Brain}
-                  colorValue={settings.colors.mind}
-                  onColorChange={(value) => handleSettingChange('colors', { mind: value })}
-                  usedColors={[
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
-                />
-                <SubcategoryEditor
-                  category="time"
-                  subcategories={settings.subcategories.time || []}
-                  onUpdate={(category, newSubcategories) => {
-                    handleSettingChange('subcategories', {
-                      ...settings.subcategories,
-                      [category]: newSubcategories
-                    });
-                  }}
-                  title="Время"
-                  icon={Clock}
-                  colorValue={settings.colors.time}
-                  onColorChange={(value) => handleSettingChange('colors', { time: value })}
-                  usedColors={[
-                    settings.colors.mind,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
-                />
-                <SubcategoryEditor
-                  category="sport"
-                  subcategories={settings.subcategories.sport || []}
-                  onUpdate={(category, newSubcategories) => {
-                    handleSettingChange('subcategories', {
-                      ...settings.subcategories,
-                      [category]: newSubcategories
-                    });
-                  }}
-                  title="Спорт"
-                  icon={Dumbbell}
-                  colorValue={settings.colors.sport}
-                  onColorChange={(value) => handleSettingChange('colors', { sport: value })}
-                  usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
-                />
-                <SubcategoryEditor
-                  category="habits"
-                  subcategories={settings.subcategories.habits || []}
-                  onUpdate={(category, newSubcategories) => {
-                    handleSettingChange('subcategories', {
-                      ...settings.subcategories,
-                      [category]: newSubcategories
-                    });
-                  }}
-                  title="Пороки"
-                  icon={Ban}
-                  colorValue={settings.colors.habits}
-                  onColorChange={(value) => handleSettingChange('colors', { habits: value })}
-                  usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
-                />
-                <SubcategoryEditor
-                  category="expenses"
-                  subcategories={settings.subcategories.expenses || []}
-                  onUpdate={(category, newSubcategories) => {
-                    handleSettingChange('subcategories', {
-                      ...settings.subcategories,
-                      [category]: newSubcategories
-                    });
-                  }}
-                  title="Траты"
-                  icon={DollarSign}
-                  colorValue={settings.colors.expenses}
-                  onColorChange={(value) => handleSettingChange('colors', { expenses: value })}
-                  usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.daySuccess,
-                    //Adding new colors here
-                    '--red',
-                    '--orange',
-                    '--green',
-                    '--blue',
-                    '--purple'
-                  ]}
-                />
+                {Object.entries(settings.categories).map(([key, config]) => (
+                  <SubcategoryEditor
+                    key={key}
+                    category={key as keyof typeof settings.categories}
+                    config={config}
+                    onUpdate={handleCategoryUpdate}
+                    icon={
+                      key === 'mind' ? Brain :
+                        key === 'time' ? Clock :
+                        key === 'sport' ? Dumbbell :
+                        key === 'habits' ? Ban :
+                        key === 'expenses' ? DollarSign :
+                        CheckCircle2
+                    }
+                    usedColors={getUsedColors(key)}
+                  />
+                ))}
               </div>
             </CardContent>
           </Card>
 
+          {/* Data Management Section */}
           <Card className="backdrop-blur-sm bg-card/80 border-accent/20 md:col-span-2 xl:col-span-3">
             <CardHeader>
               <CardTitle className="text-xl text-primary">

@@ -130,29 +130,57 @@ export default function Goals() {
   const [settings, setSettings] = useState<Settings>(() => {
     try {
       const stored = localStorage.getItem('day_success_tracker_settings');
-      if (!stored) return settingsSchema.parse({
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--red',
-          habits: '--orange',
-          expenses: '--orange',
-          daySuccess: '--green'
-        }
-      });
-      return settingsSchema.parse(JSON.parse(stored));
+      if (!stored) return settingsSchema.parse({});
+      const parsedSettings = JSON.parse(stored);
+
+      // Check if using old format and convert if needed
+      if (!parsedSettings.categories) {
+        const { colors = {} } = parsedSettings;
+        return settingsSchema.parse({
+          ...parsedSettings,
+          categories: {
+            mind: {
+              id: 'mind',
+              name: 'Разум',
+              emoji: '🧠',
+              color: colors.mind || '--purple',
+              subcategories: []
+            },
+            time: {
+              id: 'time',
+              name: 'Время',
+              emoji: '⏰',
+              color: colors.time || '--green',
+              subcategories: []
+            },
+            sport: {
+              id: 'sport',
+              name: 'Спорт',
+              emoji: '🏃',
+              color: colors.sport || '--red',
+              subcategories: []
+            },
+            habits: {
+              id: 'habits',
+              name: 'Привычки',
+              emoji: '🎯',
+              color: colors.habits || '--orange',
+              subcategories: []
+            },
+            expenses: {
+              id: 'expenses',
+              name: 'Траты',
+              emoji: '💰',
+              color: colors.expenses || '--orange',
+              subcategories: []
+            }
+          }
+        });
+      }
+      return settingsSchema.parse(parsedSettings);
     } catch (error) {
       console.error('Error parsing settings:', error);
-      return settingsSchema.parse({
-        colors: {
-          mind: '--purple',
-          time: '--green',
-          sport: '--red',
-          habits: '--orange',
-          expenses: '--orange',
-          daySuccess: '--green'
-        }
-      });
+      return settingsSchema.parse({});
     }
   });
 
@@ -265,7 +293,7 @@ export default function Goals() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {goals.map(goal => (
                   <div key={`input-${goal.id}`} className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${settings.colors[goal.category]}`}>
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${settings.categories[goal.category].color}`}>
                       {getIconByName(goal.iconName)}
                     </div>
                     <Input
@@ -298,11 +326,11 @@ export default function Goals() {
               transition={{ delay: index * 0.1 }}
             >
               <Card className="relative overflow-hidden p-6 backdrop-blur-lg bg-black/40 border-zinc-800">
-                <div className={`absolute inset-0 bg-gradient-to-br ${settings.colors[goal.category]} opacity-10`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${settings.categories[goal.category].color} opacity-10`} />
                 <div className="relative space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg bg-gradient-to-br ${settings.colors[goal.category]}`}>
+                      <div className={`p-2 rounded-lg bg-gradient-to-br ${settings.categories[goal.category].color}`}>
                         {getIconByName(goal.iconName)}
                       </div>
                       <h3 className="text-xl font-semibold">{goal.title}</h3>
@@ -382,7 +410,7 @@ export default function Goals() {
                           {changes.map(({ goal }) => (
                             <div
                               key={`icon-${goal.id}`}
-                              className={`p-2 rounded-lg bg-gradient-to-br ${settings.colors[goal.category]}`}
+                              className={`p-2 rounded-lg bg-gradient-to-br ${settings.categories[goal.category].color}`}
                             >
                               {getIconByName(goal.iconName)}
                             </div>
