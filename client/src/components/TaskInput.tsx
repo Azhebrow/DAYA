@@ -22,61 +22,83 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     onChange(value);
   }, [onChange]);
 
+  const getButtonStyle = (completed: boolean) => ({
+    width: '100%',
+    height: '2.25rem',
+    fontSize: '1rem',
+    backgroundColor: completed ? categoryColor : 'rgb(39 39 42)',
+    color: completed ? 'white' : 'rgba(255, 255, 255, 0.6)',
+    border: 'none',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+  });
+
+  const getInputStyle = (hasValue: boolean) => ({
+    width: '100%',
+    height: '2.25rem',
+    backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
+    border: 'none',
+    textAlign: 'center' as const,
+    fontSize: '1rem',
+    fontWeight: 'bold',
+    transition: 'all 0.2s',
+  });
+
+  const getTimeInputStyle = (hasValue: boolean) => ({
+    ...getInputStyle(hasValue),
+    color: 'white',
+  });
+
   if (task.type === TaskType.TIME) {
     const value = task.value || 0;
     const hours = Math.floor(value / 60);
     const minutes = value % 60;
 
-    // Определяем базовые стили для полей ввода
-    const baseInputStyles = {
-      width: '100%',
-      height: '36px',
-      backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-      border: 'none',
-      textAlign: 'center' as const,
-      fontSize: '16px',
-      fontWeight: '600',
-      transition: 'all 0.2s ease',
-      color: value > 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-      borderRadius: '6px',
-      padding: '0 12px',
-      outline: 'none',
-    };
-
-    const handleHoursInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const numValue = Math.min(9, Math.max(0, parseInt(e.target.value.replace(/\D/g, '')) || 0));
+    const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const numValue = Math.min(9, Math.max(0, parseInt(e.target.value) || 0));
       const totalMinutes = numValue * 60 + minutes;
       handleChange(totalMinutes);
     };
 
-    const handleMinutesInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newMinutes = Math.min(59, Math.max(0, parseInt(e.target.value.replace(/\D/g, '')) || 0));
+    const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newMinutes = Math.min(59, Math.max(0, parseInt(e.target.value) || 0));
       const totalMinutes = hours * 60 + newMinutes;
       handleChange(totalMinutes);
     };
 
+    const hasValue = hours > 0 || minutes > 0;
+    const timeInputStyle = getTimeInputStyle(hasValue);
+
     return (
       <div className="flex gap-2 w-full">
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
             value={hours > 0 ? `${hours}ч` : ''}
-            onChange={handleHoursInput}
+            onChange={(e) => {
+              const numValue = parseInt(e.target.value.replace(/\D/g, ''));
+              handleHoursChange({ target: { value: String(numValue) } } as React.ChangeEvent<HTMLInputElement>);
+            }}
+            className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0ч"
-            style={baseInputStyles}
+            style={timeInputStyle}
           />
         </div>
         <div className="flex-1">
-          <input
+          <Input
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
             value={minutes > 0 ? `${minutes}м` : ''}
-            onChange={handleMinutesInput}
+            onChange={(e) => {
+              const numValue = parseInt(e.target.value.replace(/\D/g, ''));
+              handleMinutesChange({ target: { value: String(numValue) } } as React.ChangeEvent<HTMLInputElement>);
+            }}
+            className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0м"
-            style={baseInputStyles}
+            style={timeInputStyle}
           />
         </div>
       </div>
@@ -89,15 +111,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         variant="ghost"
         size="sm"
         onClick={() => handleChange(!task.completed)}
-        style={{
-          width: '100%',
-          height: '36px',
-          backgroundColor: task.completed ? categoryColor : 'rgb(39 39 42)',
-          color: task.completed ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-          border: 'none',
-          fontWeight: 'bold',
-          transition: 'all 0.2s'
-        }}
+        style={getButtonStyle(Boolean(task.completed))}
       >
         {task.completed ? 'Выполнено' : 'Отметить'}
       </Button>
@@ -111,15 +125,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         value={String(value)}
         onValueChange={(value) => handleChange(parseInt(value))}
       >
-        <SelectTrigger 
-          style={{
-            backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-            color: value > 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-            border: 'none',
-            fontWeight: 'bold',
-            transition: 'all 0.2s'
-          }}
-        >
+        <SelectTrigger style={getInputStyle(value > 0)}>
           <SelectValue placeholder="Калории" />
         </SelectTrigger>
         <SelectContent>
@@ -148,13 +154,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
           const numValue = parseInt(e.target.value.replace(/\D/g, ''));
           handleChange(numValue || 0);
         }}
-        style={{
-          backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
-          color: value > 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.6)',
-          border: 'none',
-          fontWeight: 'bold',
-          transition: 'all 0.2s'
-        }}
+        style={getInputStyle(value > 0)}
         placeholder="0zł"
         className="text-center"
       />
