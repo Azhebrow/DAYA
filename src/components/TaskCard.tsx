@@ -1,10 +1,8 @@
 import React, { useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { Category } from '@shared/schema';
 import TaskInput from './TaskInput';
-import { calculateCategoryProgress } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { storage } from '@/lib/storage';
 
@@ -21,11 +19,6 @@ export const TaskCard = React.memo(({
   isExpenseCard = false,
   expenseIndex 
 }: TaskCardProps) => {
-  const progress = React.useMemo(() => 
-    calculateCategoryProgress(category.tasks, category.type),
-    [category.tasks, category.type]
-  );
-
   const { data: settings } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings()
@@ -35,21 +28,51 @@ export const TaskCard = React.memo(({
     onTaskUpdate(taskId, value);
   }, [onTaskUpdate]);
 
-  // If this is an expense card, update the name and emoji from settings
+  // Обновляем информацию о категории из настроек
   React.useEffect(() => {
-    if (isExpenseCard && settings?.subcategories?.expenses && typeof expenseIndex === 'number') {
-      const expenseCategory = settings.subcategories.expenses[expenseIndex];
-      if (expenseCategory) {
-        // Используем полное имя с эмодзи
-        category.name = expenseCategory.name;
-        category.emoji = expenseCategory.emoji;
-        // Также обновляем имя задачи
-        if (category.tasks[0]) {
-          category.tasks[0].name = expenseCategory.name;
+    if (!settings?.subcategories) return;
+
+    // Определяем тип категории для маппинга с настройками
+    const categoryType = category.type.toLowerCase();
+    let subcategoryList;
+
+    switch (categoryType) {
+      case 'time':
+        subcategoryList = settings.subcategories.time;
+        break;
+      case 'calorie':
+        subcategoryList = settings.subcategories.sport;
+        break;
+      case 'checkbox':
+        if (category.name.includes('Порок')) {
+          subcategoryList = settings.subcategories.habits;
+        } else {
+          subcategoryList = settings.subcategories.mind;
         }
-      }
+        break;
+      case 'expense':
+        subcategoryList = settings.subcategories.expenses;
+        break;
+      default:
+        return;
     }
-  }, [settings, category, isExpenseCard, expenseIndex]);
+
+    if (!subcategoryList) return;
+
+    category.tasks.forEach(task => {
+      // Ищем соответствующую подкатегорию по ID задачи
+      const matchingSubcategory = subcategoryList.find(
+        sub => task.id.startsWith(sub.id)
+      );
+
+      if (matchingSubcategory) {
+        // Обновляем имя и эмодзи задачи из настроек
+        task.name = matchingSubcategory.name;
+        category.name = matchingSubcategory.name;
+        category.emoji = matchingSubcategory.emoji;
+      }
+    });
+  }, [settings, category]);
 
   return (
     <motion.div
