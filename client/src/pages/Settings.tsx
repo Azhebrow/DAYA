@@ -144,7 +144,7 @@ const SubcategoryEditor = ({
   onColorChange,
   usedColors,
 }: {
-  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses';
+  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses' | 'daySuccess';
   subcategories: { id: string; name: string; emoji: string; }[];
   onUpdate: (category: string, subcategories: { id: string; name: string; emoji: string; }[]) => void;
   title: string;
@@ -230,7 +230,6 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
       { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
       { id: 'other', name: '📦 Разное', emoji: '📦' }
     ],
-    //Adding default values for other categories
     daySuccess: []
   }
 });
@@ -427,7 +426,7 @@ const SettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SubcategoryEditor
                   category="mind"
-                  subcategories={settings.subcategories.mind || []}
+                  subcategories={settings?.subcategories?.mind || DEFAULT_SETTINGS.subcategories.mind}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -448,7 +447,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="time"
-                  subcategories={settings.subcategories.time || []}
+                  subcategories={settings?.subcategories?.time || DEFAULT_SETTINGS.subcategories.time}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -469,7 +468,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="sport"
-                  subcategories={settings.subcategories.sport || []}
+                  subcategories={settings?.subcategories?.sport || DEFAULT_SETTINGS.subcategories.sport}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -490,7 +489,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="habits"
-                  subcategories={settings.subcategories.habits || []}
+                  subcategories={settings?.subcategories?.habits || DEFAULT_SETTINGS.subcategories.habits}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -511,7 +510,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="expenses"
-                  subcategories={settings.subcategories.expenses || []}
+                  subcategories={settings?.subcategories?.expenses || DEFAULT_SETTINGS.subcategories.expenses}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -528,7 +527,32 @@ const SettingsPage = () => {
                     settings.colors.sport,
                     settings.colors.habits,
                     settings.colors.daySuccess,
-                    //Adding new colors here
+                    '--red',
+                    '--orange',
+                    '--green',
+                    '--blue',
+                    '--purple'
+                  ]}
+                />
+                <SubcategoryEditor
+                  category="daySuccess"
+                  subcategories={settings?.subcategories?.daySuccess || DEFAULT_SETTINGS.subcategories.daySuccess}
+                  onUpdate={(category, newSubcategories) => {
+                    handleSettingChange('subcategories', {
+                      ...settings.subcategories,
+                      [category]: newSubcategories
+                    });
+                  }}
+                  title="Успехи дня"
+                  icon={CheckCircle2}
+                  colorValue={settings.colors.daySuccess}
+                  onColorChange={(value) => handleSettingChange('colors', { daySuccess: value })}
+                  usedColors={[
+                    settings.colors.mind,
+                    settings.colors.time,
+                    settings.colors.sport,
+                    settings.colors.habits,
+                    settings.colors.expenses,
                     '--red',
                     '--orange',
                     '--green',
