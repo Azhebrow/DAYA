@@ -136,7 +136,7 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 
 const SubcategoryEditor = ({
   category,
-  subcategories = [], // Add default empty array
+  subcategories,
   onUpdate,
   title,
   icon: Icon,
@@ -144,7 +144,7 @@ const SubcategoryEditor = ({
   onColorChange,
   usedColors,
 }: {
-  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses' | 'daySuccess';
+  category: 'mind' | 'time' | 'sport' | 'habits' | 'expenses';
   subcategories: { id: string; name: string; emoji: string; }[];
   onUpdate: (category: string, subcategories: { id: string; name: string; emoji: string; }[]) => void;
   title: string;
@@ -166,7 +166,7 @@ const SubcategoryEditor = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {(subcategories || []).map((sub, index) => (
+          {subcategories.map((sub, index) => (
             <div key={sub.id} className="flex items-center gap-2">
               <Input
                 value={sub.name}
@@ -230,7 +230,8 @@ const DEFAULT_SETTINGS = settingsSchema.parse({
       { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
       { id: 'other', name: '📦 Разное', emoji: '📦' }
     ],
-    daySuccess: [] // Initialize with empty array
+    //Adding default values for other categories
+    daySuccess: []
   }
 });
 
@@ -249,18 +250,11 @@ const SettingsPage = () => {
     let newSettings = { ...settings };
 
     if (key === 'colors') {
-      newSettings = { ...settings, colors: { ...DEFAULT_SETTINGS.colors, ...settings.colors, ...value } };
+      newSettings = { ...settings, colors: { ...settings.colors, ...value } };
     } else if (key === 'timeTarget') {
       newSettings = { ...settings, timeTarget: value * 60 };
     } else if (key === 'subcategories') {
-      newSettings = { 
-        ...settings, 
-        subcategories: { 
-          ...DEFAULT_SETTINGS.subcategories,
-          ...settings.subcategories,
-          ...value 
-        } 
-      };
+      newSettings = { ...settings, subcategories: { ...settings.subcategories, ...value } };
     } else {
       newSettings = { ...settings, [key]: value };
     }
@@ -433,7 +427,7 @@ const SettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SubcategoryEditor
                   category="mind"
-                  subcategories={settings?.subcategories?.mind || DEFAULT_SETTINGS.subcategories.mind}
+                  subcategories={settings.subcategories.mind || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -454,7 +448,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="time"
-                  subcategories={settings?.subcategories?.time || DEFAULT_SETTINGS.subcategories.time}
+                  subcategories={settings.subcategories.time || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -475,7 +469,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="sport"
-                  subcategories={settings?.subcategories?.sport || DEFAULT_SETTINGS.subcategories.sport}
+                  subcategories={settings.subcategories.sport || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -496,7 +490,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="habits"
-                  subcategories={settings?.subcategories?.habits || DEFAULT_SETTINGS.subcategories.habits}
+                  subcategories={settings.subcategories.habits || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -517,7 +511,7 @@ const SettingsPage = () => {
                 />
                 <SubcategoryEditor
                   category="expenses"
-                  subcategories={settings?.subcategories?.expenses || DEFAULT_SETTINGS.subcategories.expenses}
+                  subcategories={settings.subcategories.expenses || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -534,32 +528,7 @@ const SettingsPage = () => {
                     settings.colors.sport,
                     settings.colors.habits,
                     settings.colors.daySuccess,
-                    '--red',
-                    '--orange',
-                    '--green',
-                    '--blue',
-                    '--purple'
-                  ]}
-                />
-                <SubcategoryEditor
-                  category="daySuccess"
-                  subcategories={settings?.subcategories?.daySuccess || DEFAULT_SETTINGS.subcategories.daySuccess}
-                  onUpdate={(category, newSubcategories) => {
-                    handleSettingChange('subcategories', {
-                      ...settings.subcategories,
-                      [category]: newSubcategories
-                    });
-                  }}
-                  title="Успехи дня"
-                  icon={CheckCircle2}
-                  colorValue={settings.colors.daySuccess}
-                  onColorChange={(value) => handleSettingChange('colors', { daySuccess: value })}
-                  usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.expenses,
+                    //Adding new colors here
                     '--red',
                     '--orange',
                     '--green',

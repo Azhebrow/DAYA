@@ -53,8 +53,21 @@ export const TaskCard = React.memo(({
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
       case 'Привычки': 
       case 'Пороки': return <Ban className="h-5 w-5" />;
-      default: return null;
+      default: return category.emoji ? <span>{category.emoji}</span> : null;
     }
+  };
+
+  const getTaskName = (taskId: string) => {
+    if (!settings?.subcategories) return '';
+
+    // Find the task name in the appropriate subcategory
+    for (const [categoryKey, subcategories] of Object.entries(settings.subcategories)) {
+      const subcategory = subcategories.find(sub => sub.id === taskId);
+      if (subcategory) {
+        return subcategory.name;
+      }
+    }
+    return taskId;
   };
 
   const iconColor = getIconColor();
@@ -68,9 +81,7 @@ export const TaskCard = React.memo(({
       <Card className="bg-zinc-900/50 task-card">
         <div className="flex items-center h-14 px-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
-            {!isExpenseCard && (
-              <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
-            )}
+            <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
             <span className="text-base font-medium text-gray-200">
               {category.name === 'Привычки' ? 'Пороки' : category.name}
             </span>
@@ -98,7 +109,7 @@ export const TaskCard = React.memo(({
               className="flex items-center h-14 px-4 border-b border-zinc-800 last:border-0"
             >
               {!isExpenseCard && (
-                <span className="w-1/2 text-gray-400">{task.name}</span>
+                <span className="w-1/2 text-gray-400">{getTaskName(task.id)}</span>
               )}
               <div className={isExpenseCard ? "w-full" : "w-1/2"}>
                 <TaskInput
