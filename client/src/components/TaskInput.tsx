@@ -39,7 +39,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
     color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
     border: 'none',
-    paddingLeft: '0.5rem',
+    textAlign: 'center',
     fontSize: '1rem',
     fontWeight: 'bold',
     transition: 'all 0.2s',
@@ -63,19 +63,33 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     const hours = Math.floor(value / 60);
     const minutes = value % 60;
 
+    // Создаем строку формата для отображения (например, "2ч 30мин")
+    const displayValue = `${hours ? hours + 'ч ' : ''}${minutes ? minutes + 'мин' : (hours ? '' : '0мин')}`;
+
+    const handleTimeClick = (e: React.MouseEvent<HTMLInputElement>) => {
+      const input = e.currentTarget;
+      input.select();
+    };
+
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const [hours, minutes] = e.target.value.split(':').map(Number);
-      const totalMinutes = (hours || 0) * 60 + (minutes || 0);
-      handleChange(totalMinutes);
+      const input = e.target.value;
+      const matches = input.match(/(\d+)ч?\s*(\d+)?м?и?н?/);
+      if (matches) {
+        const hours = parseInt(matches[1]) || 0;
+        const minutes = parseInt(matches[2]) || 0;
+        const totalMinutes = hours * 60 + minutes;
+        handleChange(totalMinutes);
+      }
     };
 
     return (
       <Input
-        type="time"
-        value={`${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`}
+        type="text"
+        value={displayValue}
         onChange={handleTimeChange}
+        onClick={handleTimeClick}
         style={getInputStyle(value > 0)}
-        step="1"
+        placeholder="0мин"
       />
     );
   }
