@@ -73,11 +73,14 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
 
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const input = e.target.value;
-      const matches = input.match(/(\d+)ч?\s*(\d+)?м?и?н?/);
+      // Улучшенное регулярное выражение для парсинга часов и минут
+      const matches = input.match(/(\d+)\s*ч?\s*(\d{0,2})\s*м?и?н?/);
       if (matches) {
         const hours = parseInt(matches[1]) || 0;
-        const minutes = parseInt(matches[2]) || 0;
-        const totalMinutes = hours * 60 + minutes;
+        const minutes = parseInt(matches[2] || '0');
+        // Проверяем, что минуты не превышают 59
+        const validMinutes = Math.min(minutes, 59);
+        const totalMinutes = hours * 60 + validMinutes;
         handleChange(totalMinutes);
       }
     };
@@ -131,7 +134,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
         />
         <span style={{
           position: 'absolute',
-          left: '0.5rem',
+          right: '0.5rem',
           top: '50%',
           transform: 'translateY(-50%)',
           fontSize: '0.875rem',
