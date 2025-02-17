@@ -37,7 +37,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
             onChange(newHours * 60 + minutes);
           }}
         >
-          <SelectTrigger className="w-[90px] h-8 border-gray-700">
+          <SelectTrigger className="w-[90px] h-8">
             <SelectValue placeholder="Часы" />
           </SelectTrigger>
           <SelectContent>
@@ -55,7 +55,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
             onChange(hours * 60 + newMinutes);
           }}
         >
-          <SelectTrigger className="w-[90px] h-8 border-gray-700">
+          <SelectTrigger className="w-[90px] h-8">
             <SelectValue placeholder="Минуты" />
           </SelectTrigger>
           <SelectContent>
@@ -107,8 +107,8 @@ const CalorieTask = React.memo(({ task, onChange }: { task: Task; onChange: (val
   </div>
 ));
 
-const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: { 
-  task: Task; 
+const ExpenseTask = React.memo(({ task, onChange, isExpenseCard = false }: {
+  task: Task;
   onChange: (value: number) => void;
   isExpenseCard?: boolean;
 }) => (
