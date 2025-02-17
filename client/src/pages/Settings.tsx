@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/lib/storage';
 import { Settings, settingsSchema } from '@shared/schema';
 import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+//import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'; // Removed Popover components
 import { format } from 'date-fns';
 import { Brain, Clock, Dumbbell, Ban, DollarSign, ChevronDown, ChevronUp, CalendarIcon } from 'lucide-react';
 import { ExportImport } from '@/components/ExportImport';
@@ -93,7 +93,7 @@ const ColorPicker = ({
   return (
     <Button
       variant="ghost"
-      className="w-full p-4 h-auto hover:bg-transparent"
+      className="w-full p-4 h-auto hover:bg-transparent hover:opacity-90"
       style={{ backgroundColor: `var(${colorValue})` }}
       onClick={() => {
         // Простое переключение между предустановленными цветами
@@ -108,7 +108,9 @@ const ColorPicker = ({
           <Icon className="h-5 w-5" />
           <span className="font-medium">{title}</span>
         </div>
-        <ChevronDown className="h-4 w-4 text-white" />
+        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+          <ChevronDown className="h-4 w-4 text-white" />
+        </div>
       </div>
     </Button>
   );
