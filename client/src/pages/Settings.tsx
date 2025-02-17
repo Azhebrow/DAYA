@@ -192,16 +192,14 @@ const SettingsPage = () => {
   const { toast } = useToast();
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
 
-  // Use schema's default values instead of hardcoded defaults
-  const defaultSettings = settingsSchema.parse({});
-
-  const { data: settings = defaultSettings, isLoading } = useQuery({
+  const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings(),
-    initialData: defaultSettings
   });
 
   const handleSettingChange = async (key: keyof Settings, value: any) => {
+    if (!settings) return;
+
     let newSettings = { ...settings };
 
     if (key === 'colors') {
@@ -209,12 +207,12 @@ const SettingsPage = () => {
     } else if (key === 'timeTarget') {
       newSettings = { ...settings, timeTarget: value * 60 };
     } else if (key === 'subcategories') {
-      newSettings = { 
-        ...settings, 
-        subcategories: { 
+      newSettings = {
+        ...settings,
+        subcategories: {
           ...settings.subcategories,
-          ...value 
-        } 
+          ...value
+        }
       };
     } else {
       newSettings = { ...settings, [key]: value };
@@ -237,8 +235,20 @@ const SettingsPage = () => {
     }
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  // Показываем загрузку только при первой загрузке данных
+  if (isLoading || !settings) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
+        <div className="container mx-auto space-y-4 max-w-7xl">
+          <header className="backdrop-blur-sm bg-card/30 rounded-lg p-4 mb-4">
+            <h1 className="text-2xl font-bold text-primary">Настройки</h1>
+          </header>
+          <div className="flex items-center justify-center min-h-[200px]">
+            <div className="text-muted-foreground">Загрузка настроек...</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const handleClearData = async () => {

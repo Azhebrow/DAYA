@@ -141,6 +141,14 @@ export class DatabaseStorage implements IStorage {
     if (!dbSettings) {
       // Создаем настройки по умолчанию с помощью схемы
       const defaultSettings = settingsSchema.parse({
+        colors: {
+          mind: '--purple',
+          time: '--green',
+          sport: '--blue',
+          habits: '--red',
+          expenses: '--orange',
+          daySuccess: '--emerald'
+        },
         subcategories: {
           mind: [
             { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
@@ -170,7 +178,14 @@ export class DatabaseStorage implements IStorage {
           daySuccess: [
             { id: 'achievement', name: 'Достижение', emoji: '🏆' }
           ]
-        }
+        },
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0],
+        calorieTarget: 2000,
+        timeTarget: 480,
+        viewMode: 'normal',
+        timeRange: '7',
+        darkMode: true
       });
       const [newSettings] = await db.insert(settings).values(defaultSettings).returning();
       return settingsSchema.parse(newSettings);
