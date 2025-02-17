@@ -70,7 +70,6 @@ export default function Dashboard() {
     const entry = storage.getDayEntry(dateStr);
 
     if (entry) {
-      // Обновляем названия категорий расходов из настроек
       const updatedEntry = {
         ...entry,
         categories: entry.categories.map(category => {
@@ -82,7 +81,6 @@ export default function Dashboard() {
               return {
                 ...category,
                 name: matchingCategory.name,
-                emoji: matchingCategory.emoji,
                 tasks: category.tasks.map(task => ({
                   ...task,
                   name: matchingCategory.name
@@ -97,7 +95,6 @@ export default function Dashboard() {
       return;
     }
 
-    // Get expense categories from settings
     const expenseCategories = settings?.subcategories?.expenses || [];
 
     const newEntry: DayEntry = {
@@ -106,7 +103,6 @@ export default function Dashboard() {
         {
           id: 'mind',
           name: 'Разум',
-          emoji: '🧠',
           type: CategoryType.CHECKBOX,
           tasks: [
             {
@@ -135,7 +131,6 @@ export default function Dashboard() {
         {
           id: 'time',
           name: 'Время',
-          emoji: '⏱️',
           type: CategoryType.TIME,
           tasks: [
             {
@@ -167,7 +162,6 @@ export default function Dashboard() {
         {
           id: 'sport',
           name: 'Спорт',
-          emoji: '🏃‍♂️',
           type: CategoryType.CALORIE,
           tasks: [
             {
@@ -197,7 +191,6 @@ export default function Dashboard() {
         {
           id: 'habits',
           name: 'Привычки',
-          emoji: '🚫',
           type: CategoryType.CHECKBOX,
           tasks: [
             {
@@ -224,10 +217,9 @@ export default function Dashboard() {
           ]
         },
         // Generate expense categories from settings
-        ...expenseCategories.map((category, index) => ({
-          id: `exp${index + 1}`,
+        ...expenseCategories.map((category) => ({
+          id: `exp${category.id}`,
           name: category.name,
-          emoji: category.emoji,
           type: CategoryType.EXPENSE,
           tasks: [
             {
@@ -244,7 +236,6 @@ export default function Dashboard() {
         {
           id: 'exp8',
           name: 'Отчет',
-          emoji: '✏️',
           type: CategoryType.EXPENSE,
           tasks: [
             {
