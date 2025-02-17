@@ -83,50 +83,60 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     };
 
     return (
-      <div className="flex items-center justify-center gap-2" style={{ width: '100%' }}>
-        <div className="flex items-center justify-center" style={{ width: '45%' }}>
-          <div className="relative flex items-center justify-center" style={{ width: '100%' }}>
+      <div className="flex gap-2 w-full">
+        <div className="flex-1 relative">
+          <div className="relative flex items-center justify-center w-full">
             <Input
               type="number"
               min="0"
               value={hours || ''}
               onChange={handleHoursChange}
-              style={{
-                ...getInputStyle(value > 0),
-                paddingRight: '1.5rem',
-                width: '100%'
-              }}
+              className="w-full h-9 pr-6 text-center bg-zinc-800 border-0"
               placeholder="0"
+              style={{
+                backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                transition: 'all 0.2s',
+              }}
             />
-            <span 
-              className="absolute right-1 text-sm pointer-events-none"
-              style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}
+            <div 
+              className="absolute inset-y-0 right-2 flex items-center pointer-events-none"
+              style={{ 
+                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+              }}
             >
-              ч
-            </span>
+              <span className="text-sm">ч</span>
+            </div>
           </div>
         </div>
-        <div className="flex items-center justify-center" style={{ width: '45%' }}>
-          <div className="relative flex items-center justify-center" style={{ width: '100%' }}>
+        <div className="flex-1 relative">
+          <div className="relative flex items-center justify-center w-full">
             <Input
               type="number"
               min="0"
               max="59"
               value={minutes || ''}
               onChange={handleMinutesChange}
-              style={{
-                ...getInputStyle(value > 0),
-                paddingRight: '2rem',
-                width: '100%'
-              }}
+              className="w-full h-9 pr-8 text-center bg-zinc-800 border-0"
               placeholder="0"
+              style={{
+                backgroundColor: value > 0 ? categoryColor : 'rgb(39 39 42)',
+                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                transition: 'all 0.2s',
+              }}
             />
-            <span 
-              className="absolute right-1 text-sm pointer-events-none"
-              style={{ color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)' }}
+            <div 
+              className="absolute inset-y-0 right-2 flex items-center pointer-events-none"
+              style={{ 
+                color: value > 0 ? 'white' : 'rgba(255, 255, 255, 0.6)',
+              }}
             >
-              мин
-            </span>
+              <span className="text-sm">мин</span>
+            </div>
           </div>
         </div>
       </div>
