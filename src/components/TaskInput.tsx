@@ -37,9 +37,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
             onChange(newHours * 60 + minutes);
           }}
         >
-          <SelectTrigger 
-            className={`w-[90px] h-8 ${hours > 0 ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
-          >
+          <SelectTrigger className="w-[90px] h-8">
             <SelectValue placeholder="Часы" />
           </SelectTrigger>
           <SelectContent>
@@ -57,9 +55,7 @@ const TimeTask = React.memo(({ task, onChange }: { task: Task; onChange: (value:
             onChange(hours * 60 + newMinutes);
           }}
         >
-          <SelectTrigger 
-            className={`w-[90px] h-8 ${minutes > 0 ? 'bg-zinc-700 hover:bg-zinc-600' : 'bg-zinc-800 hover:bg-zinc-700'} border-gray-700`}
-          >
+          <SelectTrigger className="w-[90px] h-8">
             <SelectValue placeholder="Минуты" />
           </SelectTrigger>
           <SelectContent>
