@@ -43,13 +43,17 @@ export const TaskCard = React.memo(({
   };
 
   const getCategoryIcon = () => {
+    if (isExpenseCard) {
+      return null; // Don't show any icon for expense cards as the name already includes emoji
+    }
+
     switch (category.name) {
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
       case 'Привычки': 
       case 'Пороки': return <Ban className="h-5 w-5" />;
-      default: return category.emoji ? <span>{category.emoji}</span> : null;
+      default: return null;
     }
   };
 
@@ -76,7 +80,7 @@ export const TaskCard = React.memo(({
       <Card className="bg-zinc-900/50 task-card">
         <div className="flex items-center h-14 px-4 border-b border-zinc-800">
           <div className="flex items-center gap-2">
-            <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
+            {!isExpenseCard && <span style={{ color: iconColor }}>{getCategoryIcon()}</span>}
             <span className="text-base font-medium text-gray-200">
               {category.name}
             </span>
