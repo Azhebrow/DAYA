@@ -76,6 +76,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
     };
 
     const hasValue = hours > 0 || minutes > 0;
+    const commonInputStyle = getInputStyle(hasValue);
 
     return (
       <div className="flex gap-2 w-full">
@@ -91,13 +92,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0ч"
-            style={{
-              backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
-              color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              transition: 'all 0.2s',
-            }}
+            style={commonInputStyle}
           />
         </div>
         <div className="flex-1">
@@ -112,13 +107,7 @@ const TaskInput = React.memo(({ task, onChange, isExpenseCard = false, categoryC
             }}
             className="w-full h-9 text-center bg-zinc-800 border-0"
             placeholder="0м"
-            style={{
-              backgroundColor: hasValue ? categoryColor : 'rgb(39 39 42)',
-              color: hasValue ? 'white' : 'rgba(255, 255, 255, 0.6)',
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              transition: 'all 0.2s',
-            }}
+            style={commonInputStyle}
           />
         </div>
       </div>
