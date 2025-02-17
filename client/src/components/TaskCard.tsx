@@ -29,14 +29,10 @@ export const TaskCard = React.memo(({
     queryFn: () => storage.getSettings(),
   });
 
-  const handleTaskUpdate = useCallback((taskId: string, value: number | boolean | string) => {
-    onTaskUpdate(taskId, value);
-  }, [onTaskUpdate]);
-
   const getIconColor = () => {
     if (!settings?.colors) return '--purple';
 
-    switch (category.name) {
+    switch (category.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()) {
       case 'Разум': return `var(${settings.colors.mind})`;
       case 'Время': return `var(${settings.colors.time})`;
       case 'Спорт': return `var(${settings.colors.sport})`;
@@ -47,7 +43,8 @@ export const TaskCard = React.memo(({
   };
 
   const getCategoryIcon = () => {
-    switch (category.name) {
+    const baseName = category.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
+    switch (baseName) {
       case 'Разум': return <Brain className="h-5 w-5" />;
       case 'Время': return <Clock className="h-5 w-5" />;
       case 'Спорт': return <Dumbbell className="h-5 w-5" />;
@@ -64,7 +61,7 @@ export const TaskCard = React.memo(({
     for (const [categoryKey, subcategories] of Object.entries(settings.subcategories)) {
       const subcategory = subcategories.find(sub => sub.id === taskId);
       if (subcategory) {
-        return subcategory.name;
+        return subcategory.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim();
       }
     }
     return taskId;
@@ -83,7 +80,7 @@ export const TaskCard = React.memo(({
           <div className="flex items-center gap-2">
             <span style={{ color: iconColor }}>{getCategoryIcon()}</span>
             <span className="text-base font-medium text-gray-200">
-              {category.name === 'Привычки' ? 'Пороки' : category.name}
+              {category.name.replace(/[\u{1F300}-\u{1F9FF}]/gu, '').trim()}
             </span>
           </div>
 
