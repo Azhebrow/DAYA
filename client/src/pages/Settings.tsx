@@ -129,6 +129,7 @@ const CategoryEditor = ({
   icon: Icon,
   colorValue,
   onColorChange,
+  hideSubcategories = false
 }: {
   category: keyof Settings['subcategories'];
   subcategories: { id: string; name: string; emoji: string; }[];
@@ -137,6 +138,7 @@ const CategoryEditor = ({
   icon: React.ElementType;
   colorValue: string;
   onColorChange: (color: string) => void;
+  hideSubcategories?: boolean;
 }) => {
   return (
     <Card className="bg-card/80 border-accent/20">
@@ -149,23 +151,25 @@ const CategoryEditor = ({
           title={title}
         />
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {subcategories.map((item, index) => (
-            <div key={item.id} className="flex items-center gap-2">
-              <Input
-                value={item.name}
-                onChange={(e) => {
-                  const newItems = [...subcategories];
-                  newItems[index] = { ...item, name: e.target.value };
-                  onUpdate(category, newItems);
-                }}
-                className="flex-1"
-              />
-            </div>
-          ))}
-        </div>
-      </CardContent>
+      {!hideSubcategories && subcategories && (
+        <CardContent>
+          <div className="space-y-4">
+            {subcategories.map((item, index) => (
+              <div key={item.id} className="flex items-center gap-2">
+                <Input
+                  value={item.name}
+                  onChange={(e) => {
+                    const newItems = [...subcategories];
+                    newItems[index] = { ...item, name: e.target.value };
+                    onUpdate(category, newItems);
+                  }}
+                  className="flex-1"
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 };
@@ -289,12 +293,13 @@ const SettingsPage = () => {
               />
               <CategoryEditor
                 category="daySuccess"
-                subcategories={settings.subcategories.daySuccess}
-                onUpdate={(category, items) => handleSettingChange('subcategories', { [category]: items })}
+                subcategories={[]}
+                onUpdate={() => {}}
                 title="Показатель успеха"
                 icon={BarChartIcon}
                 colorValue={settings.colors.daySuccess}
                 onColorChange={(color) => handleSettingChange('colors', { daySuccess: color })}
+                hideSubcategories={true}
               />
             </div>
           </CardContent>
