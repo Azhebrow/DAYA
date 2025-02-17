@@ -245,6 +245,7 @@ const SettingsPage = () => {
     queryFn: async () => {
       const stored = await storage.getSettings();
       if (!stored) return DEFAULT_SETTINGS;
+
       // Merge stored settings with defaults to ensure all required fields exist
       return {
         ...DEFAULT_SETTINGS,
@@ -259,22 +260,7 @@ const SettingsPage = () => {
         }
       };
     },
-    initialData: async () => {
-      const stored = await storage.getSettings();
-      if (!stored) return DEFAULT_SETTINGS;
-      return {
-        ...DEFAULT_SETTINGS,
-        ...stored,
-        subcategories: {
-          ...DEFAULT_SETTINGS.subcategories,
-          ...stored.subcategories
-        },
-        colors: {
-          ...DEFAULT_SETTINGS.colors,
-          ...stored.colors
-        }
-      };
-    }
+    initialData: DEFAULT_SETTINGS // Используем синхронные значения по умолчанию
   });
 
   const handleSettingChange = async (key: keyof Settings, value: any) => {
