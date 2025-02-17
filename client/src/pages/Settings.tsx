@@ -133,6 +133,15 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 Я не убиваю время — я использую его. Я вкладываю каждую минуту в развитие навыков, знаний и опыта, которые приведут меня к величию. Я строю будущее своими действиями сегодня. Я знаю, кем хочу быть, и ничего не сможет меня остановить.
 Моя решимость — моя броня. Я выбираю путь дисциплины, силы и мудрости. Я хозяин своей судьбы, и никакие соблазны не могут отнять у меня власть над собой. Я выбираю быть великим. Я выбираю побеждать.`;
 
+const defaultColors = {
+  mind: '--purple',
+  time: '--green',
+  sport: '--blue',
+  habits: '--red',
+  expenses: '--orange',
+  daySuccess: '--emerald'
+};
+
 const SubcategoryEditor = ({
   category,
   subcategories = [],
@@ -407,7 +416,7 @@ const SettingsPage = () => {
                   }}
                   title="Разум"
                   icon={Brain}
-                  colorValue={settings.colors?.mind || defaultSettings.colors.mind}
+                  colorValue={settings.colors?.mind || defaultColors.mind}
                   onColorChange={(value) => handleSettingChange('colors', { mind: value })}
                   usedColors={[
                     settings.colors?.time,
@@ -428,7 +437,7 @@ const SettingsPage = () => {
                   }}
                   title="Время"
                   icon={Clock}
-                  colorValue={settings.colors?.time || defaultSettings.colors.time}
+                  colorValue={settings.colors?.time || defaultColors.time}
                   onColorChange={(value) => handleSettingChange('colors', { time: value })}
                   usedColors={[
                     settings.colors?.mind,
@@ -449,7 +458,7 @@ const SettingsPage = () => {
                   }}
                   title="Спорт"
                   icon={Dumbbell}
-                  colorValue={settings.colors?.sport || defaultSettings.colors.sport}
+                  colorValue={settings.colors?.sport || defaultColors.sport}
                   onColorChange={(value) => handleSettingChange('colors', { sport: value })}
                   usedColors={[
                     settings.colors?.mind,
@@ -470,7 +479,7 @@ const SettingsPage = () => {
                   }}
                   title="Пороки"
                   icon={Ban}
-                  colorValue={settings.colors?.habits || defaultSettings.colors.habits}
+                  colorValue={settings.colors?.habits || defaultColors.habits}
                   onColorChange={(value) => handleSettingChange('colors', { habits: value })}
                   usedColors={[
                     settings.colors?.mind,
@@ -491,7 +500,7 @@ const SettingsPage = () => {
                   }}
                   title="Траты"
                   icon={DollarSign}
-                  colorValue={settings.colors?.expenses || defaultSettings.colors.expenses}
+                  colorValue={settings.colors?.expenses || defaultColors.expenses}
                   onColorChange={(value) => handleSettingChange('colors', { expenses: value })}
                   usedColors={[
                     settings.colors?.mind,
@@ -512,7 +521,7 @@ const SettingsPage = () => {
                   }}
                   title="Успехи дня"
                   icon={CheckCircle2}
-                  colorValue={settings.colors?.daySuccess || defaultSettings.colors.daySuccess}
+                  colorValue={settings.colors?.daySuccess || defaultColors.daySuccess}
                   onColorChange={(value) => handleSettingChange('colors', { daySuccess: value })}
                   usedColors={[
                     settings.colors?.mind,
