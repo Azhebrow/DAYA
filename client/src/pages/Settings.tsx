@@ -28,7 +28,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import EmojiPicker from 'emoji-picker-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 // Updated colorPalette - organized by color groups
@@ -68,7 +67,7 @@ const colorPalette = [
   { name: 'purple-dark', value: '--purple-dark', hex: 'var(--purple-dark)' },
   { name: 'violet', value: '--violet', hex: 'var(--violet)' },
   { name: 'fuchsia', value: '--fuchsia', hex: 'var(--fuchsia)' },
-  { name: 'pink', value: '--pink', hex: 'var(--pink)' },
+  { name: 'pink', value: '--pink', hex: 'var(--pink)' }
 ];
 
 // Updated ColorPicker component
@@ -136,7 +135,7 @@ const DEFAULT_OATH_TEXT = `Я — неоспоримая сила. Я не ра�
 
 const SubcategoryEditor = ({
   category,
-  subcategories = [], // Add default empty array
+  subcategories = [],
   onUpdate,
   title,
   icon: Icon,
@@ -188,75 +187,31 @@ const SubcategoryEditor = ({
   );
 };
 
-const DEFAULT_SETTINGS = settingsSchema.parse({
-  startDate: '2025-02-07',
-  endDate: '2025-09-09',
-  oathText: DEFAULT_OATH_TEXT,
-  colors: {
-    mind: '--purple',
-    time: '--green',
-    sport: '--red',
-    habits: '--orange',
-    expenses: '--orange',
-    daySuccess: '--green'
-  },
-  subcategories: {
-    mind: [
-      { id: 'breathing', name: '🫁 Дыхание', emoji: '🫁' },
-      { id: 'tea', name: '🍵 Чай', emoji: '🍵' },
-      { id: 'cleaning', name: '🧹 Уборка', emoji: '🧹' }
-    ],
-    time: [
-      { id: 'work', name: '💼 Работа', emoji: '💼' },
-      { id: 'study', name: '📚 Учёба', emoji: '📚' },
-      { id: 'project', name: '🎯 Проект', emoji: '🎯' }
-    ],
-    sport: [
-      { id: 'pills', name: '💊 Таблетки', emoji: '💊' },
-      { id: 'training', name: '🏋️‍♂️ Тренировка', emoji: '🏋️‍♂️' },
-      { id: 'calories', name: '🔥 Калории', emoji: '🔥' }
-    ],
-    habits: [
-      { id: 'no_junk_food', name: '🍔 Дерьмо', emoji: '🍔' },
-      { id: 'no_money_waste', name: '💸 Траты', emoji: '💸' },
-      { id: 'no_adult', name: '🔞 Порно', emoji: '🔞' }
-    ],
-    expenses: [
-      { id: 'food', name: '🍽️ Еда', emoji: '🍽️' },
-      { id: 'junk', name: '🍕 Дерьмо', emoji: '🍕' },
-      { id: 'city', name: '🌆 Город', emoji: '🌆' },
-      { id: 'sport', name: '⚽ Спорт', emoji: '⚽' },
-      { id: 'fun', name: '🎮 Отдых', emoji: '🎮' },
-      { id: 'service', name: '🔧 Сервис', emoji: '🔧' },
-      { id: 'other', name: '📦 Разное', emoji: '📦' }
-    ],
-    daySuccess: [] // Initialize with empty array
-  }
-});
-
 const SettingsPage = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [isOathExpanded, setIsOathExpanded] = React.useState(false);
 
-  const { data: settings = DEFAULT_SETTINGS, isLoading } = useQuery({
+  // Use schema's default values instead of hardcoded defaults
+  const defaultSettings = settingsSchema.parse({});
+
+  const { data: settings = defaultSettings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => storage.getSettings(),
-    initialData: DEFAULT_SETTINGS
+    initialData: defaultSettings
   });
 
   const handleSettingChange = async (key: keyof Settings, value: any) => {
     let newSettings = { ...settings };
 
     if (key === 'colors') {
-      newSettings = { ...settings, colors: { ...DEFAULT_SETTINGS.colors, ...settings.colors, ...value } };
+      newSettings = { ...settings, colors: { ...settings.colors, ...value } };
     } else if (key === 'timeTarget') {
       newSettings = { ...settings, timeTarget: value * 60 };
     } else if (key === 'subcategories') {
       newSettings = { 
         ...settings, 
         subcategories: { 
-          ...DEFAULT_SETTINGS.subcategories,
           ...settings.subcategories,
           ...value 
         } 
@@ -282,15 +237,19 @@ const SettingsPage = () => {
     }
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   const handleClearData = async () => {
     try {
       await storage.clearData();
       queryClient.invalidateQueries();
-      window.location.reload();
       toast({
         title: "Данные удалены",
         description: "Все данные успешно удалены",
       });
+      window.location.reload();
     } catch (error) {
       console.error('Clear data error:', error);
       toast({
@@ -300,10 +259,6 @@ const SettingsPage = () => {
       });
     }
   };
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/95 p-4">
@@ -433,7 +388,7 @@ const SettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <SubcategoryEditor
                   category="mind"
-                  subcategories={settings?.subcategories?.mind || DEFAULT_SETTINGS.subcategories.mind}
+                  subcategories={settings.subcategories?.mind}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -442,19 +397,19 @@ const SettingsPage = () => {
                   }}
                   title="Разум"
                   icon={Brain}
-                  colorValue={settings.colors.mind}
+                  colorValue={settings.colors?.mind || defaultSettings.colors.mind}
                   onColorChange={(value) => handleSettingChange('colors', { mind: value })}
                   usedColors={[
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
+                    settings.colors?.time,
+                    settings.colors?.sport,
+                    settings.colors?.habits,
+                    settings.colors?.expenses,
+                    settings.colors?.daySuccess
+                  ].filter(Boolean)}
                 />
                 <SubcategoryEditor
                   category="time"
-                  subcategories={settings?.subcategories?.time || DEFAULT_SETTINGS.subcategories.time}
+                  subcategories={settings.subcategories?.time}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -463,19 +418,19 @@ const SettingsPage = () => {
                   }}
                   title="Время"
                   icon={Clock}
-                  colorValue={settings.colors.time}
+                  colorValue={settings.colors?.time || defaultSettings.colors.time}
                   onColorChange={(value) => handleSettingChange('colors', { time: value })}
                   usedColors={[
-                    settings.colors.mind,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
+                    settings.colors?.mind,
+                    settings.colors?.sport,
+                    settings.colors?.habits,
+                    settings.colors?.expenses,
+                    settings.colors?.daySuccess
+                  ].filter(Boolean)}
                 />
                 <SubcategoryEditor
                   category="sport"
-                  subcategories={settings?.subcategories?.sport || DEFAULT_SETTINGS.subcategories.sport}
+                  subcategories={settings.subcategories?.sport}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -484,19 +439,19 @@ const SettingsPage = () => {
                   }}
                   title="Спорт"
                   icon={Dumbbell}
-                  colorValue={settings.colors.sport}
+                  colorValue={settings.colors?.sport || defaultSettings.colors.sport}
                   onColorChange={(value) => handleSettingChange('colors', { sport: value })}
                   usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
+                    settings.colors?.mind,
+                    settings.colors?.time,
+                    settings.colors?.habits,
+                    settings.colors?.expenses,
+                    settings.colors?.daySuccess
+                  ].filter(Boolean)}
                 />
                 <SubcategoryEditor
                   category="habits"
-                  subcategories={settings?.subcategories?.habits || DEFAULT_SETTINGS.subcategories.habits}
+                  subcategories={settings.subcategories?.habits}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -505,19 +460,19 @@ const SettingsPage = () => {
                   }}
                   title="Пороки"
                   icon={Ban}
-                  colorValue={settings.colors.habits}
+                  colorValue={settings.colors?.habits || defaultSettings.colors.habits}
                   onColorChange={(value) => handleSettingChange('colors', { habits: value })}
                   usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.expenses,
-                    settings.colors.daySuccess
-                  ]}
+                    settings.colors?.mind,
+                    settings.colors?.time,
+                    settings.colors?.sport,
+                    settings.colors?.expenses,
+                    settings.colors?.daySuccess
+                  ].filter(Boolean)}
                 />
                 <SubcategoryEditor
                   category="expenses"
-                  subcategories={settings?.subcategories?.expenses || DEFAULT_SETTINGS.subcategories.expenses}
+                  subcategories={settings.subcategories?.expenses}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -526,24 +481,19 @@ const SettingsPage = () => {
                   }}
                   title="Траты"
                   icon={DollarSign}
-                  colorValue={settings.colors.expenses}
+                  colorValue={settings.colors?.expenses || defaultSettings.colors.expenses}
                   onColorChange={(value) => handleSettingChange('colors', { expenses: value })}
                   usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.daySuccess,
-                    '--red',
-                    '--orange',
-                    '--green',
-                    '--blue',
-                    '--purple'
-                  ]}
+                    settings.colors?.mind,
+                    settings.colors?.time,
+                    settings.colors?.sport,
+                    settings.colors?.habits,
+                    settings.colors?.daySuccess
+                  ].filter(Boolean)}
                 />
                 <SubcategoryEditor
                   category="daySuccess"
-                  subcategories={settings?.subcategories?.daySuccess || DEFAULT_SETTINGS.subcategories.daySuccess}
+                  subcategories={settings.subcategories?.daySuccess || []}
                   onUpdate={(category, newSubcategories) => {
                     handleSettingChange('subcategories', {
                       ...settings.subcategories,
@@ -552,20 +502,15 @@ const SettingsPage = () => {
                   }}
                   title="Успехи дня"
                   icon={CheckCircle2}
-                  colorValue={settings.colors.daySuccess}
+                  colorValue={settings.colors?.daySuccess || defaultSettings.colors.daySuccess}
                   onColorChange={(value) => handleSettingChange('colors', { daySuccess: value })}
                   usedColors={[
-                    settings.colors.mind,
-                    settings.colors.time,
-                    settings.colors.sport,
-                    settings.colors.habits,
-                    settings.colors.expenses,
-                    '--red',
-                    '--orange',
-                    '--green',
-                    '--blue',
-                    '--purple'
-                  ]}
+                    settings.colors?.mind,
+                    settings.colors?.time,
+                    settings.colors?.sport,
+                    settings.colors?.habits,
+                    settings.colors?.expenses
+                  ].filter(Boolean)}
                 />
               </div>
             </CardContent>
